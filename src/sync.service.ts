@@ -25,6 +25,9 @@ export class SyncService implements OnModuleInit {
 		this.logger.log('Starting sync process');
 		const latestBlock = await this.cometbft.getLatestBlock();
 		for (let index = 1; index <= latestBlock; index++) {
+			// TODO: early abort for testing
+			if (index > 10) break;
+
 			// fetch the block
 			this.logger.log(`Fetching block ${index}`);
 			const blockResponse = await this.cometbft.getBlockAtHeight(index);
