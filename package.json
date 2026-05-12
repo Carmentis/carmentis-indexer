@@ -20,16 +20,20 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@cmts-dev/carmentis-sdk": "^1.18.4",
+    "@cmts-dev/carmentis-sdk-core": "^1.0.0",
     "@cosmjs/tendermint-rpc": "^0.38.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/schedule": "^6.1.1",
+    "@nestjs/swagger": "^11.4.2",
     "@nestjs/typeorm": "^11.0.0",
     "axios": "^1.13.4",
     "better-sqlite3": "^12.6.2",
+    "carmentis-sdk": "link:../../Users/arnau/AppData/Local/pnpm/global/5/node_modules/@ctms-dev/carmentis-sdk",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
     "pg": "^8.18.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
@@ -63,6 +67,11 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
   },
   "jest": {
     "moduleFileExtensions": [

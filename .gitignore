@@ -48,6 +48,12 @@ lerna-debug.log*
 .temp
 .tmp
 
+# data directory
+microblocks
+
+# debug scripts
+run.bat
+
 # Runtime data
 pids
 *.pid
