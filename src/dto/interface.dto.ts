@@ -1,4 +1,9 @@
-export interface IEscrowLockDto {
+export interface BaseListResponse<T> {
+    items: T[];
+    hasMore: boolean;
+}
+
+export interface EscrowLock {
     amount: number;
     escrowIdentifier: string;
     fundEmitterAccountId: string;
@@ -7,7 +12,7 @@ export interface IEscrowLockDto {
     durationDays: number;
 }
 
-export interface IVestingLockDto {
+export interface VestingLock {
     amount: number;
     initialVestedAmountInAtomics: number;
     cliffStartTimestamp: number;
@@ -15,7 +20,7 @@ export interface IVestingLockDto {
     vestingDurationDays: number;
 }
 
-export interface IStakingLockDto {
+export interface StakingLock {
     amount: number;
     validatorNodeId: string;
     plannedUnlockAmountInAtomics: number;
@@ -25,16 +30,17 @@ export interface IStakingLockDto {
     plannedSlashingTimestamp: number;
 }
 
-export interface IAccountDto {
+export interface Account {
     id: string;
     height: number;
     balance: number;
-    escrowLocks: IEscrowLockDto[];
-    vestingLocks: IVestingLockDto[];
-    stakingLocks: IStakingLockDto[];
+    escrowLocks: EscrowLock[];
+    vestingLocks: VestingLock[];
+    stakingLocks: StakingLock[];
 }
+export type AccountListResponse = BaseListResponse<Account>;
 
-export interface IAccountHistoryDto {
+export interface AccountHistory {
     accountId: string;
     height: number;
     type: number;
@@ -43,8 +49,9 @@ export interface IAccountHistoryDto {
     amount: number;
     chainReference: string;
 }
+export type AccountHistoryListResponse = BaseListResponse<AccountHistory>;
 
-export interface IApplicationDto {
+export interface Application {
     virtualBlockchainId: string;
     organizationId: string;
     name: string;
@@ -52,8 +59,9 @@ export interface IApplicationDto {
     homepageUrl: string;
     description: string;
 }
+export type ApplicationListResponse = BaseListResponse<Application>;
 
-export interface IBlockSignatureDto {
+export interface BlockSignature {
     height: number;
     blockIdFlag: number;
     validatorAddress: string;
@@ -62,7 +70,7 @@ export interface IBlockSignatureDto {
     signature: string;
 }
 
-export interface IBlockDto {
+export interface Block {
     height: number;
     hash: string;
     blockVersion: number;
@@ -81,18 +89,20 @@ export interface IBlockDto {
     lastResultsHash: string;
     evidenceHash: string;
     proposerAddress: string;
-    signatures: IBlockSignatureDto[];
+    signatures: BlockSignature[];
 }
+export type BlockListResponse = BaseListResponse<Block>;
 
-export interface IMicroblockDto {
+export interface Microblock {
     hash: string;
     blockHeight: number;
     virtualBlockchainId: string;
     type: number;
     height: number;
 }
+export type MicroblockListResponse = BaseListResponse<Microblock>;
 
-export interface IOrganizationDto {
+export interface Organization {
     virtualBlockchainId: string;
     accountId: string;
     name: string;
@@ -100,8 +110,9 @@ export interface IOrganizationDto {
     countryCode: string;
     website: string;
 }
+export type OrganizationListResponse = BaseListResponse<Organization>;
 
-export interface IValidatorNodeDto {
+export interface ValidatorNode {
     virtualBlockchainId: string;
     organizationId: string;
     cometPublicKeyType: string;
@@ -109,3 +120,4 @@ export interface IValidatorNodeDto {
     address: string;
     rpcEndpoint: string;
 }
+export type ValidatorNodeListResponse = BaseListResponse<ValidatorNode>;

@@ -12,13 +12,20 @@ import { OrganizationEntity } from "./entities/organization.entity";
 import { ApplicationEntity } from "./entities/application.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
 import {
-    IBlockDto,
-    IMicroblockDto,
-    IAccountDto,
-    IAccountHistoryDto,
-    IOrganizationDto,
-    IApplicationDto,
-    IValidatorNodeDto,
+    Block,
+    BlockListResponse,
+    Microblock,
+    MicroblockListResponse,
+    Account,
+    AccountListResponse,
+    AccountHistory,
+    AccountHistoryListResponse,
+    Organization,
+    OrganizationListResponse,
+    Application,
+    ApplicationListResponse,
+    ValidatorNode,
+    ValidatorNodeListResponse,
 } from "./dto/interface.dto";
 import {
     GetBlocksQueryDto,
@@ -73,20 +80,23 @@ export class AppService {
             where.milliseconds = timestampRange;
         }
 
+        const take = this.take(limit);
         const entities = await BlockEntity.find({
             where,
             order: sort ? { [sort]: order } : undefined,
-            take: this.limit(limit),
+            take,
         });
-        const res: IBlockDto[] = [];
+        const hasMore = this.hasMore(entities, take);
+        const items: Block[] = [];
         for (const e of entities) {
             const signatures = await BlockSignatureEntity.find({
                 where: { height: e.height },
             });
-            const block: IBlockDto = { ...e, signatures };
-            res.push(block);
+            const block: Block = { ...e, signatures };
+            items.push(block);
         }
-        return res;
+        const response: BlockListResponse = { items, hasMore };
+        return response;
     }
 
     async getMicroblocks(query: GetMicroblocksQueryDto) {
@@ -113,15 +123,19 @@ export class AppService {
             where.virtualBlockchainId = vb_id;
         }
 
+        const take = this.take(limit);
         const entities = await MicroblockEntity.find({
             where,
             order: sort ? { [sort]: order } : undefined,
-            take: this.limit(limit),
+            take,
         });
-        return entities.map((e) => {
-            const microblock: IMicroblockDto = { ...e };
+        const hasMore = this.hasMore(entities, take);
+        const items = entities.map((e) => {
+            const microblock: Microblock = { ...e };
             return microblock;
         });
+        const response: MicroblockListResponse = { items, hasMore };
+        return response;
     }
 
     async getAccounts(query: GetAccountsQueryDto) {
@@ -144,11 +158,13 @@ export class AppService {
             where.balance = balanceRange;
         }
 
+        const take = this.take(limit);
         const entities = await AccountEntity.find({
             where,
-            take: this.limit(limit),
+            take,
         });
-        const res: IAccountDto[] = [];
+        const hasMore = this.hasMore(entities, take);
+        const items: Account[] = [];
         for (const e of entities) {
             const escrowLocks = await EscrowLockEntity.find({
                 where: { accountId: e.id },
@@ -159,15 +175,16 @@ export class AppService {
             const stakingLocks = await StakingLockEntity.find({
                 where: { accountId: e.id },
             });
-            const account: IAccountDto = {
+            const account: Account = {
                 ...e,
                 escrowLocks,
                 vestingLocks,
                 stakingLocks,
             };
-            res.push(account);
+            items.push(account);
         }
-        return res;
+        const response: AccountListResponse = { items, hasMore };
+        return response;
     }
 
     async getAccountHistory(query: GetAccountHistoryQueryDto) {
@@ -217,15 +234,19 @@ export class AppService {
             where.timestamp = timestampRange;
         }
 
+        const take = this.take(limit);
         const entities= await AccountHistoryEntity.find({
             where,
             order: sort ? { [sort]: order } : undefined,
-            take: this.limit(limit),
+            take,
         });
-        return entities.map((e) => {
-            const accountHistory: IAccountHistoryDto = { ...e };
+        const hasMore = this.hasMore(entities, take);
+        const items = entities.map((e) => {
+            const accountHistory: AccountHistory = { ...e };
             return accountHistory;
         });
+        const response: AccountHistoryListResponse = { items, hasMore };
+        return response;
     }
 
     async getOrganizations(query: GetOrganizationsQueryDto) {
@@ -249,14 +270,18 @@ export class AppService {
             where.name = name;
         }
 
+        const take = this.take(limit);
         const entities = await OrganizationEntity.find({
             where,
-            take: this.limit(limit),
+            take,
         });
-        return entities.map((e) => {
-            const organization: IOrganizationDto = { ...e };
+        const hasMore = this.hasMore(entities, take);
+        const items = entities.map((e) => {
+            const organization: Organization = { ...e };
             return organization;
         });
+        const response: OrganizationListResponse = { items, hasMore };
+        return response;
     }
 
     async getApplications(query: GetApplicationsQueryDto) {
@@ -280,14 +305,18 @@ export class AppService {
             where.name = name;
         }
 
+        const take = this.take(limit);
         const entities = await ApplicationEntity.find({
             where,
-            take: this.limit(limit),
+            take,
         });
-        return entities.map((e) => {
-            const application: IApplicationDto = { ...e };
+        const hasMore = this.hasMore(entities, take);
+        const items = entities.map((e) => {
+            const application: Application = { ...e };
             return application;
         });
+        const response: ApplicationListResponse = { items, hasMore };
+        return response;
     }
 
     async getValidatorNodes(query: GetValidatorNodesQueryDto) {
@@ -315,17 +344,21 @@ export class AppService {
             where.address = address;
         }
 
+        const take = this.take(limit);
         const entities = await ValidatorNodeEntity.find({
             where,
-            take: this.limit(limit),
+            take,
         });
-        return entities.map((e) => {
-            const validatorNode: IValidatorNodeDto = { ...e };
+        const hasMore = this.hasMore(entities, take);
+        const items = entities.map((e) => {
+            const validatorNode: ValidatorNode = { ...e };
             return validatorNode;
         });
+        const response: ValidatorNodeListResponse = { items, hasMore };
+        return response;
     }
 
-    private range(gte: number|undefined, lte: number|undefined) {
+    private range(gte: number | undefined, lte: number | undefined) {
         if (
             gte !== undefined &&
             lte !== undefined
@@ -347,7 +380,15 @@ export class AppService {
         }
     }
 
-    private limit(limit: number|undefined) {
-        return limit === undefined ? MAX_LIMIT : Math.min(MAX_LIMIT, limit);
+    private take(limit: number | undefined) {
+        return limit === undefined ? MAX_LIMIT + 1 : Math.min(MAX_LIMIT, limit) + 1;
+    }
+
+    private hasMore(entities: unknown[], take: number) {
+        if (entities.length > take - 1) {
+            entities.pop();
+            return true;
+        }
+        return false;
     }
 }

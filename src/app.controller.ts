@@ -9,13 +9,13 @@ import {
     GetValidatorNodesQueryDto,
 } from "./dto/query.dto";
 import {
-    BlockResponseDto,
-    MicroblockResponseDto,
-    AccountResponseDto,
-    AccountHistoryResponseDto,
-    OrganizationResponseDto,
-    ApplicationResponseDto,
-    ValidatorNodeResponseDto,
+    BlockListResponseDto,
+    MicroblockListResponseDto,
+    AccountListResponseDto,
+    AccountHistoryListResponseDto,
+    OrganizationListResponseDto,
+    ApplicationListResponseDto,
+    ValidatorNodeListResponseDto,
 } from "./dto/response.dto";
 import { AppService } from "./app.service";
 import { ApiOkResponse } from "@nestjs/swagger";
@@ -30,43 +30,43 @@ export class AppController {
     }
 
     @Get("/blocks")
-    @ApiOkResponse({ type: BlockResponseDto })
+    @ApiOkResponse({ type: BlockListResponseDto })
     async getBlocks(@Query() query: GetBlocksQueryDto) {
         return this.appService.getBlocks(query);
     }
 
     @Get("/microblocks")
-    @ApiOkResponse({ type: MicroblockResponseDto })
+    @ApiOkResponse({ type: MicroblockListResponseDto })
     async getMicroblocks(@Query() query: GetMicroblocksQueryDto) {
         return this.appService.getMicroblocks(query);
     }
 
     @Get("/accounts")
-    @ApiOkResponse({ type: AccountResponseDto })
+    @ApiOkResponse({ type: AccountListResponseDto })
     async getAccounts(@Query() query: GetAccountsQueryDto) {
         return this.appService.getAccounts(query);
     }
 
     @Get("/account-history")
-    @ApiOkResponse({ type: AccountHistoryResponseDto })
+    @ApiOkResponse({ type: AccountHistoryListResponseDto })
     async getAccountHistory(@Query() query: GetAccountHistoryQueryDto) {
         return this.appService.getAccountHistory(query);
     }
 
     @Get("/organizations")
-    @ApiOkResponse({ type: OrganizationResponseDto })
+    @ApiOkResponse({ type: OrganizationListResponseDto })
     async getOrganizations(@Query() query: GetOrganizationsQueryDto) {
         return this.appService.getOrganizations(query);
     }
 
     @Get("/applications")
-    @ApiOkResponse({ type: ApplicationResponseDto })
+    @ApiOkResponse({ type: ApplicationListResponseDto })
     async getApplications(@Query() query: GetApplicationsQueryDto) {
         return this.appService.getApplications(query);
     }
 
     @Get("/validator-nodes")
-    @ApiOkResponse({ type: ValidatorNodeResponseDto })
+    @ApiOkResponse({ type: ValidatorNodeListResponseDto })
     async getValidatorNodes(@Query() query: GetValidatorNodesQueryDto) {
         return this.appService.getValidatorNodes(query);
     }

@@ -1,19 +1,24 @@
 import {
-    IAccountDto,
-    IAccountHistoryDto,
-    IEscrowLockDto,
-    IVestingLockDto,
-    IStakingLockDto,
-    IApplicationDto,
-    IBlockDto,
-    IBlockSignatureDto,
-    IMicroblockDto,
-    IOrganizationDto,
-    IValidatorNodeDto,
+    Account,
+    AccountHistory,
+    EscrowLock,
+    VestingLock,
+    StakingLock,
+    Application,
+    Block,
+    BlockSignature,
+    Microblock,
+    Organization,
+    ValidatorNode,
 } from "./interface.dto";
 import { ApiProperty } from "@nestjs/swagger";
 
-export class EscrowLockResponseDto implements IEscrowLockDto {
+class BaseListResponseDto<T> {
+    items: T[];
+    hasMore: boolean;
+}
+
+export class EscrowLockDto implements EscrowLock {
     @ApiProperty() amount: number;
     @ApiProperty() escrowIdentifier: string;
     @ApiProperty() fundEmitterAccountId: string;
@@ -22,7 +27,7 @@ export class EscrowLockResponseDto implements IEscrowLockDto {
     @ApiProperty() durationDays: number;
 }
 
-export class VestingLockResponseDto implements IVestingLockDto {
+export class VestingLockDto implements VestingLock {
     @ApiProperty() amount: number;
     @ApiProperty() initialVestedAmountInAtomics: number;
     @ApiProperty() cliffStartTimestamp: number;
@@ -30,7 +35,7 @@ export class VestingLockResponseDto implements IVestingLockDto {
     @ApiProperty() vestingDurationDays: number;
 }
 
-export class StakingLockResponseDto implements IStakingLockDto {
+export class StakingLockDto implements StakingLock {
     @ApiProperty() amount: number;
     @ApiProperty() validatorNodeId: string;
     @ApiProperty() plannedUnlockAmountInAtomics: number;
@@ -40,20 +45,21 @@ export class StakingLockResponseDto implements IStakingLockDto {
     @ApiProperty() plannedSlashingTimestamp: number;
 }
 
-export class AccountResponseDto implements IAccountDto {
+export class AccountDto implements Account {
     @ApiProperty() id: string;
     @ApiProperty() height: number;
     @ApiProperty() balance: number;
 
-    @ApiProperty({ type: [EscrowLockResponseDto] })
-    escrowLocks: EscrowLockResponseDto[];
-    @ApiProperty({ type: [VestingLockResponseDto] })
-    vestingLocks: VestingLockResponseDto[];
-    @ApiProperty({ type: [StakingLockResponseDto] })
-    stakingLocks: StakingLockResponseDto[];
+    @ApiProperty({ type: [EscrowLockDto] })
+    escrowLocks: EscrowLockDto[];
+    @ApiProperty({ type: [VestingLockDto] })
+    vestingLocks: VestingLockDto[];
+    @ApiProperty({ type: [StakingLockDto] })
+    stakingLocks: StakingLockDto[];
 }
+export class AccountListResponseDto extends BaseListResponseDto<AccountDto> {}
 
-export class AccountHistoryResponseDto implements IAccountHistoryDto {
+export class AccountHistoryDto implements AccountHistory {
     @ApiProperty() accountId: string;
     @ApiProperty() height: number;
     @ApiProperty() type: number;
@@ -62,8 +68,9 @@ export class AccountHistoryResponseDto implements IAccountHistoryDto {
     @ApiProperty() amount: number;
     @ApiProperty() chainReference: string;
 }
+export class AccountHistoryListResponseDto extends BaseListResponseDto<AccountHistoryDto> {}
 
-export class ApplicationResponseDto implements IApplicationDto {
+export class ApplicationDto implements Application {
     @ApiProperty() virtualBlockchainId: string;
     @ApiProperty() organizationId: string;
     @ApiProperty() name: string;
@@ -71,8 +78,9 @@ export class ApplicationResponseDto implements IApplicationDto {
     @ApiProperty() homepageUrl: string;
     @ApiProperty() description: string;
 }
+export class ApplicationListResponseDto extends BaseListResponseDto<ApplicationDto> {}
 
-export class BlockSignatureResponseDto implements IBlockSignatureDto {
+export class BlockSignatureDto implements BlockSignature {
     @ApiProperty() height: number;
     @ApiProperty() blockIdFlag: number;
     @ApiProperty() validatorAddress: string;
@@ -81,7 +89,7 @@ export class BlockSignatureResponseDto implements IBlockSignatureDto {
     @ApiProperty() signature: string;
 }
 
-export class BlockResponseDto implements IBlockDto {
+export class BlockDto implements Block {
     @ApiProperty() height: number;
     @ApiProperty() hash: string;
     @ApiProperty() blockVersion: number;
@@ -101,19 +109,31 @@ export class BlockResponseDto implements IBlockDto {
     @ApiProperty() evidenceHash: string;
     @ApiProperty() proposerAddress: string;
 
-    @ApiProperty({ type: [BlockSignatureResponseDto] })
-    signatures: BlockSignatureResponseDto[];
+    @ApiProperty({ type: [BlockSignatureDto] })
+    signatures: BlockSignatureDto[];
+}
+export class BlockListResponseDto {
+    @ApiProperty({ type: () => BlockDto, isArray: true })
+    items: BlockDto[];
+    @ApiProperty()
+    hasMore: boolean;
 }
 
-export class MicroblockResponseDto implements IMicroblockDto {
+export class MicroblockDto implements Microblock {
     @ApiProperty() hash: string;
     @ApiProperty() blockHeight: number;
     @ApiProperty() virtualBlockchainId: string;
     @ApiProperty() type: number;
     @ApiProperty() height: number;
 }
+export class MicroblockListResponseDto {
+    @ApiProperty({ type: () => MicroblockDto, isArray: true })
+    items: MicroblockDto[];
+    @ApiProperty()
+    hasMore: boolean;
+}
 
-export class OrganizationResponseDto implements IOrganizationDto {
+export class OrganizationDto implements Organization {
     @ApiProperty() virtualBlockchainId: string;
     @ApiProperty() accountId: string;
     @ApiProperty() name: string;
@@ -121,12 +141,24 @@ export class OrganizationResponseDto implements IOrganizationDto {
     @ApiProperty() countryCode: string;
     @ApiProperty() website: string;
 }
+export class OrganizationListResponseDto {
+    @ApiProperty({ type: () => OrganizationDto, isArray: true })
+    items: OrganizationDto[];
+    @ApiProperty()
+    hasMore: boolean;
+}
 
-export class ValidatorNodeResponseDto implements IValidatorNodeDto {
+export class ValidatorNodeDto implements ValidatorNode {
     @ApiProperty() virtualBlockchainId: string;
     @ApiProperty() organizationId: string;
     @ApiProperty() cometPublicKeyType: string;
     @ApiProperty() cometPublicKey: string;
     @ApiProperty() address: string;
     @ApiProperty() rpcEndpoint: string;
+}
+export class ValidatorNodeListResponseDto {
+    @ApiProperty({ type: () => ValidatorNodeDto, isArray: true })
+    items: ValidatorNodeDto[];
+    @ApiProperty()
+    hasMore: boolean;
 }
