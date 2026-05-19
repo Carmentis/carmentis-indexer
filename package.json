@@ -1,7 +1,7 @@
 {
   "name": "@cmts-dev/carmentis-indexer",
   "version": "0.0.1",
-  "description": "simple SDK for executing queries on the Carmentis indexer",
+  "description": "Carmentis indexer",
   "author": "Carmentis SAS",
   "license": "Apache 2.0",
   "private": false,
