@@ -1,6 +1,0 @@
-ignoredBuiltDependencies:
-  - cbor-extract
-
-overrides:
-  carmentis-sdk: link:../../Users/arnau/AppData/Local/pnpm/global/5/node_modules/@ctms-dev/carmentis-sdk
-  '@cmts-dev/carmentis-sdk-core': link:../../Users/arnau/AppData/Local/pnpm/global/5/node_modules/@cmts-dev/carmentis-sdk-core

@@ -74,7 +74,10 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "better-sqlite3"
-    ]
+    ],
+    "overrides": {
+      "@cmts-dev/carmentis-sdk-core": "link:../../Users/arnau/AppData/Local/pnpm/global/5/node_modules/@cmts-dev/carmentis-sdk-core"
+    }
   },
   "files": [
     "dist/sdk"
