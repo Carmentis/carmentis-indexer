@@ -14,6 +14,8 @@ export class MicroblockEntity extends BaseEntity {
     type: number;
     @Column()
     height: number;
+    @Column()
+    size: number;
 
     @ManyToOne(() => BlockEntity, { onDelete: "RESTRICT" })
     @JoinColumn({ name: "blockHeight", referencedColumnName: "height" })

@@ -2,8 +2,11 @@ import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { RequestedAccountUpdate, Utils } from "@cmts-dev/carmentis-sdk-core";
 import { CometbftApiService } from "./cometbft-api.service";
 import { StateCommitService } from "./state-commit.service";
+import { QueryService } from "./query.service";
 import { ChainEntity } from "./entities/chain.entity";
 import { BlockEntity } from "./entities/block.entity";
+import { ValidatorNodeEntity } from "./entities/validator-node.entity";
+import { VotingPowerEntity } from "./entities/voting-power.entity";
 
 @Injectable()
 export class SyncService implements OnModuleInit {
@@ -46,6 +49,10 @@ export class SyncService implements OnModuleInit {
             const modifiedAccounts = blockModifiedAccounts.modifiedAccounts;
             await this.syncModifiedAccounts(modifiedAccounts);
             await this.syncMicroblocks(height);
+            await this.syncVotingPowers(
+                height,
+                blockData.commit?.header.time.getTime() ?? 0,
+            );
         }
     }
 
@@ -79,7 +86,6 @@ export class SyncService implements OnModuleInit {
             this.logger.log(
                 `Fetched ${count} microblock(s) for block ${height} (part ${pNdx} of ${nParts})`,
             );
-            console.log(Utils.jsonPrettify(serializedMicroblocks));
             for (const serializedMicroblock of serializedMicroblocks) {
                 await this.stateCommitService.commitMicroblock(
                     height,
@@ -88,6 +94,66 @@ export class SyncService implements OnModuleInit {
             }
             if (partIndex >= blockContent.numberOfParts - 1) {
                 break;
+            }
+        }
+    }
+
+    async syncVotingPowers(height: number, blockTimestamp: number) {
+        // turn the block timestamp into a day timestamp
+        const timestamp = Utils.addDaysToTimestamp(
+            Math.floor(blockTimestamp / 1000),
+            0,
+        ) * 1000;
+
+        // get the known voting powers from the DB
+        const queryService = new QueryService();
+        const votingPowers = await queryService.getCurrentVotingPowers();
+
+        // get the validators at the requested height from Comet
+        const validators = await this.cometbft.getValidators(height);
+        const definedValidators = new Set();
+
+        // update the DB according to the list of validators returned by Comet
+        for (const validator of validators) {
+            const address = Utils.binaryToHexa(validator.address);
+            const votingPower = Number(validator.votingPower);
+            const node = await ValidatorNodeEntity.findOne({
+                where: { address },
+            });
+            if (node === null) {
+                this.logger.warn(`node with address '${address}' not found`);
+                continue;
+            }
+            const nodeId = node.virtualBlockchainId;
+            definedValidators.add(nodeId);
+            const previousVotingPower = votingPowers.find(
+                (vp) => vp.nodeId === nodeId,
+            );
+            if (
+                previousVotingPower === undefined ||
+                previousVotingPower.votingPower !== votingPower
+            ) {
+                this.logger.log(`setting voting power of node ${nodeId} to ${votingPower}`);
+                await VotingPowerEntity.save({
+                    nodeId,
+                    height,
+                    timestamp,
+                    votingPower,
+                });
+            }
+        }
+
+        // update former known validators which are not in the list returned by Comet anymore
+        // but still have a voting power greater than 0 in the DB
+        for (const vp of votingPowers) {
+            if (!definedValidators.has(vp.nodeId) && vp.votingPower !== 0) {
+                this.logger.log(`setting voting power of node ${vp.nodeId} to 0`);
+                await VotingPowerEntity.save({
+                    nodeId: vp.nodeId,
+                    height,
+                    timestamp,
+                    votingPower: 0,
+                });
             }
         }
     }

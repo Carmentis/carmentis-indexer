@@ -11,6 +11,7 @@ import {
 import { OrganizationEntity } from "./entities/organization.entity";
 import { ApplicationEntity } from "./entities/application.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
+import { VotingPowerEntity } from "./entities/voting-power.entity";
 import {
     Block,
     BlockListResponse,
@@ -26,7 +27,9 @@ import {
     ApplicationListResponse,
     ValidatorNode,
     ValidatorNodeListResponse,
-} from "./dto/interface.dto";
+    VotingPower,
+    VotingPowerListResponse,
+} from "./dto/response-interface.dto";
 import {
     GetBlocksQueryDto,
     GetMicroblocksQueryDto,
@@ -35,10 +38,17 @@ import {
     GetOrganizationsQueryDto,
     GetApplicationsQueryDto,
     GetValidatorNodesQueryDto,
+    GetVotingPowersQueryDto,
 } from "./dto/query.dto";
-import { FindOptionsWhere, MoreThanOrEqual, LessThanOrEqual, Between } from "typeorm";
+import {
+    FindOptionsWhere,
+    MoreThanOrEqual,
+    LessThanOrEqual,
+    Between,
+} from "typeorm";
+import { MicroblockStorageService } from "./microblock-storage.service";
 
-const MAX_LIMIT = 50;
+const MAX_LIMIT = 100;
 
 @Injectable()
 export class AppService {
@@ -66,7 +76,7 @@ export class AppService {
         if (height !== undefined) {
             if (heightRange !== null) {
                 throw new BadRequestException(
-                    "'height_gte'/'height_lte' cannot be used in conjunction with 'height'"
+                    "'height_gte'/'height_lte' cannot be used in conjunction with 'height'",
                 );
             }
             where.height = height;
@@ -104,6 +114,7 @@ export class AppService {
             hash,
             block_height,
             vb_id,
+            include_content,
             sort,
             order,
             limit,
@@ -130,10 +141,16 @@ export class AppService {
             take,
         });
         const hasMore = this.hasMore(entities, take);
-        const items = entities.map((e) => {
+        const storageService = new MicroblockStorageService();
+        const items: Microblock[] = [];
+        for (const e of entities) {
             const microblock: Microblock = { ...e };
-            return microblock;
-        });
+            if (include_content) {
+                const rawContent = await storageService.loadMicroblock(e.hash);
+                microblock.content = rawContent.toString("base64");
+            }
+            items.push(microblock);
+        }
         const response: MicroblockListResponse = { items, hasMore };
         return response;
     }
@@ -358,6 +375,37 @@ export class AppService {
         return response;
     }
 
+    async getVotingPowers(query: GetVotingPowersQueryDto) {
+        const {
+            node_id,
+            sort,
+            order,
+            limit,
+        } = query;
+
+        const where: FindOptionsWhere<VotingPowerEntity> = {};
+
+        this.checkSortConsistency(!!sort, !!order);
+
+        if (node_id !== undefined) {
+            where.nodeId = node_id;
+        }
+
+        const take = this.take(limit);
+        const entities = await VotingPowerEntity.find({
+            where,
+            order: sort ? { [sort]: order } : undefined,
+            take,
+        });
+        const hasMore = this.hasMore(entities, take);
+        const items = entities.map((e) => {
+            const votingPower: VotingPower = { ...e };
+            return votingPower;
+        });
+        const response: VotingPowerListResponse = { items, hasMore };
+        return response;
+    }
+
     private range(gte: number | undefined, lte: number | undefined) {
         if (
             gte !== undefined &&
@@ -381,7 +429,11 @@ export class AppService {
     }
 
     private take(limit: number | undefined) {
-        return limit === undefined ? MAX_LIMIT + 1 : Math.min(MAX_LIMIT, limit) + 1;
+        return (
+            limit === undefined
+                ? MAX_LIMIT
+                : Math.min(MAX_LIMIT, limit)
+        ) + 1;
     }
 
     private hasMore(entities: unknown[], take: number) {

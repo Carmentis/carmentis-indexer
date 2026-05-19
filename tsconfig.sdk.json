@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/sdk",
+    "declaration": true,
+    "module": "ES2022",
+    "target": "ES2022",
+    "moduleResolution": "Bundler",
+    "emitDeclarationOnly": false
+  },
+  "include": [
+    "src/sdk/**/*"
+  ]
+}

@@ -26,6 +26,10 @@ export class AccountHistoryEntity extends BaseEntity {
     amount: number;
     @Column()
     chainReference: string;
+    @Column()
+    publicReference: string;
+    @Column()
+    privateReference: string;
 
     @ManyToOne(() => AccountEntity, { onDelete: "RESTRICT" })
     @JoinColumn({ name: "accountId", referencedColumnName: "id" })

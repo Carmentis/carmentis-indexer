@@ -19,6 +19,7 @@ import { ChainEntity } from "./entities/chain.entity";
 import { MicroblockEntity } from "./entities/microblock.entity";
 import { OrganizationEntity } from "./entities/organization.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
+import { VotingPowerEntity } from "./entities/voting-power.entity";
 
 const entities = [
     AccountEntity,
@@ -34,6 +35,7 @@ const entities = [
     OrganizationEntity,
     ValidatorNodeEntity,
     VirtualBlockchainEntity,
+    VotingPowerEntity,
 ];
 
 @Module({

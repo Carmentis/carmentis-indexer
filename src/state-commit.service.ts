@@ -130,6 +130,8 @@ export class StateCommitService {
                     chainReference: Utils.binaryToHexa(
                         historyUpdate.chainReference,
                     ),
+                    publicReference: historyUpdate.publicReference,
+                    privateReference: historyUpdate.privateReference,
                 });
             }
             // 3) save EscrowLockEntity, VestingLockEntity, StakingLockEntity
@@ -221,9 +223,6 @@ export class StateCommitService {
         const height = header.height;
         let virtualBlockchainId: string;
 
-        console.log(header);
-        console.log(sections);
-
         if (height == 1) {
             virtualBlockchainId = hash;
         } else {
@@ -244,6 +243,7 @@ export class StateCommitService {
             virtualBlockchainId,
             type,
             height,
+            size: serializedMicroblock.length,
         });
         const storageService = new MicroblockStorageService();
         await storageService.saveMicroblock(

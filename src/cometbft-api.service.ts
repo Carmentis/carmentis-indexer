@@ -1,6 +1,11 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { Comet38Client } from "@cosmjs/tendermint-rpc";
-import type { CommitResponse } from "@cosmjs/tendermint-rpc/build/comet38";
+import type {
+    CommitResponse,
+    StatusResponse,
+    ValidatorsResponse,
+    Validator,
+} from "@cosmjs/tendermint-rpc/build/comet38";
 import * as v from "valibot";
 import {
     AbciQueryEncoder,
@@ -54,13 +59,7 @@ export class CometbftApiService implements OnModuleInit {
         try {
             commitData = await client.commit(height);
         } catch (error) {
-            const parsed = this.parseRpcErrorMessage(error);
-            if (
-                parsed &&
-                parsed.code === -32603 &&
-                typeof parsed.data === "string" &&
-                parsed.data.includes("lowest height")
-            ) {
+            if (CometbftApiService.isInvalidHeightError(error)) {
                 this.logger.warn(`commit data not available for block at height ${height}`);
                 commitData = null;
             } else {
@@ -91,8 +90,6 @@ export class CometbftApiService implements OnModuleInit {
             size: parsedResponse.size,
             microblockCount: parsedResponse.microblockCount,
         };
-        console.log("blockData.commit?.commit.signatures", blockData.commit?.commit.signatures);
-        console.log("blockData", Utils.jsonPrettify(blockData));
         return blockData;
     }
 
@@ -173,13 +170,27 @@ export class CometbftApiService implements OnModuleInit {
         return abciResponse as AccountUpdatesAbciResponse;
     }
 
-    async getChainStatus() {
+    async getChainStatus(): Promise<StatusResponse> {
         const client = await Comet38Client.connect(this.nodeUrl);
         const status = await client.status();
         return status;
     }
 
-    private isRpcError(error: unknown): error is { message: string } {
+    async getValidators(height: number): Promise<readonly Validator[]> {
+        const client = await Comet38Client.connect(this.nodeUrl);
+        try {
+            const validators = await client.validators({ height });
+            return validators.validators;
+        } catch (error) {
+            if (CometbftApiService.isInvalidHeightError(error)) {
+                this.logger.warn(`validators not available for block at height ${height}`);
+                return [];
+            }
+            throw error;
+        }
+    }
+
+    private static isRpcError(error: unknown): error is { message: string } {
         return (
             typeof error === "object" &&
             error !== null &&
@@ -188,8 +199,8 @@ export class CometbftApiService implements OnModuleInit {
         );
     }
 
-    private parseRpcErrorMessage(error: unknown): RpcErrorData | null {
-        if (!this.isRpcError(error)) {
+    private static parseRpcErrorMessage(error: unknown): RpcErrorData | null {
+        if (!CometbftApiService.isRpcError(error)) {
             return null;
         }
         try {
@@ -197,5 +208,15 @@ export class CometbftApiService implements OnModuleInit {
         } catch {
             return null;
         }
+    }
+
+    private static isInvalidHeightError(error: any) {
+        const parsed = CometbftApiService.parseRpcErrorMessage(error);
+        return (
+            parsed &&
+            parsed.code === -32603 &&
+            typeof parsed.data === "string" &&
+            parsed.data.includes("lowest height")
+        );
     }
 }

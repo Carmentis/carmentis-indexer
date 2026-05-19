@@ -7,6 +7,7 @@ import {
     GetOrganizationsQueryDto,
     GetApplicationsQueryDto,
     GetValidatorNodesQueryDto,
+    GetVotingPowersQueryDto,
 } from "./dto/query.dto";
 import {
     BlockListResponseDto,
@@ -16,6 +17,7 @@ import {
     OrganizationListResponseDto,
     ApplicationListResponseDto,
     ValidatorNodeListResponseDto,
+    VotingPowerListResponseDto,
 } from "./dto/response.dto";
 import { AppService } from "./app.service";
 import { ApiOkResponse } from "@nestjs/swagger";
@@ -69,5 +71,11 @@ export class AppController {
     @ApiOkResponse({ type: ValidatorNodeListResponseDto })
     async getValidatorNodes(@Query() query: GetValidatorNodesQueryDto) {
         return this.appService.getValidatorNodes(query);
+    }
+
+    @Get("/voting-powers")
+    @ApiOkResponse({ type: VotingPowerListResponseDto })
+    async getVotingPowers(@Query() query: GetVotingPowersQueryDto) {
+        return this.appService.getVotingPowers(query);
     }
 }

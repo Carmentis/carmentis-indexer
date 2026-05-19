@@ -10,8 +10,9 @@ import {
     Microblock,
     Organization,
     ValidatorNode,
-} from "./interface.dto";
-import { ApiProperty } from "@nestjs/swagger";
+    VotingPower,
+} from "./response-interface.dto";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 class BaseListResponseDto<T> {
     items: T[];
@@ -67,6 +68,8 @@ export class AccountHistoryDto implements AccountHistory {
     @ApiProperty() linkedAccountId: string;
     @ApiProperty() amount: number;
     @ApiProperty() chainReference: string;
+    @ApiProperty() publicReference: string;
+    @ApiProperty() privateReference: string;
 }
 export class AccountHistoryListResponseDto extends BaseListResponseDto<AccountHistoryDto> {}
 
@@ -125,6 +128,13 @@ export class MicroblockDto implements Microblock {
     @ApiProperty() virtualBlockchainId: string;
     @ApiProperty() type: number;
     @ApiProperty() height: number;
+    @ApiProperty() size: number;
+
+    @ApiProperty()
+    @ApiPropertyOptional({
+        description: "Returned only if include_content=true",
+    })
+    content?: string;
 }
 export class MicroblockListResponseDto {
     @ApiProperty({ type: () => MicroblockDto, isArray: true })
@@ -159,6 +169,19 @@ export class ValidatorNodeDto implements ValidatorNode {
 export class ValidatorNodeListResponseDto {
     @ApiProperty({ type: () => ValidatorNodeDto, isArray: true })
     items: ValidatorNodeDto[];
+    @ApiProperty()
+    hasMore: boolean;
+}
+
+export class VotingPowerDto implements VotingPower {
+    @ApiProperty() nodeId: string;
+    @ApiProperty() height: number;
+    @ApiProperty() timestamp: number;
+    @ApiProperty() votingPower: number;
+}
+export class VotingPowerListResponseDto {
+    @ApiProperty({ type: () => VotingPowerDto, isArray: true })
+    items: VotingPowerDto[];
     @ApiProperty()
     hasMore: boolean;
 }

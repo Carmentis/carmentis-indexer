@@ -48,6 +48,8 @@ export interface AccountHistory {
     linkedAccountId: string;
     amount: number;
     chainReference: string;
+    publicReference: string;
+    privateReference: string;
 }
 export type AccountHistoryListResponse = BaseListResponse<AccountHistory>;
 
@@ -99,6 +101,8 @@ export interface Microblock {
     virtualBlockchainId: string;
     type: number;
     height: number;
+    size: number;
+    content?: string;
 }
 export type MicroblockListResponse = BaseListResponse<Microblock>;
 
@@ -121,3 +125,11 @@ export interface ValidatorNode {
     rpcEndpoint: string;
 }
 export type ValidatorNodeListResponse = BaseListResponse<ValidatorNode>;
+
+export interface VotingPower {
+    nodeId: string;
+    height: number;
+    timestamp: number;
+    votingPower: number;
+}
+export type VotingPowerListResponse = BaseListResponse<VotingPower>;

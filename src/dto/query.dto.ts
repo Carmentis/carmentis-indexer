@@ -1,21 +1,21 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { IsEnum, IsOptional } from "class-validator";
 import { Type } from "class-transformer";
-
-export enum BlockSort {
-    HEIGHT = "height",
-}
-export enum MicroblockSort {
-    BLOCK_HEIGHT = "blockHeight",
-}
-export enum AccountHistorySort {
-    HEIGHT = "height",
-}
-
-export enum SortOrder {
-    ASC = "ASC",
-    DESC = "DESC",
-}
+import {
+    SortOrder,
+    BlockSort,
+    MicroblockSort,
+    AccountHistorySort,
+    VotingPowerSort,
+    AccountsQuery,
+    AccountHistoryQuery,
+    BlocksQuery,
+    MicroblocksQuery,
+    OrganizationsQuery,
+    ApplicationsQuery,
+    ValidatorNodesQuery,
+    VotingPowersQuery,
+} from "./query-interface.dto";
 
 const SORT_DESCRIPTION = "Field on which the sort is applied";
 
@@ -39,7 +39,7 @@ class ListDto {
     limit?: number;
 }
 
-export class GetBlocksQueryDto extends ListDto {
+export class GetBlocksQueryDto extends ListDto implements BlocksQuery{
     @ApiPropertyOptional({
         description: SORT_DESCRIPTION,
         enum: BlockSort,
@@ -89,7 +89,7 @@ export class GetBlocksQueryDto extends ListDto {
     timestamp_lte?: number;
 }
 
-export class GetMicroblocksQueryDto extends ListDto {
+export class GetMicroblocksQueryDto extends ListDto implements MicroblocksQuery {
     @ApiPropertyOptional({
         description: SORT_DESCRIPTION,
         enum: MicroblockSort,
@@ -121,9 +121,16 @@ export class GetMicroblocksQueryDto extends ListDto {
     @IsOptional()
     @Type(() => Number)
     vb_id?: string;
+
+    @ApiPropertyOptional({
+        description: "Flag to include the microblock content in the response",
+    })
+    @IsOptional()
+    @Type(() => Boolean)
+    include_content?: boolean;
 }
 
-export class GetAccountsQueryDto extends ListDto {
+export class GetAccountsQueryDto extends ListDto implements AccountsQuery {
     @ApiPropertyOptional({
         description: "Account ID",
         example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
@@ -149,7 +156,7 @@ export class GetAccountsQueryDto extends ListDto {
     balance_lte?: number;
 }
 
-export class GetAccountHistoryQueryDto extends ListDto {
+export class GetAccountHistoryQueryDto extends ListDto implements AccountHistoryQuery {
     @ApiPropertyOptional({
         description: SORT_DESCRIPTION,
         enum: AccountHistorySort,
@@ -223,7 +230,7 @@ export class GetAccountHistoryQueryDto extends ListDto {
     timestamp_lte?: number;
 }
 
-export class GetOrganizationsQueryDto extends ListDto {
+export class GetOrganizationsQueryDto extends ListDto implements OrganizationsQuery {
     @ApiPropertyOptional({
         description: "Virtual blockchain ID",
         example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
@@ -249,7 +256,7 @@ export class GetOrganizationsQueryDto extends ListDto {
     name?: string;
 }
 
-export class GetApplicationsQueryDto extends ListDto {
+export class GetApplicationsQueryDto extends ListDto implements ApplicationsQuery {
     @ApiPropertyOptional({
         description: "Virtual blockchain ID",
         example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
@@ -275,7 +282,7 @@ export class GetApplicationsQueryDto extends ListDto {
     name?: string;
 }
 
-export class GetValidatorNodesQueryDto extends ListDto {
+export class GetValidatorNodesQueryDto extends ListDto implements ValidatorNodesQuery {
     @ApiPropertyOptional({
         description: "Virtual blockchain ID",
         example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
@@ -307,4 +314,22 @@ export class GetValidatorNodesQueryDto extends ListDto {
     @IsOptional()
     @Type(() => String)
     address?: string;
+}
+
+export class GetVotingPowersQueryDto extends ListDto implements VotingPowersQuery {
+    @ApiPropertyOptional({
+        description: SORT_DESCRIPTION,
+        enum: VotingPowerSort,
+    })
+    @IsOptional()
+    @IsEnum(VotingPowerSort)
+    sort?: VotingPowerSort;
+
+    @ApiPropertyOptional({
+        description: "Node virtual blockchain ID",
+        example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
+    })
+    @IsOptional()
+    @Type(() => String)
+    node_id?: string;
 }
