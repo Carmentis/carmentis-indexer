@@ -16,6 +16,10 @@ export class MicroblockEntity extends BaseEntity {
     height: number;
     @Column()
     size: number;
+    @Column()
+    gas: number;
+    @Column()
+    gasPrice: number;
 
     @ManyToOne(() => BlockEntity, { onDelete: "RESTRICT" })
     @JoinColumn({ name: "blockHeight", referencedColumnName: "height" })

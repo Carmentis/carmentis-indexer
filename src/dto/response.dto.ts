@@ -129,6 +129,12 @@ export class MicroblockDto implements Microblock {
     @ApiProperty() type: number;
     @ApiProperty() height: number;
     @ApiProperty() size: number;
+    @ApiProperty() gas: number;
+
+    @ApiProperty({
+        description: "Expressed in atomics",
+    })
+    gasPrice: number;
 
     @ApiProperty()
     @ApiPropertyOptional({

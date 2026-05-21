@@ -244,6 +244,8 @@ export class StateCommitService {
             type,
             height,
             size: serializedMicroblock.length,
+            gas: microblock.getGas(),
+            gasPrice: microblock.getGasPrice().getAmountAsAtomic(),
         });
         const storageService = new MicroblockStorageService();
         await storageService.saveMicroblock(

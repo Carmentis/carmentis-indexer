@@ -102,6 +102,8 @@ export interface Microblock {
     type: number;
     height: number;
     size: number;
+    gas: number;
+    gasPrice: number;
     content?: string;
 }
 export type MicroblockListResponse = BaseListResponse<Microblock>;
