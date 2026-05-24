@@ -12,6 +12,8 @@
   "scripts": {
     "build": "pnpm --filter @cmts-dev/carmentis-indexer-common build && tsdown"
   },
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
