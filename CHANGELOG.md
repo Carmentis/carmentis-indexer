@@ -1,3 +1,10 @@
+## [1.0.9](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.8...v1.0.9) (2026-05-24)
+
+
+### Bug Fixes
+
+* removed external dependency carmentis-indexer-common ([120cf1f](https://github.com/Carmentis/carmentis-indexer/commit/120cf1f7e1df6c6832e476c212b10638e389419d))
+
 ## [1.0.8](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.7...v1.0.8) (2026-05-24)
 
 
