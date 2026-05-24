@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.2...v1.0.3) (2026-05-24)
+
+
+### Bug Fixes
+
+* minimumReleaseAge: 0 ([5b758ff](https://github.com/Carmentis/carmentis-indexer/commit/5b758ffef92fa5028a500b4054a2eed54e334bda))
+
 ## [1.0.2](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.1...v1.0.2) (2026-05-24)
 
 
