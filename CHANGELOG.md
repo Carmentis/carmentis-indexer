@@ -1,3 +1,10 @@
+## [1.0.10](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.9...v1.0.10) (2026-05-24)
+
+
+### Bug Fixes
+
+* added main and types in the SDK's package.json ([a09e791](https://github.com/Carmentis/carmentis-indexer/commit/a09e7910e54d80dad08751b3e654867b02dc1098))
+
 ## [1.0.9](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.8...v1.0.9) (2026-05-24)
 
 
