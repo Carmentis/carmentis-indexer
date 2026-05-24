@@ -1,4 +1,13 @@
 packages:
   - 'packages/*'
 
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@scarf/scarf'
+  - '@swc/core'
+  - better-sqlite3
+  - cbor-extract
+  - sqlite3
+  - unrs-resolver
+
 minimumReleaseAge: 0
