@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.7...v1.0.8) (2026-05-24)
+
+
+### Bug Fixes
+
+* attempt to fix /app/dist not found ([4e44a81](https://github.com/Carmentis/carmentis-indexer/commit/4e44a810c5a6cd335b16babaf68f1af82fb842e8))
+
 ## [1.0.7](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.6...v1.0.7) (2026-05-24)
 
 
