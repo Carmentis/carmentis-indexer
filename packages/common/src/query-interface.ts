@@ -1,19 +1,28 @@
-export enum SortOrder {
-    ASC = "ASC",
-    DESC = "DESC",
-}
-export enum BlockSort {
-    HEIGHT = "height",
-}
-export enum MicroblockSort {
-    BLOCK_HEIGHT = "blockHeight",
-}
-export enum AccountHistorySort {
-    HEIGHT = "height",
-}
-export enum VotingPowerSort {
-    HEIGHT = "height",
-}
+export const SortOrder = {
+    ASC: "ASC",
+    DESC: "DESC",
+} as const;
+export type SortOrder = typeof SortOrder[keyof typeof SortOrder];
+
+export const BlockSort = {
+    HEIGHT: "height",
+} as const;
+export type BlockSort = typeof BlockSort[keyof typeof BlockSort];
+
+export const AccountHistorySort = {
+    HEIGHT: "height",
+} as const;
+export type AccountHistorySort = typeof AccountHistorySort[keyof typeof AccountHistorySort];
+
+export const VotingPowerSort = {
+    HEIGHT: "height",
+} as const;
+export type VotingPowerSort = typeof VotingPowerSort[keyof typeof VotingPowerSort];
+
+export const MicroblockSort = {
+    BLOCK_HEIGHT: "blockHeight",
+} as const;
+export type MicroblockSort = typeof MicroblockSort[keyof typeof MicroblockSort];
 
 export interface BaseQuery {
     order?: SortOrder;

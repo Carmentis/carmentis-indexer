@@ -1,2 +1,56 @@
-export * from "@cmts-dev/carmentis-indexer-common";
+import * as common from "@cmts-dev/carmentis-indexer-common";
+
+export const {
+    SortOrder,
+    BlockSort,
+    AccountHistorySort,
+    VotingPowerSort,
+    MicroblockSort,
+} = common;
+
+export type {
+    BaseQuery,
+    AnyQuery,
+    ChainQuery,
+    GasPriceQuery,
+    AccountsQuery,
+    BlocksQuery,
+    MicroblocksQuery,
+    AccountHistoryQuery,
+    OrganizationsQuery,
+    ApplicationsQuery,
+    ValidatorNodesQuery,
+    VirtualBlockchainsQuery,
+    VotingPowersQuery,
+
+    BaseListResponse,
+    ObjectCount,
+    Chain,
+    ChainResponse,
+    GasPrice,
+    GasPriceResponse,
+    EscrowLock,
+    VestingLock,
+    StakingLock,
+    Account,
+    AccountListResponse,
+    AccountHistory,
+    AccountHistoryListResponse,
+    Application,
+    ApplicationListResponse,
+    BlockSignature,
+    Block,
+    BlockListResponse,
+    Microblock,
+    MicroblockListResponse,
+    Organization,
+    OrganizationListResponse,
+    ValidatorNode,
+    ValidatorNodeListResponse,
+    VirtualBlockchain,
+    VirtualBlockchainListResponse,
+    VotingPower,
+    VotingPowerListResponse,
+} from "@cmts-dev/carmentis-indexer-common";
+
 export * from "./client";
