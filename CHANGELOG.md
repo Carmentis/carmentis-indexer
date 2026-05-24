@@ -1,3 +1,10 @@
+## [1.0.12](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.11...v1.0.12) (2026-05-24)
+
+
+### Bug Fixes
+
+* explicit exports in sdk ([d0e442f](https://github.com/Carmentis/carmentis-indexer/commit/d0e442fad5d896d166c03b7daa37ad26130e4a54))
+
 ## [1.0.11](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.10...v1.0.11) (2026-05-24)
 
 
