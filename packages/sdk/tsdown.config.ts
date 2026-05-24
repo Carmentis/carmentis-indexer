@@ -3,5 +3,7 @@ export default {
   outDir: "dist",
   dts: true,
   format: ["esm", "cjs"],
-  noExternal: ["@cmts-dev/carmentis-indexer-common"]
+  deps: {
+    alwaysBundle: ["@cmts-dev/carmentis-indexer-common"]
+  }
 };

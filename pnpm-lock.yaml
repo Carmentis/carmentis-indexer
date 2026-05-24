@@ -186,6 +186,9 @@ importers:
 
   packages/sdk:
     devDependencies:
+      '@cmts-dev/carmentis-indexer-common':
+        specifier: workspace:*
+        version: link:../common
       tsdown:
         specifier: ^0.22.0
         version: 0.22.0(typescript@5.9.3)
