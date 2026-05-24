@@ -185,10 +185,6 @@ importers:
         version: 8.59.4(eslint@9.39.4)(typescript@5.9.3)
 
   packages/sdk:
-    dependencies:
-      '@cmts-dev/carmentis-indexer-common':
-        specifier: workspace:*
-        version: link:../common
     devDependencies:
       tsdown:
         specifier: ^0.22.0
