@@ -13,14 +13,14 @@
     "build": "pnpm --filter @cmts-dev/carmentis-indexer-common build && tsdown"
   },
   "main": "./dist/index.cjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.cts",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs",
-      "types": "./dist/index.d.mts"
+      "types": "./dist/index.d.cts"
     }
-  },
+  }
   "files": [
     "dist"
   ],
