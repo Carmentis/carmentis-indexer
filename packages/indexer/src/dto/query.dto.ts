@@ -7,7 +7,6 @@ import {
     MicroblockSort,
     AccountHistorySort,
     VotingPowerSort,
-    ChainQuery,
     GasPriceQuery,
     AccountsQuery,
     AccountHistoryQuery,
@@ -18,7 +17,7 @@ import {
     ValidatorNodesQuery,
     VirtualBlockchainsQuery,
     VotingPowersQuery,
-} from "./query-interface.dto";
+} from "@cmts-dev/carmentis-indexer-common";
 
 const SORT_DESCRIPTION = "Field on which the sort is applied";
 

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { VotingPowerEntity } from "./entities/voting-power.entity";
 import { VirtualBlockchainEntity } from "./entities/virtual-blockchain.entity";
-import { ObjectCount } from "./dto/response-interface.dto";
+import { ObjectCount } from "@cmts-dev/carmentis-indexer-common";
 
 @Injectable()
 export class QueryService {

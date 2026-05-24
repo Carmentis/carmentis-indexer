@@ -1,6 +1,6 @@
 export default {
-  entry: ["src/sdk/index.ts"],
-  outDir: "dist/sdk",
+  entry: ["src/index.ts"],
+  outDir: "dist",
   dts: true,
   format: ["esm", "cjs"]
 };

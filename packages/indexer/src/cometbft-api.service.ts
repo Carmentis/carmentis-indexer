@@ -1,11 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { Comet38Client } from "@cosmjs/tendermint-rpc";
-import type {
-    CommitResponse,
-    StatusResponse,
-    ValidatorsResponse,
-    Validator,
-} from "@cosmjs/tendermint-rpc/build/comet38";
+type StatusResponse = Awaited<ReturnType<Comet38Client["status"]>>;
+type CommitResponse = Awaited<ReturnType<Comet38Client["commit"]>>;
+type ValidatorsResponse = Awaited<ReturnType<Comet38Client["validators"]>>;
+type Validator = ValidatorsResponse["validators"][number];
 import * as v from "valibot";
 import {
     AbciQueryEncoder,
@@ -21,7 +19,6 @@ import {
     RequestedAccountUpdate,
     AccountUpdatesAbciResponseSchema,
     AccountUpdatesAbciResponse,
-    Utils,
 } from "@cmts-dev/carmentis-sdk-core";
 
 type RpcErrorData = {

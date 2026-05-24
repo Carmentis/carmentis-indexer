@@ -35,7 +35,7 @@ import {
     VirtualBlockchainListResponse,
     VotingPower,
     VotingPowerListResponse,
-} from "./dto/response-interface.dto";
+} from "@cmts-dev/carmentis-indexer-common";
 import {
     GetChainQueryDto,
     GetGasPriceQueryDto,

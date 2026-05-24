@@ -10,7 +10,7 @@ import {
     ValidatorNodesQuery,
     VotingPowersQuery,
     AnyQuery,
-} from "../dto/query-interface.dto";
+} from "@cmts-dev/carmentis-indexer-common";
 import {
     ChainResponse,
     GasPriceResponse,
@@ -22,7 +22,7 @@ import {
     ApplicationListResponse,
     ValidatorNodeListResponse,
     VotingPowerListResponse,
-} from "../dto/response-interface.dto";
+} from "@cmts-dev/carmentis-indexer-common";
 
 export class Indexer {
     private readonly endpoint: string;

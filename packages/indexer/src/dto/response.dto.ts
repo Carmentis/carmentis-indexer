@@ -15,7 +15,7 @@ import {
     ValidatorNode,
     VirtualBlockchain,
     VotingPower,
-} from "./response-interface.dto";
+} from "@cmts-dev/carmentis-indexer-common";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 class BaseListResponseDto<T> {
