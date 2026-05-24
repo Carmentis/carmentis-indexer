@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.5...v1.0.6) (2026-05-24)
+
+
+### Bug Fixes
+
+* attempt to fix ERR_PNPM_IGNORED_BUILDS (2) ([19b378f](https://github.com/Carmentis/carmentis-indexer/commit/19b378faa57e3e474f59c175002bdc6d09fcfcb8))
+
 ## [1.0.5](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.4...v1.0.5) (2026-05-24)
 
 
