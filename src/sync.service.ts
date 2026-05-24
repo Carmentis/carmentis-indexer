@@ -7,6 +7,7 @@ import { ChainEntity } from "./entities/chain.entity";
 import { BlockEntity } from "./entities/block.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
 import { VotingPowerEntity } from "./entities/voting-power.entity";
+import { SyncStateService } from "./sync-state.service";
 
 @Injectable()
 export class SyncService implements OnModuleInit {
@@ -15,10 +16,12 @@ export class SyncService implements OnModuleInit {
     constructor(
         private readonly cometbft: CometbftApiService,
         private readonly stateCommitService: StateCommitService,
+        private readonly syncState: SyncStateService,
+        private readonly queryService: QueryService,
     ) {}
 
-    async onModuleInit() {
-        await this.synchronize();
+    onModuleInit() {
+        setTimeout(this.synchronize.bind(this), 1000);
     }
 
     async synchronize() {
@@ -34,6 +37,7 @@ export class SyncService implements OnModuleInit {
             height <= latestBlockHeight;
             height++
         ) {
+            this.syncState.setHeights(height, latestBlockHeight);
             await this.syncBlock(height);
         }
         setTimeout(this.synchronize.bind(this), 1000);
@@ -106,8 +110,7 @@ export class SyncService implements OnModuleInit {
         ) * 1000;
 
         // get the known voting powers from the DB
-        const queryService = new QueryService();
-        const votingPowers = await queryService.getCurrentVotingPowers();
+        const votingPowers = await this.queryService.getCurrentVotingPowers();
 
         // get the validators at the requested height from Comet
         const validators = await this.cometbft.getValidators(height);

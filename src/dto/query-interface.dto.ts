@@ -21,6 +21,8 @@ export interface BaseQuery {
 }
 
 export type AnyQuery =
+    ChainQuery |
+    GasPriceQuery |
     AccountsQuery |
     BlocksQuery |
     MicroblocksQuery |
@@ -30,12 +32,22 @@ export type AnyQuery =
     ValidatorNodesQuery |
     VotingPowersQuery;
 
+export type ChainQuery = Record<string, never>;
+
+export interface GasPriceQuery {
+    height_gte?: number;
+    height_lte?: number;
+}
+
 export interface AccountsQuery extends BaseQuery {
     height?: number;
     height_gte?: number;
     height_lte?: number;
     timestamp_gte?: number;
     timestamp_lte?: number;
+    with_escrow?: boolean;
+    with_vesting?: boolean;
+    with_staking?: boolean;
 }
 
 export interface BlocksQuery extends BaseQuery {
@@ -84,6 +96,11 @@ export interface ValidatorNodesQuery extends BaseQuery {
     organization_id?: string;
     public_key?: string;
     address?: string;
+}
+
+export interface VirtualBlockchainsQuery extends BaseQuery {
+    vb_id?: string;
+    type?: number;
 }
 
 export interface VotingPowersQuery extends BaseQuery {

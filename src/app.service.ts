@@ -1,4 +1,5 @@
-import { Injectable, BadRequestException } from "@nestjs/common";
+import { Injectable, BadRequestException, InternalServerErrorException } from "@nestjs/common";
+import { ChainEntity } from "./entities/chain.entity";
 import { BlockEntity, BlockSignatureEntity } from "./entities/block.entity";
 import { MicroblockEntity } from "./entities/microblock.entity";
 import {
@@ -11,8 +12,11 @@ import {
 import { OrganizationEntity } from "./entities/organization.entity";
 import { ApplicationEntity } from "./entities/application.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
+import { VirtualBlockchainEntity } from "./entities/virtual-blockchain.entity";
 import { VotingPowerEntity } from "./entities/voting-power.entity";
 import {
+    ChainResponse,
+    GasPriceResponse,
     Block,
     BlockListResponse,
     Microblock,
@@ -27,10 +31,14 @@ import {
     ApplicationListResponse,
     ValidatorNode,
     ValidatorNodeListResponse,
+    VirtualBlockchain,
+    VirtualBlockchainListResponse,
     VotingPower,
     VotingPowerListResponse,
 } from "./dto/response-interface.dto";
 import {
+    GetChainQueryDto,
+    GetGasPriceQueryDto,
     GetBlocksQueryDto,
     GetMicroblocksQueryDto,
     GetAccountsQueryDto,
@@ -38,6 +46,7 @@ import {
     GetOrganizationsQueryDto,
     GetApplicationsQueryDto,
     GetValidatorNodesQueryDto,
+    GetVirtualBlockchainsQueryDto,
     GetVotingPowersQueryDto,
 } from "./dto/query.dto";
 import {
@@ -47,13 +56,65 @@ import {
     Between,
 } from "typeorm";
 import { MicroblockStorageService } from "./microblock-storage.service";
+import { QueryService } from "./query.service";
 
 const MAX_LIMIT = 100;
 
 @Injectable()
 export class AppService {
-    getHello(): string {
-        return "Hello World!";
+    constructor(
+        private readonly microblockStorageService: MicroblockStorageService,
+        private readonly queryService: QueryService,
+    ) {}
+
+    getRoot(): string {
+        return `Carmentis Indexer API v1<br><a href="../../swagger">swagger</a>`;
+    }
+
+    async getChain(query: GetChainQueryDto) {
+        const chain = await ChainEntity.findOneBy({ id: 1 });
+        if (chain === null) {
+            throw new InternalServerErrorException(`object 'chain' not found`);
+        }
+        const height = (await BlockEntity.maximum("height", {})) || 0;
+        const objectCounts = await this.queryService.getVirtualBlockchainCounts();
+        const response: ChainResponse = {
+            version: chain.version,
+            network: chain.network,
+            earliestBlockHash: chain.earliestBlockHash,
+            height,
+            objectCounts,
+        };
+        return response;
+    }
+
+    async getGasPrice(query: GetGasPriceQueryDto) {
+        const {
+            height_gte,
+            height_lte,
+        } = query;
+
+        const where: FindOptionsWhere<MicroblockEntity> = {};
+
+        const heightRange = this.range(height_gte, height_lte);
+        if (heightRange !== null) {
+            where.blockHeight = heightRange;
+        }
+
+        const res: GasPriceResponse | undefined =
+            await MicroblockEntity
+                .createQueryBuilder("microblock")
+                .select("MIN(microblock.gasPrice)", "min")
+                .addSelect("MAX(microblock.gasPrice)", "max")
+                .addSelect("AVG(microblock.gasPrice)", "average")
+                .addSelect("COUNT(*)", "microblocks")
+                .where(where)
+                .getRawOne();
+        if (res === undefined) {
+            throw new InternalServerErrorException(`unable to retrieve gas price data`);
+        }
+        const gasPrice: GasPriceResponse = res;
+        return gasPrice;
     }
 
     async getBlocks(query: GetBlocksQueryDto) {
@@ -96,7 +157,6 @@ export class AppService {
             order: sort ? { [sort]: order } : undefined,
             take,
         });
-        const hasMore = this.hasMore(entities, take);
         const items: Block[] = [];
         for (const e of entities) {
             const signatures = await BlockSignatureEntity.find({
@@ -105,6 +165,7 @@ export class AppService {
             const block: Block = { ...e, signatures };
             items.push(block);
         }
+        const hasMore = this.hasMore(items, take);
         const response: BlockListResponse = { items, hasMore };
         return response;
     }
@@ -140,17 +201,16 @@ export class AppService {
             order: sort ? { [sort]: order } : undefined,
             take,
         });
-        const hasMore = this.hasMore(entities, take);
-        const storageService = new MicroblockStorageService();
         const items: Microblock[] = [];
         for (const e of entities) {
             const microblock: Microblock = { ...e };
             if (include_content) {
-                const rawContent = await storageService.loadMicroblock(e.hash);
+                const rawContent = await this.microblockStorageService.loadMicroblock(e.hash);
                 microblock.content = rawContent.toString("base64");
             }
             items.push(microblock);
         }
+        const hasMore = this.hasMore(items, take);
         const response: MicroblockListResponse = { items, hasMore };
         return response;
     }
@@ -160,6 +220,9 @@ export class AppService {
             id,
             balance_gte,
             balance_lte,
+            with_escrow,
+            with_staking,
+            with_vesting,
             order,
             limit,
         } = query;
@@ -180,7 +243,6 @@ export class AppService {
             where,
             take,
         });
-        const hasMore = this.hasMore(entities, take);
         const items: Account[] = [];
         for (const e of entities) {
             const escrowLocks = await EscrowLockEntity.find({
@@ -192,14 +254,21 @@ export class AppService {
             const stakingLocks = await StakingLockEntity.find({
                 where: { accountId: e.id },
             });
-            const account: Account = {
-                ...e,
-                escrowLocks,
-                vestingLocks,
-                stakingLocks,
-            };
-            items.push(account);
+            if (
+                (!with_escrow || escrowLocks.length > 0) &&
+                (!with_staking || stakingLocks.length > 0) &&
+                (!with_vesting || vestingLocks.length > 0)
+            ) {
+                const account: Account = {
+                    ...e,
+                    escrowLocks,
+                    vestingLocks,
+                    stakingLocks,
+                };
+                items.push(account);
+            }
         }
+        const hasMore = this.hasMore(items, take);
         const response: AccountListResponse = { items, hasMore };
         return response;
     }
@@ -257,11 +326,11 @@ export class AppService {
             order: sort ? { [sort]: order } : undefined,
             take,
         });
-        const hasMore = this.hasMore(entities, take);
         const items = entities.map((e) => {
             const accountHistory: AccountHistory = { ...e };
             return accountHistory;
         });
+        const hasMore = this.hasMore(items, take);
         const response: AccountHistoryListResponse = { items, hasMore };
         return response;
     }
@@ -292,11 +361,11 @@ export class AppService {
             where,
             take,
         });
-        const hasMore = this.hasMore(entities, take);
         const items = entities.map((e) => {
             const organization: Organization = { ...e };
             return organization;
         });
+        const hasMore = this.hasMore(items, take);
         const response: OrganizationListResponse = { items, hasMore };
         return response;
     }
@@ -327,11 +396,11 @@ export class AppService {
             where,
             take,
         });
-        const hasMore = this.hasMore(entities, take);
         const items = entities.map((e) => {
             const application: Application = { ...e };
             return application;
         });
+        const hasMore = this.hasMore(items, take);
         const response: ApplicationListResponse = { items, hasMore };
         return response;
     }
@@ -366,12 +435,43 @@ export class AppService {
             where,
             take,
         });
-        const hasMore = this.hasMore(entities, take);
         const items = entities.map((e) => {
             const validatorNode: ValidatorNode = { ...e };
             return validatorNode;
         });
+        const hasMore = this.hasMore(items, take);
         const response: ValidatorNodeListResponse = { items, hasMore };
+        return response;
+    }
+
+    async getVirtualBlockchains(query: GetVirtualBlockchainsQueryDto) {
+        const {
+            vb_id,
+            type,
+            order,
+            limit,
+        } = query;
+
+        const where: FindOptionsWhere<VirtualBlockchainEntity> = {};
+
+        if (vb_id !== undefined) {
+            where.virtualBlockchainId = vb_id;
+        }
+        if (type !== undefined) {
+            where.type = type;
+        }
+
+        const take = this.take(limit);
+        const entities = await VirtualBlockchainEntity.find({
+            where,
+            take,
+        });
+        const items = entities.map((e) => {
+            const virtualBlockchain: VirtualBlockchain = { ...e };
+            return virtualBlockchain;
+        });
+        const hasMore = this.hasMore(items, take);
+        const response: VirtualBlockchainListResponse = { items, hasMore };
         return response;
     }
 
@@ -397,11 +497,11 @@ export class AppService {
             order: sort ? { [sort]: order } : undefined,
             take,
         });
-        const hasMore = this.hasMore(entities, take);
         const items = entities.map((e) => {
             const votingPower: VotingPower = { ...e };
             return votingPower;
         });
+        const hasMore = this.hasMore(items, take);
         const response: VotingPowerListResponse = { items, hasMore };
         return response;
     }
@@ -436,9 +536,9 @@ export class AppService {
         ) + 1;
     }
 
-    private hasMore(entities: unknown[], take: number) {
-        if (entities.length > take - 1) {
-            entities.pop();
+    private hasMore(items: unknown[], take: number) {
+        if (items.length > take - 1) {
+            items.pop();
             return true;
         }
         return false;

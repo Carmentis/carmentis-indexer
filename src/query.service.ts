@@ -1,5 +1,9 @@
+import { Injectable } from "@nestjs/common";
 import { VotingPowerEntity } from "./entities/voting-power.entity";
+import { VirtualBlockchainEntity } from "./entities/virtual-blockchain.entity";
+import { ObjectCount } from "./dto/response-interface.dto";
 
+@Injectable()
 export class QueryService {
     async getCurrentVotingPowers() {
         const rows = await VotingPowerEntity.createQueryBuilder("vp")
@@ -15,6 +19,16 @@ export class QueryService {
                 "vp.nodeId = latest.nodeId AND vp.height = latest.maxHeight",
             )
             .getMany();
+        return rows;
+    }
+
+    async getVirtualBlockchainCounts() {
+        const rows: ObjectCount[] = await VirtualBlockchainEntity
+            .createQueryBuilder("e")
+            .select("e.type", "type")
+            .addSelect("COUNT(*)", "count")
+            .groupBy("e.type")
+            .getRawMany();
         return rows;
     }
 }

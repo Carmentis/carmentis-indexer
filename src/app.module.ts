@@ -2,8 +2,11 @@ import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { SyncService } from "./sync.service";
+import { SyncStateService } from "./sync-state.service";
 import { CometbftApiService } from "./cometbft-api.service";
 import { StateCommitService } from "./state-commit.service";
+import { MicroblockStorageService } from "./microblock-storage.service";
+import { QueryService } from "./query.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { VirtualBlockchainEntity } from "./entities/virtual-blockchain.entity";
 import {
@@ -52,8 +55,11 @@ const entities = [
     providers: [
         AppService,
         SyncService,
+        SyncStateService,
         CometbftApiService,
         StateCommitService,
+        QueryService,
+        MicroblockStorageService,
     ],
 })
 export class AppModule {}

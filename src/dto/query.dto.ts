@@ -7,6 +7,8 @@ import {
     MicroblockSort,
     AccountHistorySort,
     VotingPowerSort,
+    ChainQuery,
+    GasPriceQuery,
     AccountsQuery,
     AccountHistoryQuery,
     BlocksQuery,
@@ -14,6 +16,7 @@ import {
     OrganizationsQuery,
     ApplicationsQuery,
     ValidatorNodesQuery,
+    VirtualBlockchainsQuery,
     VotingPowersQuery,
 } from "./query-interface.dto";
 
@@ -39,7 +42,28 @@ class ListDto {
     limit?: number;
 }
 
-export class GetBlocksQueryDto extends ListDto implements BlocksQuery{
+export class GetChainQueryDto {
+}
+
+export class GetGasPriceQueryDto implements GasPriceQuery {
+    @ApiPropertyOptional({
+        description: "Minimum block height (inclusive)",
+        example: 100,
+    })
+    @IsOptional()
+    @Type(() => Number)
+    height_gte?: number;
+
+    @ApiPropertyOptional({
+        description: "Maximum block height (inclusive)",
+        example: 200,
+    })
+    @IsOptional()
+    @Type(() => Number)
+    height_lte?: number;
+}
+
+export class GetBlocksQueryDto extends ListDto implements BlocksQuery {
     @ApiPropertyOptional({
         description: SORT_DESCRIPTION,
         enum: BlockSort,
@@ -154,6 +178,27 @@ export class GetAccountsQueryDto extends ListDto implements AccountsQuery {
     @IsOptional()
     @Type(() => Number)
     balance_lte?: number;
+
+    @ApiPropertyOptional({
+        description: "Filter accounts with at least one escrow lock",
+    })
+    @IsOptional()
+    @Type(() => Boolean)
+    with_escrow?: boolean;
+
+    @ApiPropertyOptional({
+        description: "Filter accounts with at least one vesting lock",
+    })
+    @IsOptional()
+    @Type(() => Boolean)
+    with_vesting?: boolean;
+
+    @ApiPropertyOptional({
+        description: "Filter accounts with at least one staking lock",
+    })
+    @IsOptional()
+    @Type(() => Boolean)
+    with_staking?: boolean;
 }
 
 export class GetAccountHistoryQueryDto extends ListDto implements AccountHistoryQuery {
@@ -280,6 +325,24 @@ export class GetApplicationsQueryDto extends ListDto implements ApplicationsQuer
     @IsOptional()
     @Type(() => String)
     name?: string;
+}
+
+export class GetVirtualBlockchainsQueryDto extends ListDto implements VirtualBlockchainsQuery {
+    @ApiPropertyOptional({
+        description: "Virtual blockchain ID",
+        example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
+    })
+    @IsOptional()
+    @Type(() => String)
+    vb_id?: string;
+
+    @ApiPropertyOptional({
+        description: "Type",
+        example: 1,
+    })
+    @IsOptional()
+    @Type(() => Number)
+    type?: number;
 }
 
 export class GetValidatorNodesQueryDto extends ListDto implements ValidatorNodesQuery {

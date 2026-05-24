@@ -1,4 +1,7 @@
 import {
+    ObjectCount,
+    Chain,
+    GasPrice,
     Account,
     AccountHistory,
     EscrowLock,
@@ -10,6 +13,7 @@ import {
     Microblock,
     Organization,
     ValidatorNode,
+    VirtualBlockchain,
     VotingPower,
 } from "./response-interface.dto";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
@@ -17,6 +21,27 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 class BaseListResponseDto<T> {
     items: T[];
     hasMore: boolean;
+}
+
+export class ObjectCountDto implements ObjectCount {
+    @ApiProperty() type: number;
+    @ApiProperty() count: number;
+}
+
+export class ChainResponseDto implements Chain {
+    @ApiProperty() version: string;
+    @ApiProperty() network: string;
+    @ApiProperty() earliestBlockHash: string;
+    @ApiProperty() height: number;
+    @ApiProperty({ type: () => ObjectCountDto, isArray: true })
+    objectCounts: ObjectCountDto[];
+}
+
+export class GasPriceResponseDto implements GasPrice {
+    @ApiProperty() min: number;
+    @ApiProperty() max: number;
+    @ApiProperty() average: number;
+    @ApiProperty() microblocks: number;
 }
 
 export class EscrowLockDto implements EscrowLock {
@@ -175,6 +200,21 @@ export class ValidatorNodeDto implements ValidatorNode {
 export class ValidatorNodeListResponseDto {
     @ApiProperty({ type: () => ValidatorNodeDto, isArray: true })
     items: ValidatorNodeDto[];
+    @ApiProperty()
+    hasMore: boolean;
+}
+
+export class VirtualBlockchainDto implements VirtualBlockchain {
+    @ApiProperty() virtualBlockchainId: string;
+    @ApiProperty() height: number;
+    @ApiProperty() type: number;
+    @ApiProperty() creationTimestamp: number;
+    @ApiProperty() modificationTimestamp: number;
+    @ApiProperty() lastMicroblockHash: string;
+}
+export class VirtualBlockchainListResponseDto {
+    @ApiProperty({ type: () => VirtualBlockchainDto, isArray: true })
+    items: VirtualBlockchainDto[];
     @ApiProperty()
     hasMore: boolean;
 }

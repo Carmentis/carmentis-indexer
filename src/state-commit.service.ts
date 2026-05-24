@@ -18,6 +18,7 @@ import { BlockEntity, BlockSignatureEntity } from "./entities/block.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
 import { OrganizationEntity } from "./entities/organization.entity";
 import { ApplicationEntity } from "./entities/application.entity";
+import { VirtualBlockchainEntity } from "./entities/virtual-blockchain.entity";
 import {
     AccountEntity,
     AccountHistoryEntity,
@@ -33,6 +34,10 @@ import { DeepPartial } from "typeorm";
 @Injectable()
 export class StateCommitService {
     private readonly logger = new Logger();
+
+    constructor(
+        private readonly microblockStorageService: MicroblockStorageService,
+    ) {}
 
     async commitBlock(height: number, block: BlockData) {
         this.logger.log(`Committing block ${height}`);
@@ -220,6 +225,7 @@ export class StateCommitService {
         const sections = microblock.getAllSections();
         const hash = Utils.binaryToHexa(microblock.getHash().toBytes());
         const type: VirtualBlockchainType = header.microblockType;
+        const timestamp = microblock.getTimestamp();
         const height = header.height;
         let virtualBlockchainId: string;
 
@@ -247,8 +253,7 @@ export class StateCommitService {
             gas: microblock.getGas(),
             gasPrice: microblock.getGasPrice().getAmountAsAtomic(),
         });
-        const storageService = new MicroblockStorageService();
-        await storageService.saveMicroblock(
+        await this.microblockStorageService.saveMicroblock(
             hash,
             serializedMicroblock,
         );
@@ -266,6 +271,28 @@ export class StateCommitService {
                 await this.saveApplication(virtualBlockchainId, sections);
                 break;
             }
+        }
+
+        if (height == 1) {
+            await VirtualBlockchainEntity.save({
+                virtualBlockchainId,
+                type,
+                height,
+                creationTimestamp: timestamp,
+                modificationTimestamp: timestamp,
+                lastMicroblockHash: hash,
+            });
+        } else {
+            await VirtualBlockchainEntity.update(
+                {
+                    virtualBlockchainId
+                },
+                {
+                    height,
+                    modificationTimestamp: timestamp,
+                    lastMicroblockHash: hash,
+                },
+            );
         }
     }
 

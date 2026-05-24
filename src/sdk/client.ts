@@ -1,4 +1,6 @@
 import {
+    ChainQuery,
+    GasPriceQuery,
     AccountsQuery,
     BlocksQuery,
     MicroblocksQuery,
@@ -10,6 +12,8 @@ import {
     AnyQuery,
 } from "../dto/query-interface.dto";
 import {
+    ChainResponse,
+    GasPriceResponse,
     AccountListResponse,
     AccountHistoryListResponse,
     BlockListResponse,
@@ -27,68 +31,74 @@ export class Indexer {
         this.endpoint = endpoint;
     }
 
+    async getChain(parameters: ChainQuery) {
+        return (await this.query(
+            "chain",
+            parameters,
+        )) as ChainResponse;
+    }
+
+    async getGasPrice(parameters: GasPriceQuery) {
+        return (await this.query(
+            "gas-price",
+            parameters,
+        )) as GasPriceResponse;
+    }
+
     async getBlocks(parameters: BlocksQuery = {}) {
-        const res = (await this.query(
+        return (await this.query(
             "blocks",
             parameters,
         )) as BlockListResponse;
-        return res;
     }
 
     async getMicroblocks(parameters: MicroblocksQuery = {}) {
-        const res = (await this.query(
+        return (await this.query(
             "microblocks",
             parameters,
         )) as MicroblockListResponse;
-        return res;
     }
 
     async getOrganizations(parameters: OrganizationsQuery = {}) {
-        const res = (await this.query(
+        return (await this.query(
             "organizations",
             parameters,
         )) as OrganizationListResponse;
-        return res;
     }
 
     async getApplications(parameters: ApplicationsQuery = {}) {
-        const res = (await this.query(
+        return (await this.query(
             "applications",
             parameters,
         )) as ApplicationListResponse;
-        return res;
     }
 
     async getValidatorNodes(parameters: ValidatorNodesQuery = {}) {
-        const res = (await this.query(
+        return (await this.query(
             "validator-nodes",
             parameters,
         )) as ValidatorNodeListResponse;
-        return res;
     }
 
     async getAccounts(parameters: AccountsQuery = {}) {
-        const res = (await this.query(
+        return (await this.query(
             "accounts",
             parameters,
         )) as AccountListResponse;
-        return res;
     }
 
     async getAccountHistory(parameters: AccountHistoryQuery = {}) {
-        const res = (await this.query(
+        return (await this.query(
             "account-history",
             parameters,
         )) as AccountHistoryListResponse;
-        return res;
     }
 
     async getVotingPower(parameters: VotingPowersQuery = {}) {
-        const res = (await this.query(
+        return (await this.query(
             "voting-powers",
             parameters,
         )) as VotingPowerListResponse;
-        return res;
     }
 
     private async query(

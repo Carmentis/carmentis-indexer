@@ -3,6 +3,28 @@ export interface BaseListResponse<T> {
     hasMore: boolean;
 }
 
+export interface ObjectCount {
+    type: number;
+    count: number;
+}
+
+export interface Chain {
+    version: string;
+    network: string;
+    earliestBlockHash: string;
+    height: number;
+    objectCounts: ObjectCount[];
+}
+export type ChainResponse = Chain;
+
+export interface GasPrice {
+    min: number;
+    max: number;
+    average: number;
+    microblocks: number;
+}
+export type GasPriceResponse = GasPrice;
+
 export interface EscrowLock {
     amount: number;
     escrowIdentifier: string;
@@ -127,6 +149,16 @@ export interface ValidatorNode {
     rpcEndpoint: string;
 }
 export type ValidatorNodeListResponse = BaseListResponse<ValidatorNode>;
+
+export interface VirtualBlockchain {
+    virtualBlockchainId: string;
+    height: number;
+    type: number;
+    creationTimestamp: number;
+    modificationTimestamp: number;
+    lastMicroblockHash: string;
+}
+export type VirtualBlockchainListResponse = BaseListResponse<VirtualBlockchain>;
 
 export interface VotingPower {
     nodeId: string;

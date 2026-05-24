@@ -9,8 +9,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "nest build",
-    "build:sdk": "tsdown",
+    "build": "nest build && tsdown",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

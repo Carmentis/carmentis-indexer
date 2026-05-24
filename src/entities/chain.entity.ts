@@ -6,9 +6,9 @@ export class ChainEntity extends BaseEntity {
     id: number;
 
     @Column()
-    earliestBlockHash: string;
-    @Column()
     version: string;
     @Column()
     network: string;
+    @Column()
+    earliestBlockHash: string;
 }
