@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.3...v1.0.4) (2026-05-24)
+
+
+### Bug Fixes
+
+* updated onlyBuiltDependencies ([5b1e0f5](https://github.com/Carmentis/carmentis-indexer/commit/5b1e0f58cfab6286e8d63ca433707f5b0f53ffd8))
+
 ## [1.0.3](https://github.com/Carmentis/carmentis-indexer/compare/v1.0.2...v1.0.3) (2026-05-24)
 
 
