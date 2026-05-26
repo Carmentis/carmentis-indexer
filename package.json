@@ -9,7 +9,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "nest build && tsdown",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -19,7 +19,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@cmts-dev/carmentis-sdk-core": "^1.0.0",
+    "@cmts-dev/carmentis-sdk-core": "^1.2.4",
     "@cosmjs/tendermint-rpc": "^0.38.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
@@ -66,7 +66,6 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "tsdown": "^0.22.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },

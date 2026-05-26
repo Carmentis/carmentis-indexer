@@ -1,0 +1,6 @@
+packages:
+  - .
+minimumReleaseAge: 0
+
+onlyBuiltDependencies:
+  - sqlite3

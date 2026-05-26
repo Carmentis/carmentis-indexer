@@ -18,11 +18,6 @@ import {
 } from "./response-interface.dto";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
-class BaseListResponseDto<T> {
-    items: T[];
-    hasMore: boolean;
-}
-
 export class ObjectCountDto implements ObjectCount {
     @ApiProperty() type: number;
     @ApiProperty() count: number;
@@ -84,7 +79,12 @@ export class AccountDto implements Account {
     stakingLocks: StakingLockDto[];
 }
 
-export class AccountListResponseDto extends BaseListResponseDto<AccountDto> {}
+export class AccountListResponseDto {
+    @ApiProperty({ type: () => AccountDto, isArray: true })
+    items: AccountDto[];
+    @ApiProperty()
+    hasMore: boolean;
+}
 
 export class AccountHistoryDto implements AccountHistory {
     @ApiProperty() accountId: string;
@@ -98,7 +98,12 @@ export class AccountHistoryDto implements AccountHistory {
     @ApiProperty() privateReference: string;
 }
 
-export class AccountHistoryListResponseDto extends BaseListResponseDto<AccountHistoryDto> {}
+export class AccountHistoryListResponseDto {
+    @ApiProperty({ type: () => AccountHistoryDto, isArray: true })
+    items: AccountHistoryDto[];
+    @ApiProperty()
+    hasMore: boolean;
+}
 
 export class ApplicationDto implements Application {
     @ApiProperty() virtualBlockchainId: string;
@@ -109,7 +114,12 @@ export class ApplicationDto implements Application {
     @ApiProperty() description: string;
 }
 
-export class ApplicationListResponseDto extends BaseListResponseDto<ApplicationDto> {}
+export class ApplicationListResponseDto {
+    @ApiProperty({ type: () => ApplicationDto, isArray: true })
+    items: ApplicationDto[];
+    @ApiProperty()
+    hasMore: boolean;
+}
 
 export class BlockSignatureDto implements BlockSignature {
     @ApiProperty() height: number;
