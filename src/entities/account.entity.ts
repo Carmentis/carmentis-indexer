@@ -1,4 +1,12 @@
-import { BaseEntity, Column, Entity, PrimaryColumn, ManyToOne, JoinColumn, PrimaryGeneratedColumn } from "typeorm";
+import {
+    BaseEntity,
+    Column,
+    Entity,
+    PrimaryColumn,
+    ManyToOne,
+    JoinColumn,
+    PrimaryGeneratedColumn,
+} from "typeorm";
 
 @Entity()
 export class AccountEntity extends BaseEntity {

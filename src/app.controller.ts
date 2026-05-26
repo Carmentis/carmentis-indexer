@@ -1,4 +1,9 @@
-import { Controller, Get, Query, ServiceUnavailableException } from "@nestjs/common";
+import {
+    Controller,
+    Get,
+    Query,
+    ServiceUnavailableException,
+} from "@nestjs/common";
 import {
     GetChainQueryDto,
     GetGasPriceQueryDto,
@@ -119,10 +124,11 @@ export class AppController {
     }
 
     checkApiAvaibilityOrFail() {
-        const { dbHeight, chainHeight, synchronized } = this.syncState.getStatus();
+        const { dbHeight, chainHeight, synchronized } =
+            this.syncState.getStatus();
         if (!synchronized) {
             throw new ServiceUnavailableException(
-                `the indexer is not synchronized (height ${dbHeight} / ${chainHeight})`
+                `the indexer is not synchronized (height ${dbHeight} / ${chainHeight})`,
             );
         }
     }

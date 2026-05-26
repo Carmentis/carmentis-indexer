@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, InternalServerErrorException } from "@nestjs/common";
+import {
+    Injectable,
+    BadRequestException,
+    InternalServerErrorException,
+} from "@nestjs/common";
 import { ChainEntity } from "./entities/chain.entity";
 import { BlockEntity, BlockSignatureEntity } from "./entities/block.entity";
 import { MicroblockEntity } from "./entities/microblock.entity";
@@ -77,7 +81,8 @@ export class AppService {
             throw new InternalServerErrorException(`object 'chain' not found`);
         }
         const height = (await BlockEntity.maximum("height", {})) || 0;
-        const objectCounts = await this.queryService.getVirtualBlockchainCounts();
+        const objectCounts =
+            await this.queryService.getVirtualBlockchainCounts();
         const response: ChainResponse = {
             version: chain.version,
             network: chain.network,
@@ -89,10 +94,7 @@ export class AppService {
     }
 
     async getGasPrice(query: GetGasPriceQueryDto) {
-        const {
-            height_gte,
-            height_lte,
-        } = query;
+        const { height_gte, height_lte } = query;
 
         const where: FindOptionsWhere<MicroblockEntity> = {};
 
@@ -102,8 +104,7 @@ export class AppService {
         }
 
         const res: GasPriceResponse | undefined =
-            await MicroblockEntity
-                .createQueryBuilder("microblock")
+            await MicroblockEntity.createQueryBuilder("microblock")
                 .select("MIN(microblock.gasPrice)", "min")
                 .addSelect("MAX(microblock.gasPrice)", "max")
                 .addSelect("AVG(microblock.gasPrice)", "average")
@@ -111,7 +112,9 @@ export class AppService {
                 .where(where)
                 .getRawOne();
         if (res === undefined) {
-            throw new InternalServerErrorException(`unable to retrieve gas price data`);
+            throw new InternalServerErrorException(
+                `unable to retrieve gas price data`,
+            );
         }
         const gasPrice: GasPriceResponse = res;
         return gasPrice;
@@ -205,7 +208,8 @@ export class AppService {
         for (const e of entities) {
             const microblock: Microblock = { ...e };
             if (include_content) {
-                const rawContent = await this.microblockStorageService.loadMicroblock(e.hash);
+                const rawContent =
+                    await this.microblockStorageService.loadMicroblock(e.hash);
                 microblock.content = rawContent.toString("base64");
             }
             items.push(microblock);
@@ -306,7 +310,7 @@ export class AppService {
         if (height !== undefined) {
             if (heightRange !== null) {
                 throw new BadRequestException(
-                    "'height_gte'/'height_lte' cannot be used in conjunction with 'height'"
+                    "'height_gte'/'height_lte' cannot be used in conjunction with 'height'",
                 );
             }
             where.height = height;
@@ -321,7 +325,7 @@ export class AppService {
         }
 
         const take = this.take(limit);
-        const entities= await AccountHistoryEntity.find({
+        const entities = await AccountHistoryEntity.find({
             where,
             order: sort ? { [sort]: order } : undefined,
             take,
@@ -336,13 +340,7 @@ export class AppService {
     }
 
     async getOrganizations(query: GetOrganizationsQueryDto) {
-        const {
-            vb_id,
-            account_id,
-            name,
-            order,
-            limit,
-        } = query;
+        const { vb_id, account_id, name, order, limit } = query;
 
         const where: FindOptionsWhere<OrganizationEntity> = {};
 
@@ -371,13 +369,7 @@ export class AppService {
     }
 
     async getApplications(query: GetApplicationsQueryDto) {
-        const {
-            vb_id,
-            organization_id,
-            name,
-            order,
-            limit,
-        } = query;
+        const { vb_id, organization_id, name, order, limit } = query;
 
         const where: FindOptionsWhere<ApplicationEntity> = {};
 
@@ -406,14 +398,8 @@ export class AppService {
     }
 
     async getValidatorNodes(query: GetValidatorNodesQueryDto) {
-        const {
-            vb_id,
-            organization_id,
-            public_key,
-            address,
-            order,
-            limit,
-        } = query;
+        const { vb_id, organization_id, public_key, address, order, limit } =
+            query;
 
         const where: FindOptionsWhere<ValidatorNodeEntity> = {};
 
@@ -445,12 +431,7 @@ export class AppService {
     }
 
     async getVirtualBlockchains(query: GetVirtualBlockchainsQueryDto) {
-        const {
-            vb_id,
-            type,
-            order,
-            limit,
-        } = query;
+        const { vb_id, type, order, limit } = query;
 
         const where: FindOptionsWhere<VirtualBlockchainEntity> = {};
 
@@ -476,12 +457,7 @@ export class AppService {
     }
 
     async getVotingPowers(query: GetVotingPowersQueryDto) {
-        const {
-            node_id,
-            sort,
-            order,
-            limit,
-        } = query;
+        const { node_id, sort, order, limit } = query;
 
         const where: FindOptionsWhere<VotingPowerEntity> = {};
 
@@ -507,10 +483,7 @@ export class AppService {
     }
 
     private range(gte: number | undefined, lte: number | undefined) {
-        if (
-            gte !== undefined &&
-            lte !== undefined
-        ) {
+        if (gte !== undefined && lte !== undefined) {
             return Between(gte, lte);
         }
         if (gte !== undefined) {
@@ -530,10 +503,8 @@ export class AppService {
 
     private take(limit: number | undefined) {
         return (
-            limit === undefined
-                ? MAX_LIMIT
-                : Math.min(MAX_LIMIT, limit)
-        ) + 1;
+            (limit === undefined ? MAX_LIMIT : Math.min(MAX_LIMIT, limit)) + 1
+        );
     }
 
     private hasMore(items: unknown[], take: number) {

@@ -82,7 +82,9 @@ export class StateCommitService {
                 lastCommitHash: Utils.binaryToHexa(header.lastCommitHash),
                 dataHash: Utils.binaryToHexa(header.dataHash),
                 validatorsHash: Utils.binaryToHexa(header.validatorsHash),
-                nextValidatorsHash: Utils.binaryToHexa(header.nextValidatorsHash),
+                nextValidatorsHash: Utils.binaryToHexa(
+                    header.nextValidatorsHash,
+                ),
                 consensusHash: Utils.binaryToHexa(header.consensusHash),
                 appHash: Utils.binaryToHexa(header.appHash),
                 lastResultsHash: Utils.binaryToHexa(header.lastResultsHash),
@@ -174,13 +176,15 @@ export class StateCommitService {
         }
     }
 
-    async commitEscrowLock(accountId: string, amount: number, params: EscrowParameters) {
+    async commitEscrowLock(
+        accountId: string,
+        amount: number,
+        params: EscrowParameters,
+    ) {
         await EscrowLockEntity.save({
             accountId,
             amount,
-            escrowIdentifier: Utils.binaryToHexa(
-                params.escrowIdentifier,
-            ),
+            escrowIdentifier: Utils.binaryToHexa(params.escrowIdentifier),
             fundEmitterAccountId: Utils.binaryToHexa(
                 params.fundEmitterAccountId,
             ),
@@ -192,7 +196,11 @@ export class StateCommitService {
         });
     }
 
-    async commitVestingLock(accountId: string, amount: number, params: VestingParameters) {
+    async commitVestingLock(
+        accountId: string,
+        amount: number,
+        params: VestingParameters,
+    ) {
         await VestingLockEntity.save({
             accountId,
             amount,
@@ -203,7 +211,11 @@ export class StateCommitService {
         });
     }
 
-    async commitStakingLock(accountId: string, amount: number, params: NodeStakingParameters) {
+    async commitStakingLock(
+        accountId: string,
+        amount: number,
+        params: NodeStakingParameters,
+    ) {
         await StakingLockEntity.save({
             accountId,
             amount,
@@ -220,7 +232,8 @@ export class StateCommitService {
         blockHeight: number,
         serializedMicroblock: Uint8Array,
     ) {
-        const microblock = Microblock.loadFromSerializedMicroblock(serializedMicroblock);
+        const microblock =
+            Microblock.loadFromSerializedMicroblock(serializedMicroblock);
         const header = microblock.getHeader();
         const sections = microblock.getAllSections();
         const hash = Utils.binaryToHexa(microblock.getHash().toBytes());
@@ -285,7 +298,7 @@ export class StateCommitService {
         } else {
             await VirtualBlockchainEntity.update(
                 {
-                    virtualBlockchainId
+                    virtualBlockchainId,
                 },
                 {
                     height,
@@ -300,7 +313,9 @@ export class StateCommitService {
         virtualBlockchainId: string,
         sections: Section[],
     ) {
-        const record: DeepPartial<ValidatorNodeEntity> = { virtualBlockchainId };
+        const record: DeepPartial<ValidatorNodeEntity> = {
+            virtualBlockchainId,
+        };
         for (const section of sections) {
             switch (section.type) {
                 case SectionType.VN_CREATION: {
@@ -339,9 +354,7 @@ export class StateCommitService {
         for (const section of sections) {
             switch (section.type) {
                 case SectionType.ORG_CREATION: {
-                    record.accountId = Utils.binaryToHexa(
-                        section.accountId,
-                    );
+                    record.accountId = Utils.binaryToHexa(section.accountId);
                     break;
                 }
                 case SectionType.ORG_DESCRIPTION: {

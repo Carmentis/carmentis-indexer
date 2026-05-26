@@ -16,7 +16,6 @@ describe("AppController", () => {
     });
 
     describe("root", () => {
-        it("to do", () => {
-        });
+        it("to do", () => {});
     });
 });

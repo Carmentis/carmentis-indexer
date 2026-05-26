@@ -104,10 +104,9 @@ export class SyncService implements OnModuleInit {
 
     async syncVotingPowers(height: number, blockTimestamp: number) {
         // turn the block timestamp into a day timestamp
-        const timestamp = Utils.addDaysToTimestamp(
-            Math.floor(blockTimestamp / 1000),
-            0,
-        ) * 1000;
+        const timestamp =
+            Utils.addDaysToTimestamp(Math.floor(blockTimestamp / 1000), 0) *
+            1000;
 
         // get the known voting powers from the DB
         const votingPowers = await this.queryService.getCurrentVotingPowers();
@@ -136,7 +135,9 @@ export class SyncService implements OnModuleInit {
                 previousVotingPower === undefined ||
                 previousVotingPower.votingPower !== votingPower
             ) {
-                this.logger.log(`setting voting power of node ${nodeId} to ${votingPower}`);
+                this.logger.log(
+                    `setting voting power of node ${nodeId} to ${votingPower}`,
+                );
                 await VotingPowerEntity.save({
                     nodeId,
                     height,
@@ -150,7 +151,9 @@ export class SyncService implements OnModuleInit {
         // but still have a voting power greater than 0 in the DB
         for (const vp of votingPowers) {
             if (!definedValidators.has(vp.nodeId) && vp.votingPower !== 0) {
-                this.logger.log(`setting voting power of node ${vp.nodeId} to 0`);
+                this.logger.log(
+                    `setting voting power of node ${vp.nodeId} to 0`,
+                );
                 await VotingPowerEntity.save({
                     nodeId: vp.nodeId,
                     height,
@@ -172,7 +175,8 @@ export class SyncService implements OnModuleInit {
             },
             take: 1,
         });
-        const knownHeight = lastKnownBlock.length == 0 ? 0 : lastKnownBlock[0].height;
+        const knownHeight =
+            lastKnownBlock.length == 0 ? 0 : lastKnownBlock[0].height;
 
         // get the actual chain status from the node
         const actualStatus = await this.cometbft.getChainStatus();
@@ -194,7 +198,7 @@ export class SyncService implements OnModuleInit {
             if (earliestBlockHash !== knownStatus.earliestBlockHash) {
                 throw new Error(
                     `Earliest block hash mismatch detected. Was the chain reset?\n` +
-                    `If so, please delete 'db.sqlite' and restart the indexer.`
+                        `If so, please delete 'db.sqlite' and restart the indexer.`,
                 );
             }
         }

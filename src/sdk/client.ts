@@ -32,24 +32,15 @@ export class Indexer {
     }
 
     async getChain(parameters: ChainQuery) {
-        return (await this.query(
-            "chain",
-            parameters,
-        )) as ChainResponse;
+        return (await this.query("chain", parameters)) as ChainResponse;
     }
 
     async getGasPrice(parameters: GasPriceQuery) {
-        return (await this.query(
-            "gas-price",
-            parameters,
-        )) as GasPriceResponse;
+        return (await this.query("gas-price", parameters)) as GasPriceResponse;
     }
 
     async getBlocks(parameters: BlocksQuery = {}) {
-        return (await this.query(
-            "blocks",
-            parameters,
-        )) as BlockListResponse;
+        return (await this.query("blocks", parameters)) as BlockListResponse;
     }
 
     async getMicroblocks(parameters: MicroblocksQuery = {}) {
@@ -101,10 +92,7 @@ export class Indexer {
         )) as VotingPowerListResponse;
     }
 
-    private async query(
-        type: string,
-        parameters: AnyQuery,
-    ): Promise<unknown> {
+    private async query(type: string, parameters: AnyQuery): Promise<unknown> {
         const url = new URL(`${this.endpoint}/api/v1/${type}`);
         for (const [key, value] of Object.entries(parameters)) {
             url.searchParams.set(key, String(value));

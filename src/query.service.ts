@@ -23,12 +23,12 @@ export class QueryService {
     }
 
     async getVirtualBlockchainCounts() {
-        const rows: ObjectCount[] = await VirtualBlockchainEntity
-            .createQueryBuilder("e")
-            .select("e.type", "type")
-            .addSelect("COUNT(*)", "count")
-            .groupBy("e.type")
-            .getRawMany();
+        const rows: ObjectCount[] =
+            await VirtualBlockchainEntity.createQueryBuilder("e")
+                .select("e.type", "type")
+                .addSelect("COUNT(*)", "count")
+                .groupBy("e.type")
+                .getRawMany();
         return rows;
     }
 }

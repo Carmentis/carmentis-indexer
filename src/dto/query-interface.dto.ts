@@ -2,15 +2,19 @@ export enum SortOrder {
     ASC = "ASC",
     DESC = "DESC",
 }
+
 export enum BlockSort {
     HEIGHT = "height",
 }
+
 export enum MicroblockSort {
     BLOCK_HEIGHT = "blockHeight",
 }
+
 export enum AccountHistorySort {
     HEIGHT = "height",
 }
+
 export enum VotingPowerSort {
     HEIGHT = "height",
 }
@@ -21,16 +25,16 @@ export interface BaseQuery {
 }
 
 export type AnyQuery =
-    ChainQuery |
-    GasPriceQuery |
-    AccountsQuery |
-    BlocksQuery |
-    MicroblocksQuery |
-    AccountHistoryQuery |
-    OrganizationsQuery |
-    ApplicationsQuery |
-    ValidatorNodesQuery |
-    VotingPowersQuery;
+    | ChainQuery
+    | GasPriceQuery
+    | AccountsQuery
+    | BlocksQuery
+    | MicroblocksQuery
+    | AccountHistoryQuery
+    | OrganizationsQuery
+    | ApplicationsQuery
+    | ValidatorNodesQuery
+    | VotingPowersQuery;
 
 export type ChainQuery = Record<string, never>;
 

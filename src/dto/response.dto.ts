@@ -83,6 +83,7 @@ export class AccountDto implements Account {
     @ApiProperty({ type: [StakingLockDto] })
     stakingLocks: StakingLockDto[];
 }
+
 export class AccountListResponseDto extends BaseListResponseDto<AccountDto> {}
 
 export class AccountHistoryDto implements AccountHistory {
@@ -96,6 +97,7 @@ export class AccountHistoryDto implements AccountHistory {
     @ApiProperty() publicReference: string;
     @ApiProperty() privateReference: string;
 }
+
 export class AccountHistoryListResponseDto extends BaseListResponseDto<AccountHistoryDto> {}
 
 export class ApplicationDto implements Application {
@@ -106,6 +108,7 @@ export class ApplicationDto implements Application {
     @ApiProperty() homepageUrl: string;
     @ApiProperty() description: string;
 }
+
 export class ApplicationListResponseDto extends BaseListResponseDto<ApplicationDto> {}
 
 export class BlockSignatureDto implements BlockSignature {
@@ -140,6 +143,7 @@ export class BlockDto implements Block {
     @ApiProperty({ type: [BlockSignatureDto] })
     signatures: BlockSignatureDto[];
 }
+
 export class BlockListResponseDto {
     @ApiProperty({ type: () => BlockDto, isArray: true })
     items: BlockDto[];
@@ -167,6 +171,7 @@ export class MicroblockDto implements Microblock {
     })
     content?: string;
 }
+
 export class MicroblockListResponseDto {
     @ApiProperty({ type: () => MicroblockDto, isArray: true })
     items: MicroblockDto[];
@@ -182,6 +187,7 @@ export class OrganizationDto implements Organization {
     @ApiProperty() countryCode: string;
     @ApiProperty() website: string;
 }
+
 export class OrganizationListResponseDto {
     @ApiProperty({ type: () => OrganizationDto, isArray: true })
     items: OrganizationDto[];
@@ -197,6 +203,7 @@ export class ValidatorNodeDto implements ValidatorNode {
     @ApiProperty() address: string;
     @ApiProperty() rpcEndpoint: string;
 }
+
 export class ValidatorNodeListResponseDto {
     @ApiProperty({ type: () => ValidatorNodeDto, isArray: true })
     items: ValidatorNodeDto[];
@@ -212,6 +219,7 @@ export class VirtualBlockchainDto implements VirtualBlockchain {
     @ApiProperty() modificationTimestamp: number;
     @ApiProperty() lastMicroblockHash: string;
 }
+
 export class VirtualBlockchainListResponseDto {
     @ApiProperty({ type: () => VirtualBlockchainDto, isArray: true })
     items: VirtualBlockchainDto[];
@@ -225,6 +233,7 @@ export class VotingPowerDto implements VotingPower {
     @ApiProperty() timestamp: number;
     @ApiProperty() votingPower: number;
 }
+
 export class VotingPowerListResponseDto {
     @ApiProperty({ type: () => VotingPowerDto, isArray: true })
     items: VotingPowerDto[];

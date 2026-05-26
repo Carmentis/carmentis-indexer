@@ -21,7 +21,6 @@ import {
     RequestedAccountUpdate,
     AccountUpdatesAbciResponseSchema,
     AccountUpdatesAbciResponse,
-    Utils,
 } from "@cmts-dev/carmentis-sdk-core";
 
 type RpcErrorData = {
@@ -60,7 +59,9 @@ export class CometbftApiService implements OnModuleInit {
             commitData = await client.commit(height);
         } catch (error) {
             if (CometbftApiService.isInvalidHeightError(error)) {
-                this.logger.warn(`commit data not available for block at height ${height}`);
+                this.logger.warn(
+                    `commit data not available for block at height ${height}`,
+                );
                 commitData = null;
             } else {
                 throw error;
@@ -179,11 +180,15 @@ export class CometbftApiService implements OnModuleInit {
     async getValidators(height: number): Promise<readonly Validator[]> {
         const client = await Comet38Client.connect(this.nodeUrl);
         try {
-            const validators = await client.validators({ height });
+            const validators: ValidatorsResponse = await client.validators({
+                height,
+            });
             return validators.validators;
         } catch (error) {
             if (CometbftApiService.isInvalidHeightError(error)) {
-                this.logger.warn(`validators not available for block at height ${height}`);
+                this.logger.warn(
+                    `validators not available for block at height ${height}`,
+                );
                 return [];
             }
             throw error;

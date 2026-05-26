@@ -15,6 +15,7 @@ export interface Chain {
     height: number;
     objectCounts: ObjectCount[];
 }
+
 export type ChainResponse = Chain;
 
 export interface GasPrice {
@@ -23,6 +24,7 @@ export interface GasPrice {
     average: number;
     microblocks: number;
 }
+
 export type GasPriceResponse = GasPrice;
 
 export interface EscrowLock {
@@ -60,6 +62,7 @@ export interface Account {
     vestingLocks: VestingLock[];
     stakingLocks: StakingLock[];
 }
+
 export type AccountListResponse = BaseListResponse<Account>;
 
 export interface AccountHistory {
@@ -73,6 +76,7 @@ export interface AccountHistory {
     publicReference: string;
     privateReference: string;
 }
+
 export type AccountHistoryListResponse = BaseListResponse<AccountHistory>;
 
 export interface Application {
@@ -83,6 +87,7 @@ export interface Application {
     homepageUrl: string;
     description: string;
 }
+
 export type ApplicationListResponse = BaseListResponse<Application>;
 
 export interface BlockSignature {
@@ -115,6 +120,7 @@ export interface Block {
     proposerAddress: string;
     signatures: BlockSignature[];
 }
+
 export type BlockListResponse = BaseListResponse<Block>;
 
 export interface Microblock {
@@ -128,6 +134,7 @@ export interface Microblock {
     gasPrice: number;
     content?: string;
 }
+
 export type MicroblockListResponse = BaseListResponse<Microblock>;
 
 export interface Organization {
@@ -138,6 +145,7 @@ export interface Organization {
     countryCode: string;
     website: string;
 }
+
 export type OrganizationListResponse = BaseListResponse<Organization>;
 
 export interface ValidatorNode {
@@ -148,6 +156,7 @@ export interface ValidatorNode {
     address: string;
     rpcEndpoint: string;
 }
+
 export type ValidatorNodeListResponse = BaseListResponse<ValidatorNode>;
 
 export interface VirtualBlockchain {
@@ -158,6 +167,7 @@ export interface VirtualBlockchain {
     modificationTimestamp: number;
     lastMicroblockHash: string;
 }
+
 export type VirtualBlockchainListResponse = BaseListResponse<VirtualBlockchain>;
 
 export interface VotingPower {
@@ -166,4 +176,5 @@ export interface VotingPower {
     timestamp: number;
     votingPower: number;
 }
+
 export type VotingPowerListResponse = BaseListResponse<VotingPower>;

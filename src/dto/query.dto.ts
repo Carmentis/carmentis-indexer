@@ -42,8 +42,7 @@ class ListDto {
     limit?: number;
 }
 
-export class GetChainQueryDto {
-}
+export class GetChainQueryDto {}
 
 export class GetGasPriceQueryDto implements GasPriceQuery {
     @ApiPropertyOptional({
@@ -73,7 +72,8 @@ export class GetBlocksQueryDto extends ListDto implements BlocksQuery {
     sort?: BlockSort;
 
     @ApiPropertyOptional({
-        description: "Exact block height. Cannot be used in conjunction with height_gte or height_lte.",
+        description:
+            "Exact block height. Cannot be used in conjunction with height_gte or height_lte.",
         example: 123,
     })
     @IsOptional()
@@ -113,7 +113,10 @@ export class GetBlocksQueryDto extends ListDto implements BlocksQuery {
     timestamp_lte?: number;
 }
 
-export class GetMicroblocksQueryDto extends ListDto implements MicroblocksQuery {
+export class GetMicroblocksQueryDto
+    extends ListDto
+    implements MicroblocksQuery
+{
     @ApiPropertyOptional({
         description: SORT_DESCRIPTION,
         enum: MicroblockSort,
@@ -124,7 +127,8 @@ export class GetMicroblocksQueryDto extends ListDto implements MicroblocksQuery 
 
     @ApiPropertyOptional({
         description: "Block hash",
-        example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
+        example:
+            "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
     })
     @IsOptional()
     @Type(() => String)
@@ -140,7 +144,8 @@ export class GetMicroblocksQueryDto extends ListDto implements MicroblocksQuery 
 
     @ApiPropertyOptional({
         description: "Virtual blockchain ID",
-        example: "c4807cb71556c183ad79880be6c2732ae8b82089bbb27845f4452f27222900bc",
+        example:
+            "c4807cb71556c183ad79880be6c2732ae8b82089bbb27845f4452f27222900bc",
     })
     @IsOptional()
     @Type(() => Number)
@@ -157,7 +162,8 @@ export class GetMicroblocksQueryDto extends ListDto implements MicroblocksQuery 
 export class GetAccountsQueryDto extends ListDto implements AccountsQuery {
     @ApiPropertyOptional({
         description: "Account ID",
-        example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
+        example:
+            "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
     })
     @IsOptional()
     @Type(() => String)
@@ -201,7 +207,10 @@ export class GetAccountsQueryDto extends ListDto implements AccountsQuery {
     with_staking?: boolean;
 }
 
-export class GetAccountHistoryQueryDto extends ListDto implements AccountHistoryQuery {
+export class GetAccountHistoryQueryDto
+    extends ListDto
+    implements AccountHistoryQuery
+{
     @ApiPropertyOptional({
         description: SORT_DESCRIPTION,
         enum: AccountHistorySort,
@@ -212,7 +221,8 @@ export class GetAccountHistoryQueryDto extends ListDto implements AccountHistory
 
     @ApiPropertyOptional({
         description: "Account ID",
-        example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
+        example:
+            "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
     })
     @IsOptional()
     @Type(() => String)
@@ -220,7 +230,8 @@ export class GetAccountHistoryQueryDto extends ListDto implements AccountHistory
 
     @ApiPropertyOptional({
         description: "Linked account ID",
-        example: "c4807cb71556c183ad79880be6c2732ae8b82089bbb27845f4452f27222900bc",
+        example:
+            "c4807cb71556c183ad79880be6c2732ae8b82089bbb27845f4452f27222900bc",
     })
     @IsOptional()
     @Type(() => String)
@@ -235,7 +246,8 @@ export class GetAccountHistoryQueryDto extends ListDto implements AccountHistory
     type?: number;
 
     @ApiPropertyOptional({
-        description: "Exact history height. Cannot be used in conjunction with height_gte or height_lte.",
+        description:
+            "Exact history height. Cannot be used in conjunction with height_gte or height_lte.",
         example: 23,
     })
     @IsOptional()
@@ -275,10 +287,14 @@ export class GetAccountHistoryQueryDto extends ListDto implements AccountHistory
     timestamp_lte?: number;
 }
 
-export class GetOrganizationsQueryDto extends ListDto implements OrganizationsQuery {
+export class GetOrganizationsQueryDto
+    extends ListDto
+    implements OrganizationsQuery
+{
     @ApiPropertyOptional({
         description: "Virtual blockchain ID",
-        example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
+        example:
+            "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
     })
     @IsOptional()
     @Type(() => String)
@@ -286,7 +302,8 @@ export class GetOrganizationsQueryDto extends ListDto implements OrganizationsQu
 
     @ApiPropertyOptional({
         description: "Account ID",
-        example: "c4807cb71556c183ad79880be6c2732ae8b82089bbb27845f4452f27222900bc",
+        example:
+            "c4807cb71556c183ad79880be6c2732ae8b82089bbb27845f4452f27222900bc",
     })
     @IsOptional()
     @Type(() => String)
@@ -301,10 +318,14 @@ export class GetOrganizationsQueryDto extends ListDto implements OrganizationsQu
     name?: string;
 }
 
-export class GetApplicationsQueryDto extends ListDto implements ApplicationsQuery {
+export class GetApplicationsQueryDto
+    extends ListDto
+    implements ApplicationsQuery
+{
     @ApiPropertyOptional({
         description: "Virtual blockchain ID",
-        example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
+        example:
+            "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
     })
     @IsOptional()
     @Type(() => String)
@@ -312,7 +333,8 @@ export class GetApplicationsQueryDto extends ListDto implements ApplicationsQuer
 
     @ApiPropertyOptional({
         description: "Organization virtual blockchain ID",
-        example: "c4807cb71556c183ad79880be6c2732ae8b82089bbb27845f4452f27222900bc",
+        example:
+            "c4807cb71556c183ad79880be6c2732ae8b82089bbb27845f4452f27222900bc",
     })
     @IsOptional()
     @Type(() => String)
@@ -327,10 +349,14 @@ export class GetApplicationsQueryDto extends ListDto implements ApplicationsQuer
     name?: string;
 }
 
-export class GetVirtualBlockchainsQueryDto extends ListDto implements VirtualBlockchainsQuery {
+export class GetVirtualBlockchainsQueryDto
+    extends ListDto
+    implements VirtualBlockchainsQuery
+{
     @ApiPropertyOptional({
         description: "Virtual blockchain ID",
-        example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
+        example:
+            "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
     })
     @IsOptional()
     @Type(() => String)
@@ -345,10 +371,14 @@ export class GetVirtualBlockchainsQueryDto extends ListDto implements VirtualBlo
     type?: number;
 }
 
-export class GetValidatorNodesQueryDto extends ListDto implements ValidatorNodesQuery {
+export class GetValidatorNodesQueryDto
+    extends ListDto
+    implements ValidatorNodesQuery
+{
     @ApiPropertyOptional({
         description: "Virtual blockchain ID",
-        example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
+        example:
+            "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
     })
     @IsOptional()
     @Type(() => String)
@@ -356,7 +386,8 @@ export class GetValidatorNodesQueryDto extends ListDto implements ValidatorNodes
 
     @ApiPropertyOptional({
         description: "Organization virtual blockchain ID",
-        example: "c4807cb71556c183ad79880be6c2732ae8b82089bbb27845f4452f27222900bc",
+        example:
+            "c4807cb71556c183ad79880be6c2732ae8b82089bbb27845f4452f27222900bc",
     })
     @IsOptional()
     @Type(() => String)
@@ -379,7 +410,10 @@ export class GetValidatorNodesQueryDto extends ListDto implements ValidatorNodes
     address?: string;
 }
 
-export class GetVotingPowersQueryDto extends ListDto implements VotingPowersQuery {
+export class GetVotingPowersQueryDto
+    extends ListDto
+    implements VotingPowersQuery
+{
     @ApiPropertyOptional({
         description: SORT_DESCRIPTION,
         enum: VotingPowerSort,
@@ -390,7 +424,8 @@ export class GetVotingPowersQueryDto extends ListDto implements VotingPowersQuer
 
     @ApiPropertyOptional({
         description: "Node virtual blockchain ID",
-        example: "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
+        example:
+            "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
     })
     @IsOptional()
     @Type(() => String)
