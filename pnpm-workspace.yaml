@@ -1,6 +1,6 @@
 packages:
   - .
 minimumReleaseAge: 0
-
+confirmModulesPurge: false
 onlyBuiltDependencies:
   - sqlite3
