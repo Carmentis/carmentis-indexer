@@ -1,0 +1,9 @@
+dist
+node_modules
+.env
+operator-keypair.json
+admin-token.txt
+config.toml
+doc-config.md
+db-encryption-key.txt
+jwt-secret.txt
