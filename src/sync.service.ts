@@ -8,17 +8,23 @@ import { BlockEntity } from "./entities/block.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
 import { VotingPowerEntity } from "./entities/voting-power.entity";
 import { SyncStateService } from "./sync-state.service";
+import { AccountEntity } from "./entities/account.entity";
+import { DataSource, EntityManager } from "typeorm";
+
+const HEALTHY_SYNC_DELAY = 1000;
+const DEGRADED_SYNC_DELAY = 10000;
 
 @Injectable()
 export class SyncService implements OnModuleInit {
     private readonly logger = new Logger();
-    private syncDelay = 1000;
+    private syncDelay = HEALTHY_SYNC_DELAY;
 
     constructor(
         private readonly cometbft: CometbftApiService,
         private readonly stateCommitService: StateCommitService,
         private readonly syncState: SyncStateService,
         private readonly queryService: QueryService,
+        private readonly dataSource: DataSource,
     ) {}
 
     onModuleInit() {
@@ -30,11 +36,11 @@ export class SyncService implements OnModuleInit {
             () =>
                 this.synchronize()
                     .then(() => {
-                        this.syncDelay = 1000;
+                        this.syncDelay = HEALTHY_SYNC_DELAY;
                     })
                     .catch((err) => {
                         this.logger.error(`Synchronization error: ${err}`);
-                        this.syncDelay = 10000;
+                        this.syncDelay = DEGRADED_SYNC_DELAY;
                     }),
             this.syncDelay,
         );
@@ -55,49 +61,71 @@ export class SyncService implements OnModuleInit {
                 height <= latestBlockHeight;
                 height++
             ) {
+                await this.dataSource.transaction(async (manager) => {
+                    await this.syncBlock(manager, height);
+                });
                 this.syncState.setHeights(height, latestBlockHeight);
-                await this.syncBlock(height);
             }
         } finally {
             this.scheduleNextSynchronization();
         }
     }
 
-    async syncBlock(height: number) {
+    async syncBlock(manager: EntityManager, height: number) {
         this.logger.log(`Fetching block ${height}`);
         const blockData = await this.cometbft.getBlockAtHeight(height);
         if (blockData !== null) {
-            await this.stateCommitService.commitBlock(height, blockData);
+            await this.stateCommitService.commitBlock(
+                manager,
+                height,
+                blockData,
+            );
             const blockModifiedAccounts =
                 await this.cometbft.getBlockModifiedAccountsAtHeight(height);
             const modifiedAccounts = blockModifiedAccounts.modifiedAccounts;
-            await this.syncModifiedAccounts(modifiedAccounts);
-            await this.syncMicroblocks(height);
+            await this.syncModifiedAccounts(manager, modifiedAccounts);
+            await this.syncMicroblocks(manager, height);
             await this.syncVotingPowers(
+                manager,
                 height,
                 blockData.commit?.header.time.getTime() ?? 0,
             );
         }
     }
 
-    async syncModifiedAccounts(modifiedAccounts: Uint8Array[]) {
+    async syncModifiedAccounts(
+        manager: EntityManager,
+        modifiedAccounts: Uint8Array[],
+    ) {
         this.logger.log(
             `Fetching ${modifiedAccounts.length} modified accounts`,
         );
         const requestedAccountUpdates: RequestedAccountUpdate[] = [];
         for (const modifiedAccount of modifiedAccounts) {
+            let lastKnownHistoryHash = new Uint8Array(32);
+            const account = await manager.findOne(AccountEntity, {
+                where: { id: Utils.binaryToHexa(modifiedAccount) },
+            });
+            if (account !== null && account.lastHistoryHash !== "") {
+                lastKnownHistoryHash = Utils.binaryFromHexa(
+                    account.lastHistoryHash,
+                );
+            }
             requestedAccountUpdates.push({
                 accountHash: modifiedAccount,
-                lastKnownHistoryHash: new Uint8Array(32),
+                lastKnownHistoryHash,
             });
         }
         const accountUpdates = await this.cometbft.getAccountUpdates(
             requestedAccountUpdates,
         );
-        await this.stateCommitService.commitAccountUpdates(accountUpdates);
+        await this.stateCommitService.commitAccountUpdates(
+            manager,
+            accountUpdates,
+        );
     }
 
-    async syncMicroblocks(height: number) {
+    async syncMicroblocks(manager: EntityManager, height: number) {
         for (let partIndex = 0; ; partIndex++) {
             const blockContent = await this.cometbft.getRawBlockContentAtHeight(
                 height,
@@ -112,6 +140,7 @@ export class SyncService implements OnModuleInit {
             );
             for (const serializedMicroblock of serializedMicroblocks) {
                 await this.stateCommitService.commitMicroblock(
+                    manager,
                     height,
                     serializedMicroblock,
                 );
@@ -122,7 +151,11 @@ export class SyncService implements OnModuleInit {
         }
     }
 
-    async syncVotingPowers(height: number, blockTimestamp: number) {
+    async syncVotingPowers(
+        manager: EntityManager,
+        height: number,
+        blockTimestamp: number,
+    ) {
         // turn the block timestamp into a day timestamp
         const timestamp =
             Utils.addDaysToTimestamp(Math.floor(blockTimestamp / 1000), 0) *
@@ -139,7 +172,7 @@ export class SyncService implements OnModuleInit {
         for (const validator of validators) {
             const address = Utils.binaryToHexa(validator.address);
             const votingPower = Number(validator.votingPower);
-            const node = await ValidatorNodeEntity.findOne({
+            const node = await manager.findOne(ValidatorNodeEntity, {
                 where: { address },
             });
             if (node === null) {
@@ -158,7 +191,7 @@ export class SyncService implements OnModuleInit {
                 this.logger.log(
                     `setting voting power of node ${nodeId} to ${votingPower}`,
                 );
-                await VotingPowerEntity.save({
+                await manager.save(VotingPowerEntity, {
                     nodeId,
                     height,
                     timestamp,
@@ -174,7 +207,7 @@ export class SyncService implements OnModuleInit {
                 this.logger.log(
                     `setting voting power of node ${vp.nodeId} to 0`,
                 );
-                await VotingPowerEntity.save({
+                await manager.save(VotingPowerEntity, {
                     nodeId: vp.nodeId,
                     height,
                     timestamp,

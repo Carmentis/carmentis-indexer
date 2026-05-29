@@ -45,8 +45,7 @@ export class CometbftApiService implements OnModuleInit {
             process.env.NODE_URL || "https://node1.server1.devnet.carmentis.io";
     }
 
-    async onModuleInit() {
-    }
+    async onModuleInit() {}
 
     async getClient() {
         return Comet38Client.connect(this.nodeUrl);

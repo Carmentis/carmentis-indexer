@@ -19,6 +19,8 @@ export class AccountEntity extends BaseEntity {
     height: number;
     @Column({ default: 0 })
     balance: number;
+    @Column({ default: "" })
+    lastHistoryHash: string;
 }
 
 @Entity()

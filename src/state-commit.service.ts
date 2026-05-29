@@ -31,7 +31,7 @@ import {
 import { MicroblockEntity } from "./entities/microblock.entity";
 import { BlockData } from "./cometbft-api.service";
 import { MicroblockStorageService } from "./microblock-storage.service";
-import { DeepPartial } from "typeorm";
+import { DeepPartial, EntityManager } from "typeorm";
 
 @Injectable()
 export class StateCommitService {
@@ -41,14 +41,18 @@ export class StateCommitService {
         private readonly microblockStorageService: MicroblockStorageService,
     ) {}
 
-    async commitBlock(height: number, block: BlockData) {
+    async commitBlock(
+        manager: EntityManager,
+        height: number,
+        block: BlockData,
+    ) {
         this.logger.log(`Committing block ${height}`);
         const commitData = block.commit;
 
         if (commitData == null) {
             const nullHash = Utils.binaryToHexa(Utils.getNullHash());
 
-            await BlockEntity.save({
+            await manager.save(BlockEntity, {
                 height: height,
                 hash: nullHash,
                 blockVersion: 0,
@@ -71,7 +75,7 @@ export class StateCommitService {
         } else {
             const { header, commit } = commitData;
 
-            await BlockEntity.save({
+            await manager.save(BlockEntity, {
                 height,
                 hash: Utils.binaryToHexa(commit.blockId.hash),
                 blockVersion: header.version.block,
@@ -95,7 +99,7 @@ export class StateCommitService {
             });
 
             for (const sig of commit.signatures) {
-                await BlockSignatureEntity.save({
+                await manager.save(BlockSignatureEntity, {
                     height,
                     blockIdFlag: sig.blockIdFlag,
                     validatorAddress: Utils.binaryToHexa(
@@ -113,21 +117,28 @@ export class StateCommitService {
         }
     }
 
-    async commitAccountUpdates(accountUpdates: AccountUpdatesAbciResponse) {
+    async commitAccountUpdates(
+        manager: EntityManager,
+        accountUpdates: AccountUpdatesAbciResponse,
+    ) {
         this.logger.log(
             `Committing ${accountUpdates.list.length} account updates`,
         );
         for (const update of accountUpdates.list) {
             // 1) save AccountEntity
             const accountId = Utils.binaryToHexa(update.accountHash);
-            await AccountEntity.save({
+            const lastHistoryHash = Utils.binaryToHexa(
+                update.currentState.lastHistoryHash,
+            );
+            await manager.save(AccountEntity, {
                 id: accountId,
                 height: update.currentState.height,
                 balance: update.currentState.balance,
+                lastHistoryHash,
             });
             // 2) save AccountHistoryEntity
             for (const historyUpdate of update.historyUpdate) {
-                await AccountHistoryEntity.save({
+                await manager.save(AccountHistoryEntity, {
                     accountId,
                     height: historyUpdate.height,
                     type: historyUpdate.type,
@@ -144,13 +155,14 @@ export class StateCommitService {
                 });
             }
             // 3) save EscrowLockEntity, VestingLockEntity, StakingLockEntity
-            await EscrowLockEntity.delete({ accountId });
-            await VestingLockEntity.delete({ accountId });
-            await StakingLockEntity.delete({ accountId });
+            await manager.delete(EscrowLockEntity, { accountId });
+            await manager.delete(VestingLockEntity, { accountId });
+            await manager.delete(StakingLockEntity, { accountId });
             for (const lock of update.currentState.locks as Lock[]) {
                 switch (lock.type) {
                     case LockType.Escrow: {
                         await this.commitEscrowLock(
+                            manager,
                             accountId,
                             lock.lockedAmountInAtomics,
                             lock.parameters,
@@ -159,6 +171,7 @@ export class StateCommitService {
                     }
                     case LockType.Vesting: {
                         await this.commitVestingLock(
+                            manager,
                             accountId,
                             lock.lockedAmountInAtomics,
                             lock.parameters,
@@ -167,6 +180,7 @@ export class StateCommitService {
                     }
                     case LockType.NodeStaking: {
                         await this.commitStakingLock(
+                            manager,
                             accountId,
                             lock.lockedAmountInAtomics,
                             lock.parameters,
@@ -179,11 +193,12 @@ export class StateCommitService {
     }
 
     async commitEscrowLock(
+        manager: EntityManager,
         accountId: string,
         amount: number,
         params: EscrowParameters,
     ) {
-        await EscrowLockEntity.save({
+        await manager.save(EscrowLockEntity, {
             accountId,
             amount,
             escrowIdentifier: Utils.binaryToHexa(params.escrowIdentifier),
@@ -199,11 +214,12 @@ export class StateCommitService {
     }
 
     async commitVestingLock(
+        manager: EntityManager,
         accountId: string,
         amount: number,
         params: VestingParameters,
     ) {
-        await VestingLockEntity.save({
+        await manager.save(VestingLockEntity, {
             accountId,
             amount,
             initialVestedAmountInAtomics: params.initialVestedAmountInAtomics,
@@ -214,11 +230,12 @@ export class StateCommitService {
     }
 
     async commitStakingLock(
+        manager: EntityManager,
         accountId: string,
         amount: number,
         params: NodeStakingParameters,
     ) {
-        await StakingLockEntity.save({
+        await manager.save(StakingLockEntity, {
             accountId,
             amount,
             validatorNodeId: Utils.binaryToHexa(params.validatorNodeId),
@@ -231,6 +248,7 @@ export class StateCommitService {
     }
 
     async commitMicroblock(
+        manager: EntityManager,
         blockHeight: number,
         serializedMicroblock: Uint8Array,
     ) {
@@ -248,9 +266,12 @@ export class StateCommitService {
             virtualBlockchainId = hash;
         } else {
             const previousHash = Utils.binaryToHexa(header.previousHash);
-            const previousMicroblock = await MicroblockEntity.findOneBy({
-                hash: previousHash,
-            });
+            const previousMicroblock = await manager.findOneBy(
+                MicroblockEntity,
+                {
+                    hash: previousHash,
+                },
+            );
             if (previousMicroblock === null) {
                 throw new Error(
                     `unable to find previous microblock ${previousHash} of ${hash}`,
@@ -258,7 +279,7 @@ export class StateCommitService {
             }
             virtualBlockchainId = previousMicroblock.virtualBlockchainId;
         }
-        await MicroblockEntity.save({
+        await manager.save(MicroblockEntity, {
             hash,
             blockHeight,
             virtualBlockchainId,
@@ -275,25 +296,37 @@ export class StateCommitService {
 
         switch (type) {
             case VirtualBlockchainType.ACCOUNT_VIRTUAL_BLOCKCHAIN: {
-                await this.saveAccount(virtualBlockchainId, sections);
+                await this.saveAccount(manager, virtualBlockchainId, sections);
                 break;
             }
             case VirtualBlockchainType.NODE_VIRTUAL_BLOCKCHAIN: {
-                await this.saveValidatorNode(virtualBlockchainId, sections);
+                await this.saveValidatorNode(
+                    manager,
+                    virtualBlockchainId,
+                    sections,
+                );
                 break;
             }
             case VirtualBlockchainType.ORGANIZATION_VIRTUAL_BLOCKCHAIN: {
-                await this.saveOrganization(virtualBlockchainId, sections);
+                await this.saveOrganization(
+                    manager,
+                    virtualBlockchainId,
+                    sections,
+                );
                 break;
             }
             case VirtualBlockchainType.APPLICATION_VIRTUAL_BLOCKCHAIN: {
-                await this.saveApplication(virtualBlockchainId, sections);
+                await this.saveApplication(
+                    manager,
+                    virtualBlockchainId,
+                    sections,
+                );
                 break;
             }
         }
 
         if (height == 1) {
-            await VirtualBlockchainEntity.save({
+            await manager.save(VirtualBlockchainEntity, {
                 virtualBlockchainId,
                 type,
                 height,
@@ -302,7 +335,8 @@ export class StateCommitService {
                 lastMicroblockHash: hash,
             });
         } else {
-            await VirtualBlockchainEntity.update(
+            await manager.update(
+                VirtualBlockchainEntity,
                 {
                     virtualBlockchainId,
                 },
@@ -316,6 +350,7 @@ export class StateCommitService {
     }
 
     private async saveAccount(
+        manager: EntityManager,
         virtualBlockchainId: string,
         sections: Section[],
     ) {
@@ -338,11 +373,12 @@ export class StateCommitService {
             }
         }
         if (Object.keys(record).length > 1) {
-            await AccountEntity.save(record);
+            await manager.save(AccountEntity, record);
         }
     }
 
     private async saveValidatorNode(
+        manager: EntityManager,
         virtualBlockchainId: string,
         sections: Section[],
     ) {
@@ -375,11 +411,12 @@ export class StateCommitService {
             }
         }
         if (Object.keys(record).length > 1) {
-            await ValidatorNodeEntity.save(record);
+            await manager.save(ValidatorNodeEntity, record);
         }
     }
 
     private async saveOrganization(
+        manager: EntityManager,
         virtualBlockchainId: string,
         sections: Section[],
     ) {
@@ -400,11 +437,12 @@ export class StateCommitService {
             }
         }
         if (Object.keys(record).length > 1) {
-            await OrganizationEntity.save(record);
+            await manager.save(OrganizationEntity, record);
         }
     }
 
     private async saveApplication(
+        manager: EntityManager,
         virtualBlockchainId: string,
         sections: Section[],
     ) {
@@ -427,7 +465,7 @@ export class StateCommitService {
             }
         }
         if (Object.keys(record).length > 1) {
-            await ApplicationEntity.save(record);
+            await manager.save(ApplicationEntity, record);
         }
     }
 }
