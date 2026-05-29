@@ -46,7 +46,7 @@ const entities = [
         TypeOrmModule.forFeature(entities),
         TypeOrmModule.forRoot({
             type: "better-sqlite3",
-            database: "db.sqlite",
+            database: "data/db/db.sqlite",
             entities: entities,
             synchronize: true,
         }),

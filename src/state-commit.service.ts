@@ -13,6 +13,8 @@ import {
     NodeStakingParameters,
     EncoderFactory,
     CometBFTPublicKeyConverter,
+    CryptoSchemeFactory,
+    CryptoEncoderFactory,
 } from "@cmts-dev/carmentis-sdk-core";
 import { BlockEntity, BlockSignatureEntity } from "./entities/block.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
@@ -272,6 +274,10 @@ export class StateCommitService {
         );
 
         switch (type) {
+            case VirtualBlockchainType.ACCOUNT_VIRTUAL_BLOCKCHAIN: {
+                await this.saveAccount(virtualBlockchainId, sections);
+                break;
+            }
             case VirtualBlockchainType.NODE_VIRTUAL_BLOCKCHAIN: {
                 await this.saveValidatorNode(virtualBlockchainId, sections);
                 break;
@@ -306,6 +312,33 @@ export class StateCommitService {
                     lastMicroblockHash: hash,
                 },
             );
+        }
+    }
+
+    private async saveAccount(
+        virtualBlockchainId: string,
+        sections: Section[],
+    ) {
+        const record: DeepPartial<AccountEntity> = {
+            id: virtualBlockchainId,
+        };
+        for (const section of sections) {
+            switch (section.type) {
+                case SectionType.ACCOUNT_PUBLIC_KEY: {
+                    const factory = new CryptoSchemeFactory();
+                    const pk = await factory.createPublicSignatureKey(
+                        section.schemeId,
+                        section.publicKey,
+                    );
+                    const encoder =
+                        CryptoEncoderFactory.defaultStringSignatureEncoder();
+                    record.publicKey = await encoder.encodePublicKey(pk);
+                    break;
+                }
+            }
+        }
+        if (Object.keys(record).length > 1) {
+            await AccountEntity.save(record);
         }
     }
 

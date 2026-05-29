@@ -39,7 +39,6 @@ export interface BlockData {
 export class CometbftApiService implements OnModuleInit {
     private readonly logger = new Logger();
     private readonly nodeUrl: string;
-    private client: Comet38Client;
 
     constructor() {
         this.nodeUrl =
@@ -47,13 +46,16 @@ export class CometbftApiService implements OnModuleInit {
     }
 
     async onModuleInit() {
-        this.client = await Comet38Client.connect(this.nodeUrl);
+    }
+
+    async getClient() {
+        return Comet38Client.connect(this.nodeUrl);
     }
 
     async getBlockAtHeight(height: number): Promise<BlockData | null> {
         // we use the 'commit' method instead of 'block' which would also send all
         // the block transactions and may exceed the maximum size of a Go GRPC query
-        const client = await Comet38Client.connect(this.nodeUrl);
+        const client = await this.getClient();
         let commitData: CommitResponse | null;
         try {
             commitData = await client.commit(height);
@@ -98,7 +100,7 @@ export class CometbftApiService implements OnModuleInit {
         height: number,
         partIndex: number,
     ): Promise<RawBlockContentAbciResponse> {
-        const client = await Comet38Client.connect(this.nodeUrl);
+        const client = await this.getClient();
         const request: AbciRequest = {
             requestType: AbciRequestType.GET_RAW_BLOCK_CONTENT,
             height,
@@ -123,7 +125,7 @@ export class CometbftApiService implements OnModuleInit {
     async getBlockModifiedAccountsAtHeight(
         height: number,
     ): Promise<BlockModifiedAccountsAbciResponse> {
-        const client = await Comet38Client.connect(this.nodeUrl);
+        const client = await this.getClient();
         const request: AbciRequest = {
             requestType: AbciRequestType.GET_BLOCK_MODIFIED_ACCOUNTS,
             height,
@@ -150,7 +152,7 @@ export class CometbftApiService implements OnModuleInit {
     async getAccountUpdates(
         requestedAccountUpdates: RequestedAccountUpdate[],
     ): Promise<AccountUpdatesAbciResponse> {
-        const client = await Comet38Client.connect(this.nodeUrl);
+        const client = await this.getClient();
         const request: AbciRequest = {
             requestType: AbciRequestType.GET_ACCOUNT_UPDATES,
             list: requestedAccountUpdates,
@@ -171,14 +173,17 @@ export class CometbftApiService implements OnModuleInit {
         return abciResponse as AccountUpdatesAbciResponse;
     }
 
-    async getChainStatus(): Promise<StatusResponse> {
-        const client = await Comet38Client.connect(this.nodeUrl);
-        const status = await client.status();
-        return status;
+    async getChainStatus(): Promise<StatusResponse | null> {
+        const client = await this.getClient();
+        try {
+            return await client.status();
+        } catch (error) {
+            return null;
+        }
     }
 
     async getValidators(height: number): Promise<readonly Validator[]> {
-        const client = await Comet38Client.connect(this.nodeUrl);
+        const client = await this.getClient();
         try {
             const validators: ValidatorsResponse = await client.validators({
                 height,

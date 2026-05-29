@@ -421,10 +421,20 @@ export class AppService {
             where,
             take,
         });
-        const items = entities.map((e) => {
-            const validatorNode: ValidatorNode = { ...e };
-            return validatorNode;
-        });
+        const items: ValidatorNode[] = [];
+        for (const e of entities) {
+            let currentVotingPower = 0;
+            const res = await VotingPowerEntity.find({
+                where: { nodeId: e.virtualBlockchainId },
+                order: { height: "DESC" },
+                take: 1,
+            });
+            if (res.length === 1) {
+                currentVotingPower = res[0].votingPower;
+            }
+            const validatorNode: ValidatorNode = { ...e, currentVotingPower };
+            items.push(validatorNode);
+        }
         const hasMore = this.hasMore(items, take);
         const response: ValidatorNodeListResponse = { items, hasMore };
         return response;

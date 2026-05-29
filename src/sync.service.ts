@@ -12,6 +12,7 @@ import { SyncStateService } from "./sync-state.service";
 @Injectable()
 export class SyncService implements OnModuleInit {
     private readonly logger = new Logger();
+    private syncDelay = 1000;
 
     constructor(
         private readonly cometbft: CometbftApiService,
@@ -21,26 +22,45 @@ export class SyncService implements OnModuleInit {
     ) {}
 
     onModuleInit() {
-        setTimeout(this.synchronize.bind(this), 1000);
+        this.scheduleNextSynchronization();
+    }
+
+    scheduleNextSynchronization() {
+        setTimeout(
+            () =>
+                this.synchronize()
+                    .then(() => {
+                        this.syncDelay = 1000;
+                    })
+                    .catch((err) => {
+                        this.logger.error(`Synchronization error: ${err}`);
+                        this.syncDelay = 10000;
+                    }),
+            this.syncDelay,
+        );
     }
 
     async synchronize() {
-        this.logger.log(`Starting sync process`);
+        try {
+            this.logger.log(`Starting sync process`);
 
-        const { knownHeight, latestBlockHeight } = await this.getSyncStatus();
-        this.logger.log(
-            `Known height = ${knownHeight}, latest block height = ${latestBlockHeight}`,
-        );
+            const { knownHeight, latestBlockHeight } =
+                await this.getSyncStatus();
+            this.logger.log(
+                `Known height = ${knownHeight}, latest block height = ${latestBlockHeight}`,
+            );
 
-        for (
-            let height = knownHeight + 1;
-            height <= latestBlockHeight;
-            height++
-        ) {
-            this.syncState.setHeights(height, latestBlockHeight);
-            await this.syncBlock(height);
+            for (
+                let height = knownHeight + 1;
+                height <= latestBlockHeight;
+                height++
+            ) {
+                this.syncState.setHeights(height, latestBlockHeight);
+                await this.syncBlock(height);
+            }
+        } finally {
+            this.scheduleNextSynchronization();
         }
-        setTimeout(this.synchronize.bind(this), 1000);
     }
 
     async syncBlock(height: number) {
@@ -180,6 +200,9 @@ export class SyncService implements OnModuleInit {
 
         // get the actual chain status from the node
         const actualStatus = await this.cometbft.getChainStatus();
+        if (actualStatus === null) {
+            throw new Error(`Cannot get the chain status`);
+        }
         const rawEarliestBlockHash = actualStatus.syncInfo.earliestBlockHash;
         if (rawEarliestBlockHash === undefined) {
             throw new Error(`Cannot get the earliest block hash`);

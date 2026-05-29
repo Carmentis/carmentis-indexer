@@ -68,6 +68,7 @@ export class StakingLockDto implements StakingLock {
 
 export class AccountDto implements Account {
     @ApiProperty() id: string;
+    @ApiProperty() publicKey: string;
     @ApiProperty() height: number;
     @ApiProperty() balance: number;
 
@@ -212,6 +213,7 @@ export class ValidatorNodeDto implements ValidatorNode {
     @ApiProperty() cometPublicKey: string;
     @ApiProperty() address: string;
     @ApiProperty() rpcEndpoint: string;
+    @ApiProperty() currentVotingPower: number;
 }
 
 export class ValidatorNodeListResponseDto {

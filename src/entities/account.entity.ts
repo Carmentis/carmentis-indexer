@@ -12,9 +12,12 @@ import {
 export class AccountEntity extends BaseEntity {
     @PrimaryColumn()
     id: string;
-    @Column()
+
+    @Column({ default: "" })
+    publicKey: string;
+    @Column({ default: 0 })
     height: number;
-    @Column()
+    @Column({ default: 0 })
     balance: number;
 }
 
@@ -24,6 +27,7 @@ export class AccountHistoryEntity extends BaseEntity {
     accountId: string;
     @PrimaryColumn()
     height: number;
+
     @Column()
     type: number;
     @Column()
@@ -48,6 +52,7 @@ export class AccountHistoryEntity extends BaseEntity {
 export class EscrowLockEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
+
     @Column()
     accountId: string;
     @Column()
@@ -72,6 +77,7 @@ export class EscrowLockEntity extends BaseEntity {
 export class VestingLockEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
+
     @Column()
     accountId: string;
     @Column()
@@ -94,6 +100,7 @@ export class VestingLockEntity extends BaseEntity {
 export class StakingLockEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
+
     @Column()
     accountId: string;
     @Column()

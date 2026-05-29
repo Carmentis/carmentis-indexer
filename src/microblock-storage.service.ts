@@ -15,6 +15,6 @@ export class MicroblockStorageService {
     }
 
     private getPath(hash: string) {
-        return `microblocks/${hash.slice(0, 2)}/${hash.slice(2, 4)}`;
+        return `data/microblocks/${hash.slice(0, 2)}/${hash.slice(2, 4)}`;
     }
 }

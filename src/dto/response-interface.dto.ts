@@ -56,6 +56,7 @@ export interface StakingLock {
 
 export interface Account {
     id: string;
+    publicKey: string;
     height: number;
     balance: number;
     escrowLocks: EscrowLock[];
@@ -155,6 +156,7 @@ export interface ValidatorNode {
     cometPublicKey: string;
     address: string;
     rpcEndpoint: string;
+    currentVotingPower: number;
 }
 
 export type ValidatorNodeListResponse = BaseListResponse<ValidatorNode>;
