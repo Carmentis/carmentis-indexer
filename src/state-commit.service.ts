@@ -326,12 +326,19 @@ export class StateCommitService {
         }
 
         if (height == 1) {
+            const expirationDay =
+                (header.previousHash[1] << 24) |
+                (header.previousHash[2] << 16) |
+                (header.previousHash[3] << 8) |
+                header.previousHash[4];
+
             await manager.save(VirtualBlockchainEntity, {
                 virtualBlockchainId,
                 type,
                 height,
                 creationTimestamp: timestamp,
                 modificationTimestamp: timestamp,
+                expirationTimestamp: expirationDay,
                 lastMicroblockHash: hash,
             });
         } else {

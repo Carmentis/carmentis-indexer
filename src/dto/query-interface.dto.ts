@@ -8,15 +8,37 @@ export enum BlockSort {
 }
 
 export enum MicroblockSort {
+    HEIGHT = "height",
     BLOCK_HEIGHT = "blockHeight",
+}
+
+export enum AccountSort {
+    BALANCE = "balance",
 }
 
 export enum AccountHistorySort {
     HEIGHT = "height",
+    TIMESTAMP = "timestamp",
 }
 
+export enum VirtualBlockchainSort {
+    CREATION_TIMESTAMP = "creationTimestamp",
+    MODIFICATION_TIMESTAMP = "modificationTimestamp",
+    EXPIRATION_TIMESTAMP = "expirationTimestamp",
+}
 export enum VotingPowerSort {
     HEIGHT = "height",
+}
+
+export enum SearchObjectType {
+    ALL = "all",
+    ACCOUNT = "account",
+    APPLICATION = "application",
+    BLOCK = "block",
+    MICROBLOCK = "microblock",
+    ORGANIZATION = "organization",
+    NODE = "node",
+    VIRTUAL_BLOCKCHAIN = "vb",
 }
 
 export interface BaseQuery {
@@ -24,23 +46,14 @@ export interface BaseQuery {
     limit?: number;
 }
 
-export type AnyQuery =
-    | ChainQuery
-    | GasPriceQuery
-    | AccountsQuery
-    | BlocksQuery
-    | MicroblocksQuery
-    | AccountHistoryQuery
-    | OrganizationsQuery
-    | ApplicationsQuery
-    | ValidatorNodesQuery
-    | VotingPowersQuery;
-
-export type ChainQuery = Record<string, never>;
-
 export interface GasPriceQuery {
     height_gte?: number;
     height_lte?: number;
+}
+
+export interface SearchQuery extends BaseQuery {
+    q: string;
+    type?: string;
 }
 
 export interface AccountsQuery extends BaseQuery {

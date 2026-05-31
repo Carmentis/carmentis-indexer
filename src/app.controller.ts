@@ -7,6 +7,7 @@ import {
 import {
     GetChainQueryDto,
     GetGasPriceQueryDto,
+    SearchQueryDto,
     GetBlocksQueryDto,
     GetMicroblocksQueryDto,
     GetAccountsQueryDto,
@@ -20,6 +21,7 @@ import {
 import {
     GasPriceResponseDto,
     ChainResponseDto,
+    SearchListResponseDto,
     BlockListResponseDto,
     MicroblockListResponseDto,
     AccountListResponseDto,
@@ -58,6 +60,13 @@ export class AppController {
     async getGasPrice(@Query() query: GetGasPriceQueryDto) {
         this.checkApiAvaibilityOrFail();
         return this.appService.getGasPrice(query);
+    }
+
+    @Get("/search")
+    @ApiOkResponse({ type: SearchListResponseDto })
+    async search(@Query() query: SearchQueryDto) {
+        this.checkApiAvaibilityOrFail();
+        return this.appService.search(query);
     }
 
     @Get("/blocks")

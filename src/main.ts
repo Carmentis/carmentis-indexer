@@ -7,6 +7,8 @@ async function bootstrap() {
     const logger = new Logger();
     const app = await NestFactory.create(AppModule);
 
+    app.enableCors();
+
     // Set up the swagger
     const swaggerCustomOptions = {
         customSiteTitle: "Carmentis Indexer",

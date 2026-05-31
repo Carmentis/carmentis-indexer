@@ -2,6 +2,7 @@ import {
     ObjectCount,
     Chain,
     GasPrice,
+    Search,
     Account,
     AccountHistory,
     EscrowLock,
@@ -37,6 +38,20 @@ export class GasPriceResponseDto implements GasPrice {
     @ApiProperty() max: number;
     @ApiProperty() average: number;
     @ApiProperty() microblocks: number;
+}
+
+export class SearchDto implements Search {
+    @ApiProperty() type: string;
+    @ApiProperty() id: string;
+    @ApiProperty() matchedFieldName: string;
+    @ApiProperty() matchedFieldValue: string;
+}
+
+export class SearchListResponseDto {
+    @ApiProperty({ type: () => SearchDto, isArray: true })
+    items: SearchDto[];
+    @ApiProperty()
+    hasMore: boolean;
 }
 
 export class EscrowLockDto implements EscrowLock {
@@ -229,6 +244,7 @@ export class VirtualBlockchainDto implements VirtualBlockchain {
     @ApiProperty() type: number;
     @ApiProperty() creationTimestamp: number;
     @ApiProperty() modificationTimestamp: number;
+    @ApiProperty() expirationTimestamp: number;
     @ApiProperty() lastMicroblockHash: string;
 }
 

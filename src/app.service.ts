@@ -21,6 +21,8 @@ import { VotingPowerEntity } from "./entities/voting-power.entity";
 import {
     ChainResponse,
     GasPriceResponse,
+    Search,
+    SearchListResponse,
     Block,
     BlockListResponse,
     Microblock,
@@ -40,9 +42,11 @@ import {
     VotingPower,
     VotingPowerListResponse,
 } from "./dto/response-interface.dto";
+import { SearchObjectType } from "./dto/query-interface.dto";
 import {
     GetChainQueryDto,
     GetGasPriceQueryDto,
+    SearchQueryDto,
     GetBlocksQueryDto,
     GetMicroblocksQueryDto,
     GetAccountsQueryDto,
@@ -61,6 +65,7 @@ import {
 } from "typeorm";
 import { MicroblockStorageService } from "./microblock-storage.service";
 import { QueryService } from "./query.service";
+import { SearchService } from "./search.service";
 
 const MAX_LIMIT = 100;
 
@@ -69,6 +74,7 @@ export class AppService {
     constructor(
         private readonly microblockStorageService: MicroblockStorageService,
         private readonly queryService: QueryService,
+        private readonly searchService: SearchService,
     ) {}
 
     getRoot(): string {
@@ -118,6 +124,49 @@ export class AppService {
         }
         const gasPrice: GasPriceResponse = res;
         return gasPrice;
+    }
+
+    async search(query: SearchQueryDto) {
+        const { q, type, order, limit: providedLimit } = query;
+        const limit = providedLimit ?? MAX_LIMIT;
+        const items: Search[] = [];
+
+        if (type == SearchObjectType.ACCOUNT || type == SearchObjectType.ALL) {
+            await this.searchService.searchAccounts(q, items, limit);
+        }
+        if (
+            type == SearchObjectType.APPLICATION ||
+            type == SearchObjectType.ALL
+        ) {
+            await this.searchService.searchApplications(q, items, limit);
+        }
+        if (type == SearchObjectType.BLOCK || type == SearchObjectType.ALL) {
+            await this.searchService.searchBlocks(q, items, limit);
+        }
+        if (
+            type == SearchObjectType.MICROBLOCK ||
+            type == SearchObjectType.ALL
+        ) {
+            await this.searchService.searchMicroblocks(q, items, limit);
+        }
+        if (type == SearchObjectType.NODE || type == SearchObjectType.ALL) {
+            await this.searchService.searchNodes(q, items, limit);
+        }
+        if (
+            type == SearchObjectType.ORGANIZATION ||
+            type == SearchObjectType.ALL
+        ) {
+            await this.searchService.searchOrganizations(q, items, limit);
+        }
+        if (
+            type == SearchObjectType.VIRTUAL_BLOCKCHAIN ||
+            type == SearchObjectType.ALL
+        ) {
+            await this.searchService.searchVirtualBlockchains(q, items, limit);
+        }
+        const hasMore = items.length > limit;
+        const response: SearchListResponse = { items, hasMore };
+        return response;
     }
 
     async getBlocks(query: GetBlocksQueryDto) {
@@ -227,11 +276,14 @@ export class AppService {
             with_escrow,
             with_staking,
             with_vesting,
+            sort,
             order,
             limit,
         } = query;
 
         const where: FindOptionsWhere<AccountEntity> = {};
+
+        this.checkSortConsistency(!!sort, !!order);
 
         if (id !== undefined) {
             where.id = id;
@@ -245,6 +297,7 @@ export class AppService {
         const take = this.take(limit);
         const entities = await AccountEntity.find({
             where,
+            order: sort ? { [sort]: order } : undefined,
             take,
         });
         const items: Account[] = [];
@@ -441,7 +494,7 @@ export class AppService {
     }
 
     async getVirtualBlockchains(query: GetVirtualBlockchainsQueryDto) {
-        const { vb_id, type, order, limit } = query;
+        const { vb_id, type, sort, order, limit } = query;
 
         const where: FindOptionsWhere<VirtualBlockchainEntity> = {};
 
@@ -455,6 +508,7 @@ export class AppService {
         const take = this.take(limit);
         const entities = await VirtualBlockchainEntity.find({
             where,
+            order: sort ? { [sort]: order } : undefined,
             take,
         });
         const items = entities.map((e) => {

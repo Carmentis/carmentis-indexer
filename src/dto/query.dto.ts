@@ -1,13 +1,15 @@
-import { ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsEnum, IsOptional } from "class-validator";
 import { Type } from "class-transformer";
 import {
     SortOrder,
+    AccountSort,
     BlockSort,
     MicroblockSort,
     AccountHistorySort,
+    VirtualBlockchainSort,
     VotingPowerSort,
-    ChainQuery,
+    SearchQuery,
     GasPriceQuery,
     AccountsQuery,
     AccountHistoryQuery,
@@ -18,6 +20,7 @@ import {
     ValidatorNodesQuery,
     VirtualBlockchainsQuery,
     VotingPowersQuery,
+    SearchObjectType,
 } from "./query-interface.dto";
 
 const SORT_DESCRIPTION = "Field on which the sort is applied";
@@ -60,6 +63,25 @@ export class GetGasPriceQueryDto implements GasPriceQuery {
     @IsOptional()
     @Type(() => Number)
     height_lte?: number;
+}
+
+export class SearchQueryDto extends ListDto implements SearchQuery {
+    @ApiProperty({
+        description: "Query string",
+        example: "123",
+    })
+    @Type(() => String)
+    q: string;
+
+    @ApiPropertyOptional({
+        description: "Type of object on which the search should focus",
+        default: SearchObjectType.ALL,
+        enum: SearchObjectType,
+    })
+    @IsOptional()
+    @IsEnum(SearchObjectType)
+    @Type(() => String)
+    type?: string;
 }
 
 export class GetBlocksQueryDto extends ListDto implements BlocksQuery {
@@ -160,6 +182,14 @@ export class GetMicroblocksQueryDto
 }
 
 export class GetAccountsQueryDto extends ListDto implements AccountsQuery {
+    @ApiPropertyOptional({
+        description: SORT_DESCRIPTION,
+        enum: AccountSort,
+    })
+    @IsOptional()
+    @IsEnum(AccountSort)
+    sort?: AccountSort;
+
     @ApiPropertyOptional({
         description: "Account ID",
         example:
@@ -353,6 +383,14 @@ export class GetVirtualBlockchainsQueryDto
     extends ListDto
     implements VirtualBlockchainsQuery
 {
+    @ApiPropertyOptional({
+        description: SORT_DESCRIPTION,
+        enum: VirtualBlockchainSort,
+    })
+    @IsOptional()
+    @IsEnum(VirtualBlockchainSort)
+    sort?: VirtualBlockchainSort;
+
     @ApiPropertyOptional({
         description: "Virtual blockchain ID",
         example:

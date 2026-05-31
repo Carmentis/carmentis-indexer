@@ -27,6 +27,15 @@ export interface GasPrice {
 
 export type GasPriceResponse = GasPrice;
 
+export interface Search {
+    type: string;
+    id: string;
+    matchedFieldName: string;
+    matchedFieldValue: string;
+}
+
+export type SearchListResponse = BaseListResponse<Search>;
+
 export interface EscrowLock {
     amount: number;
     escrowIdentifier: string;
@@ -167,6 +176,7 @@ export interface VirtualBlockchain {
     type: number;
     creationTimestamp: number;
     modificationTimestamp: number;
+    expirationTimestamp: number;
     lastMicroblockHash: string;
 }
 

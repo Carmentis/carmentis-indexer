@@ -14,5 +14,7 @@ export class VirtualBlockchainEntity extends BaseEntity {
     @Column()
     modificationTimestamp: number;
     @Column()
+    expirationTimestamp: number;
+    @Column()
     lastMicroblockHash: string;
 }
