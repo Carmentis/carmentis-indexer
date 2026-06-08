@@ -19,7 +19,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@cmts-dev/carmentis-sdk-core": "^1.2.9",
+    "@cmts-dev/carmentis-sdk-core": "^1.2.15",
     "@cosmjs/tendermint-rpc": "^0.38.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
