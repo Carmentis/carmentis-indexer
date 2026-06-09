@@ -19,8 +19,15 @@ export class SearchService {
         return new RegExp(`^[0-9A-Z]{${length}}$`, "i").test(str);
     }
 
+    static take(items: Search[], limit: number) {
+        return Math.max(0, limit - items.length);
+    }
+
     async searchAccounts(q: string, items: Search[], limit: number) {
-        if (SearchService.isHexa(q, 64)) {
+        if (
+            SearchService.isHexa(q, 64) &&
+            SearchService.take(items, limit) > 0
+        ) {
             const item = await AccountEntity.findOne({
                 where: { id: q },
             });
@@ -40,6 +47,7 @@ export class SearchService {
             .where("e.name LIKE :q", {
                 q: `%${q}%`,
             })
+            .take(SearchService.take(items, limit))
             .getMany();
         for (const item of res) {
             items.push({
@@ -49,7 +57,10 @@ export class SearchService {
                 matchedFieldValue: item.name,
             });
         }
-        if (SearchService.isHexa(q, 64)) {
+        if (
+            SearchService.isHexa(q, 64) &&
+            SearchService.take(items, limit) > 0
+        ) {
             const item = await ApplicationEntity.findOne({
                 where: { virtualBlockchainId: q },
             });
@@ -65,7 +76,10 @@ export class SearchService {
     }
 
     async searchBlocks(q: string, items: Search[], limit: number) {
-        if (SearchService.isInteger(q)) {
+        if (
+            SearchService.isInteger(q) &&
+            SearchService.take(items, limit) > 0
+        ) {
             const item = await BlockEntity.findOne({
                 where: { height: parseInt(q, 10) },
             });
@@ -78,7 +92,10 @@ export class SearchService {
                 });
             }
         }
-        if (SearchService.isHexa(q, 64)) {
+        if (
+            SearchService.isHexa(q, 64) &&
+            SearchService.take(items, limit) > 0
+        ) {
             const item = await BlockEntity.findOne({
                 where: { hash: q },
             });
@@ -94,7 +111,10 @@ export class SearchService {
     }
 
     async searchMicroblocks(q: string, items: Search[], limit: number) {
-        if (SearchService.isHexa(q, 64)) {
+        if (
+            SearchService.isHexa(q, 64) &&
+            SearchService.take(items, limit) > 0
+        ) {
             const item = await MicroblockEntity.findOne({
                 where: { hash: q },
             });
@@ -110,7 +130,10 @@ export class SearchService {
     }
 
     async searchNodes(q: string, items: Search[], limit: number) {
-        if (SearchService.isHexa(q, 64)) {
+        if (
+            SearchService.isHexa(q, 64) &&
+            SearchService.take(items, limit) > 0
+        ) {
             const item = await ValidatorNodeEntity.findOne({
                 where: { virtualBlockchainId: q },
             });
@@ -130,6 +153,7 @@ export class SearchService {
             .where("e.name LIKE :q", {
                 q: `%${q}%`,
             })
+            .take(SearchService.take(items, limit))
             .getMany();
         for (const item of res) {
             items.push({
@@ -139,7 +163,10 @@ export class SearchService {
                 matchedFieldValue: item.name,
             });
         }
-        if (SearchService.isHexa(q, 64)) {
+        if (
+            SearchService.isHexa(q, 64) &&
+            SearchService.take(items, limit) > 0
+        ) {
             const item = await OrganizationEntity.findOne({
                 where: { virtualBlockchainId: q },
             });
@@ -155,7 +182,10 @@ export class SearchService {
     }
 
     async searchVirtualBlockchains(q: string, items: Search[], limit: number) {
-        if (SearchService.isHexa(q, 64)) {
+        if (
+            SearchService.isHexa(q, 64) &&
+            SearchService.take(items, limit) > 0
+        ) {
             const item = await VirtualBlockchainEntity.findOne({
                 where: { virtualBlockchainId: q },
             });

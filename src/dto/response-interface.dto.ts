@@ -124,6 +124,9 @@ export interface Block {
     validatorsHash: string;
     nextValidatorsHash: string;
     consensusHash: string;
+    appVbRadixHash: string;
+    appTokenRadixHash: string;
+    appStorageHash: string;
     appHash: string;
     lastResultsHash: string;
     evidenceHash: string;
@@ -147,6 +150,45 @@ export interface Microblock {
 
 export type MicroblockListResponse = BaseListResponse<Microblock>;
 
+export interface MicroblockProof {
+    block: {
+        height: number,
+        vbRadixHash: string,
+        tokenRadixHash: string,
+        storageHash: string,
+        appHash: string,
+    }
+    microblock: {
+        virtualBlockchainId: string,
+        height: number,
+        hash: string,
+    },
+    virtualBlockchain: {
+        serializedState: string,
+        merkleWitnesses: string[],
+        radixProof: string[],
+    },
+}
+
+export type MicroblockProofResponse = MicroblockProof;
+
+export interface AccountProof {
+    block: {
+        height: number,
+        vbRadixHash: string,
+        tokenRadixHash: string,
+        storageHash: string,
+        appHash: string,
+    }
+    account: {
+        virtualBlockchainId: string,
+        serializedState: string,
+        radixProof: string[],
+    },
+}
+
+export type AccountProofResponse = AccountProof;
+
 export interface Organization {
     virtualBlockchainId: string;
     accountId: string;
@@ -158,6 +200,14 @@ export interface Organization {
 
 export type OrganizationListResponse = BaseListResponse<Organization>;
 
+export enum NodeStatusEnum {
+    Unknown = "UNKNOWN",
+    Ok = "OK",
+    Sync = "SYNC",
+    Down = "DOWN",
+    Bad = "BAD",
+}
+
 export interface ValidatorNode {
     virtualBlockchainId: string;
     organizationId: string;
@@ -166,9 +216,20 @@ export interface ValidatorNode {
     address: string;
     rpcEndpoint: string;
     currentVotingPower: number;
+    status: NodeStatusEnum;
+    statusTimestamp: number;
+    statusIsExpired: boolean;
 }
 
 export type ValidatorNodeListResponse = BaseListResponse<ValidatorNode>;
+
+export interface NodeStatus {
+    nodeId: string;
+    status: NodeStatusEnum;
+    statusTimestamp: number;
+}
+
+export type NodeStatusResponse = NodeStatus;
 
 export interface VirtualBlockchain {
     virtualBlockchainId: string;

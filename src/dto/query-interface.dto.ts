@@ -124,3 +124,15 @@ export interface VotingPowersQuery extends BaseQuery {
     sort?: VotingPowerSort;
     node_id?: string;
 }
+
+export interface NodeStatusQuery {
+    node_id: string;
+}
+
+export interface MicroblockProofQuery {
+    hash: string;
+}
+
+export interface AccountProofQuery {
+    account_id: string;
+}

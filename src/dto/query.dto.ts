@@ -13,14 +13,17 @@ import {
     GasPriceQuery,
     AccountsQuery,
     AccountHistoryQuery,
+    AccountProofQuery,
     BlocksQuery,
     MicroblocksQuery,
+    MicroblockProofQuery,
     OrganizationsQuery,
     ApplicationsQuery,
     ValidatorNodesQuery,
     VirtualBlockchainsQuery,
     VotingPowersQuery,
     SearchObjectType,
+    NodeStatusQuery,
 } from "./query-interface.dto";
 
 const SORT_DESCRIPTION = "Field on which the sort is applied";
@@ -468,4 +471,30 @@ export class GetVotingPowersQueryDto
     @IsOptional()
     @Type(() => String)
     node_id?: string;
+}
+
+export class GetMicroblockProofQueryDto implements MicroblockProofQuery {
+    @ApiProperty({
+        description: "Microblock hash",
+    })
+    @Type(() => String)
+    hash: string;
+}
+
+export class GetAccountProofQueryDto implements AccountProofQuery {
+    @ApiProperty({
+        description: "Account ID",
+    })
+    @Type(() => String)
+    account_id: string;
+}
+
+export class GetNodeStatusQueryDto implements NodeStatusQuery {
+    @ApiProperty({
+        description: "Node virtual blockchain ID",
+        example:
+            "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
+    })
+    @Type(() => String)
+    node_id: string;
 }

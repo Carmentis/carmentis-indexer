@@ -5,6 +5,7 @@ import {
     Search,
     Account,
     AccountHistory,
+    AccountProof,
     EscrowLock,
     VestingLock,
     StakingLock,
@@ -12,11 +13,16 @@ import {
     Block,
     BlockSignature,
     Microblock,
+    MicroblockProof,
     Organization,
+    NodeStatusEnum,
+    NodeStatus,
     ValidatorNode,
     VirtualBlockchain,
     VotingPower,
 } from "./response-interface.dto";
+
+import { IsEnum } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class ObjectCountDto implements ObjectCount {
@@ -161,6 +167,9 @@ export class BlockDto implements Block {
     @ApiProperty() validatorsHash: string;
     @ApiProperty() nextValidatorsHash: string;
     @ApiProperty() consensusHash: string;
+    @ApiProperty() appVbRadixHash: string;
+    @ApiProperty() appTokenRadixHash: string;
+    @ApiProperty() appStorageHash: string;
     @ApiProperty() appHash: string;
     @ApiProperty() lastResultsHash: string;
     @ApiProperty() evidenceHash: string;
@@ -229,6 +238,13 @@ export class ValidatorNodeDto implements ValidatorNode {
     @ApiProperty() address: string;
     @ApiProperty() rpcEndpoint: string;
     @ApiProperty() currentVotingPower: number;
+    @ApiProperty({
+        enum: NodeStatusEnum
+    })
+    @IsEnum(NodeStatusEnum)
+    status: NodeStatusEnum;
+    @ApiProperty() statusTimestamp: number;
+    @ApiProperty() statusIsExpired: boolean;
 }
 
 export class ValidatorNodeListResponseDto {
@@ -236,6 +252,16 @@ export class ValidatorNodeListResponseDto {
     items: ValidatorNodeDto[];
     @ApiProperty()
     hasMore: boolean;
+}
+
+export class NodeStatusResponseDto implements NodeStatus {
+    @ApiProperty() nodeId: string;
+    @ApiProperty({
+        enum: NodeStatusEnum
+    })
+    @IsEnum(NodeStatusEnum)
+    status: NodeStatusEnum;
+    @ApiProperty() statusTimestamp: number;
 }
 
 export class VirtualBlockchainDto implements VirtualBlockchain {
@@ -267,4 +293,46 @@ export class VotingPowerListResponseDto {
     items: VotingPowerDto[];
     @ApiProperty()
     hasMore: boolean;
+}
+
+export class ProofBlockDto {
+    @ApiProperty() height: number;
+    @ApiProperty() vbRadixHash: string;
+    @ApiProperty() tokenRadixHash: string;
+    @ApiProperty() storageHash: string;
+    @ApiProperty() appHash: string;
+}
+
+export class MicroblockProofMicroblockDto {
+    @ApiProperty() virtualBlockchainId: string;
+    @ApiProperty() height: number;
+    @ApiProperty() hash: string;
+}
+
+export class MicroblockProofVirtualBlockchainDto {
+    @ApiProperty() serializedState: string;
+    @ApiProperty() merkleWitnesses: string[];
+    @ApiProperty() radixProof: string[];
+}
+
+export class MicroblockProofResponseDto implements MicroblockProof {
+    @ApiProperty({ type: () => ProofBlockDto })
+    block: ProofBlockDto;
+    @ApiProperty({ type: () => MicroblockProofMicroblockDto })
+    microblock: MicroblockProofMicroblockDto;
+    @ApiProperty({ type: () => MicroblockProofVirtualBlockchainDto })
+    virtualBlockchain: MicroblockProofVirtualBlockchainDto;
+}
+
+export class AccountProofAccountDto {
+    @ApiProperty() virtualBlockchainId: string;
+    @ApiProperty() serializedState: string;
+    @ApiProperty() radixProof: string[];
+}
+
+export class AccountProofResponseDto implements AccountProof {
+    @ApiProperty({ type: () => ProofBlockDto })
+    block: ProofBlockDto;
+    @ApiProperty({ type: () => MicroblockProofVirtualBlockchainDto })
+    account: AccountProofAccountDto;
 }

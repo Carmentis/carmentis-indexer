@@ -13,7 +13,6 @@ export class BlockEntity extends BaseEntity {
     height: number;
 
     @Column()
-    // from commit.blockId.hash
     hash: string;
     @Column()
     blockVersion: number;
@@ -26,10 +25,8 @@ export class BlockEntity extends BaseEntity {
     @Column()
     nanoseconds: number;
     @Column()
-    // from commit.blockId.parts.total
     partsTotal: number;
     @Column()
-    // from commit.blockId.parts.hash
     partsHash: string;
     @Column()
     lastCommitHash: string;
@@ -41,6 +38,12 @@ export class BlockEntity extends BaseEntity {
     nextValidatorsHash: string;
     @Column()
     consensusHash: string;
+    @Column()
+    appVbRadixHash: string;
+    @Column()
+    appTokenRadixHash: string;
+    @Column()
+    appStorageHash: string;
     @Column()
     appHash: string;
     @Column()

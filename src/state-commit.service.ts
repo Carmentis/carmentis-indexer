@@ -31,7 +31,7 @@ import {
 import { MicroblockEntity } from "./entities/microblock.entity";
 import { BlockData } from "./cometbft-api.service";
 import { MicroblockStorageService } from "./microblock-storage.service";
-import { DeepPartial, EntityManager } from "typeorm";
+import { Column, DeepPartial, EntityManager } from 'typeorm';
 
 @Injectable()
 export class StateCommitService {
@@ -67,6 +67,9 @@ export class StateCommitService {
                 validatorsHash: nullHash,
                 nextValidatorsHash: nullHash,
                 consensusHash: nullHash,
+                appVbRadixHash: nullHash,
+                appTokenRadixHash: nullHash,
+                appStorageHash: nullHash,
                 appHash: nullHash,
                 lastResultsHash: nullHash,
                 evidenceHash: nullHash,
@@ -92,6 +95,9 @@ export class StateCommitService {
                     header.nextValidatorsHash,
                 ),
                 consensusHash: Utils.binaryToHexa(header.consensusHash),
+                appVbRadixHash: Utils.binaryToHexa(block.appVbRadixHash),
+                appTokenRadixHash: Utils.binaryToHexa(block.appTokenRadixHash),
+                appStorageHash: Utils.binaryToHexa(block.appStorageHash),
                 appHash: Utils.binaryToHexa(header.appHash),
                 lastResultsHash: Utils.binaryToHexa(header.lastResultsHash),
                 evidenceHash: Utils.binaryToHexa(header.evidenceHash),

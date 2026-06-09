@@ -27,16 +27,19 @@ import {
     BlockListResponse,
     Microblock,
     MicroblockListResponse,
+    MicroblockProofResponse,
     Account,
     AccountListResponse,
     AccountHistory,
     AccountHistoryListResponse,
+    AccountProofResponse,
     Organization,
     OrganizationListResponse,
     Application,
     ApplicationListResponse,
     ValidatorNode,
     ValidatorNodeListResponse,
+    NodeStatusResponse,
     VirtualBlockchain,
     VirtualBlockchainListResponse,
     VotingPower,
@@ -49,13 +52,16 @@ import {
     SearchQueryDto,
     GetBlocksQueryDto,
     GetMicroblocksQueryDto,
+    GetMicroblockProofQueryDto,
     GetAccountsQueryDto,
     GetAccountHistoryQueryDto,
+    GetAccountProofQueryDto,
     GetOrganizationsQueryDto,
     GetApplicationsQueryDto,
     GetValidatorNodesQueryDto,
     GetVirtualBlockchainsQueryDto,
     GetVotingPowersQueryDto,
+    GetNodeStatusQueryDto,
 } from "./dto/query.dto";
 import {
     FindOptionsWhere,
@@ -66,6 +72,9 @@ import {
 import { MicroblockStorageService } from "./microblock-storage.service";
 import { QueryService } from "./query.service";
 import { SearchService } from "./search.service";
+import { CometbftApiService } from "./cometbft-api.service";
+import { NodeCheckService } from "./node-check.service";
+import { Utils, BlockchainUtils } from "@cmts-dev/carmentis-sdk-core";
 
 const MAX_LIMIT = 100;
 
@@ -75,6 +84,8 @@ export class AppService {
         private readonly microblockStorageService: MicroblockStorageService,
         private readonly queryService: QueryService,
         private readonly searchService: SearchService,
+        private readonly cometbft: CometbftApiService,
+        private readonly nodeCheck: NodeCheckService,
     ) {}
 
     getRoot(): string {
@@ -128,7 +139,7 @@ export class AppService {
 
     async search(query: SearchQueryDto) {
         const { q, type, order, limit: providedLimit } = query;
-        const limit = providedLimit ?? MAX_LIMIT;
+        const limit = providedLimit === undefined ? MAX_LIMIT : Math.min(MAX_LIMIT, providedLimit);
         const items: Search[] = [];
 
         if (type == SearchObjectType.ACCOUNT || type == SearchObjectType.ALL) {
@@ -485,11 +496,29 @@ export class AppService {
             if (res.length === 1) {
                 currentVotingPower = res[0].votingPower;
             }
-            const validatorNode: ValidatorNode = { ...e, currentVotingPower };
+            const status = await this.nodeCheck.getLastNodeStatus(e.virtualBlockchainId);
+            const validatorNode: ValidatorNode = {
+                ...e,
+                currentVotingPower,
+                status: status.status,
+                statusTimestamp: status.timestamp,
+                statusIsExpired: status.expired,
+            };
             items.push(validatorNode);
         }
         const hasMore = this.hasMore(items, take);
         const response: ValidatorNodeListResponse = { items, hasMore };
+        return response;
+    }
+
+    async getNodeStatus(query: GetNodeStatusQueryDto) {
+        const { node_id } = query;
+        const status = await this.nodeCheck.getCurrentNodeStatus(node_id);
+        const response: NodeStatusResponse = {
+            nodeId: node_id,
+            status: status.status,
+            statusTimestamp: status.timestamp,
+        }
         return response;
     }
 
@@ -543,6 +572,66 @@ export class AppService {
         });
         const hasMore = this.hasMore(items, take);
         const response: VotingPowerListResponse = { items, hasMore };
+        return response;
+    }
+
+    async getMicroblockProof(query: GetMicroblockProofQueryDto) {
+        const { hash } = query;
+        const { proof } = await this.cometbft.getMicroblockProof(hash);
+        const { block, microblock, virtualBlockchain } = proof;
+        const encodedState = BlockchainUtils.encodeVirtualBlockchainState(virtualBlockchain.state);
+        const serializedState = Buffer.from(encodedState).toString("base64");
+        const merkleWitnesses = virtualBlockchain.merkleWitnesses.map((bin) =>
+            Utils.binaryToHexa(bin)
+        );
+        const radixProof = virtualBlockchain.radixProof.map((bin) =>
+            Utils.binaryToHexa(bin)
+        );
+        const response: MicroblockProofResponse = {
+            block: {
+                height: block.height,
+                vbRadixHash: Utils.binaryToHexa(block.vbRadixHash),
+                tokenRadixHash: Utils.binaryToHexa(block.tokenRadixHash),
+                storageHash: Utils.binaryToHexa(block.storageHash),
+                appHash: Utils.binaryToHexa(block.appHash),
+            },
+            microblock: {
+                virtualBlockchainId: Utils.binaryToHexa(microblock.virtualBlockchainId),
+                height: microblock.height,
+                hash: Utils.binaryToHexa(microblock.hash),
+            },
+            virtualBlockchain: {
+                serializedState,
+                merkleWitnesses,
+                radixProof,
+            },
+        };
+        return response;
+    }
+
+    async getAccountProof(query: GetAccountProofQueryDto) {
+        const { account_id: accountId } = query;
+        const { proof } = await this.cometbft.getAccountProof(accountId);
+        const { block, account } = proof;
+        const encodedState = BlockchainUtils.encodeAccountState(account.state);
+        const serializedState = Buffer.from(encodedState).toString("base64");
+        const radixProof = account.radixProof.map((bin) =>
+            Utils.binaryToHexa(bin)
+        );
+        const response: AccountProofResponse = {
+            block: {
+                height: block.height,
+                vbRadixHash: Utils.binaryToHexa(block.vbRadixHash),
+                tokenRadixHash: Utils.binaryToHexa(block.tokenRadixHash),
+                storageHash: Utils.binaryToHexa(block.storageHash),
+                appHash: Utils.binaryToHexa(block.appHash),
+            },
+            account: {
+                virtualBlockchainId: Utils.binaryToHexa(account.virtualBlockchainId),
+                serializedState,
+                radixProof,
+            },
+        };
         return response;
     }
 

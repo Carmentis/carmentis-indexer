@@ -21,6 +21,11 @@ import {
     RequestedAccountUpdate,
     AccountUpdatesAbciResponseSchema,
     AccountUpdatesAbciResponse,
+    AccountProofAbciResponse,
+    MicroblockProofAbciResponse,
+    Utils,
+    AccountProofAbciResponseSchema,
+    MicroblockProofAbciResponseSchema,
 } from "@cmts-dev/carmentis-sdk-core";
 
 type RpcErrorData = {
@@ -31,6 +36,9 @@ type RpcErrorData = {
 
 export interface BlockData {
     commit: CommitResponse | null;
+    appVbRadixHash: Uint8Array;
+    appTokenRadixHash: Uint8Array;
+    appStorageHash: Uint8Array;
     size: number;
     microblockCount: number;
 }
@@ -89,6 +97,9 @@ export class CometbftApiService implements OnModuleInit {
         const parsedResponse = abciResponse as BlockInformationAbciResponse;
         const blockData = {
             commit: commitData,
+            appVbRadixHash: parsedResponse.applicationStateHashes.vbRadixHash,
+            appTokenRadixHash: parsedResponse.applicationStateHashes.tokenRadixHash,
+            appStorageHash: parsedResponse.applicationStateHashes.storageHash,
             size: parsedResponse.size,
             microblockCount: parsedResponse.microblockCount,
         };
@@ -99,21 +110,12 @@ export class CometbftApiService implements OnModuleInit {
         height: number,
         partIndex: number,
     ): Promise<RawBlockContentAbciResponse> {
-        const client = await this.getClient();
         const request: AbciRequest = {
             requestType: AbciRequestType.GET_RAW_BLOCK_CONTENT,
             height,
             partIndex,
         };
-        const serializedRequest = AbciQueryEncoder.encodeAbciRequest(request);
-        const abciQuery = {
-            path: "/carmentis",
-            data: serializedRequest,
-        };
-        const response = await client.abciQuery(abciQuery);
-        const abciResponse = AbciQueryEncoder.decodeAbciResponse(
-            response.value,
-        );
+        const abciResponse = await this.abciQuery(request);
         if (abciResponse.responseType !== AbciResponseType.RAW_BLOCK_CONTENT) {
             throw new Error(`failed to fetch block content`);
         }
@@ -124,20 +126,11 @@ export class CometbftApiService implements OnModuleInit {
     async getBlockModifiedAccountsAtHeight(
         height: number,
     ): Promise<BlockModifiedAccountsAbciResponse> {
-        const client = await this.getClient();
         const request: AbciRequest = {
             requestType: AbciRequestType.GET_BLOCK_MODIFIED_ACCOUNTS,
             height,
         };
-        const serializedRequest = AbciQueryEncoder.encodeAbciRequest(request);
-        const abciQuery = {
-            path: "/carmentis",
-            data: serializedRequest,
-        };
-        const response = await client.abciQuery(abciQuery);
-        const abciResponse = AbciQueryEncoder.decodeAbciResponse(
-            response.value,
-        );
+        const abciResponse = await this.abciQuery(request);
         if (
             abciResponse.responseType !==
             AbciResponseType.BLOCK_MODIFIED_ACCOUNTS
@@ -151,20 +144,11 @@ export class CometbftApiService implements OnModuleInit {
     async getAccountUpdates(
         requestedAccountUpdates: RequestedAccountUpdate[],
     ): Promise<AccountUpdatesAbciResponse> {
-        const client = await this.getClient();
         const request: AbciRequest = {
             requestType: AbciRequestType.GET_ACCOUNT_UPDATES,
             list: requestedAccountUpdates,
         };
-        const serializedRequest = AbciQueryEncoder.encodeAbciRequest(request);
-        const abciQuery = {
-            path: "/carmentis",
-            data: serializedRequest,
-        };
-        const response = await client.abciQuery(abciQuery);
-        const abciResponse = AbciQueryEncoder.decodeAbciResponse(
-            response.value,
-        );
+        const abciResponse = await this.abciQuery(request);
         if (abciResponse.responseType !== AbciResponseType.ACCOUNT_UPDATES) {
             throw new Error(`failed to fetch account updates`);
         }
@@ -197,6 +181,50 @@ export class CometbftApiService implements OnModuleInit {
             }
             throw error;
         }
+    }
+
+    async getMicroblockProof(
+        hash: string,
+    ): Promise<MicroblockProofAbciResponse> {
+        const request: AbciRequest = {
+            requestType: AbciRequestType.GET_MICROBLOCK_PROOF,
+            hash: Utils.binaryFromHexa(hash),
+        };
+        const abciResponse = await this.abciQuery(request);
+        if (abciResponse.responseType !== AbciResponseType.MICROBLOCK_PROOF) {
+            throw new Error(`failed to fetch proof`);
+        }
+        v.parse(MicroblockProofAbciResponseSchema, abciResponse);
+        return abciResponse as MicroblockProofAbciResponse;
+    }
+
+    async getAccountProof(
+        accountId: string,
+    ): Promise<AccountProofAbciResponse> {
+        const request: AbciRequest = {
+            requestType: AbciRequestType.GET_ACCOUNT_PROOF,
+            accountId: Utils.binaryFromHexa(accountId),
+        };
+        const abciResponse = await this.abciQuery(request);
+        if (abciResponse.responseType !== AbciResponseType.ACCOUNT_PROOF) {
+            throw new Error(`failed to fetch proof`);
+        }
+        v.parse(AccountProofAbciResponseSchema, abciResponse);
+        return abciResponse as AccountProofAbciResponse;
+    }
+
+    private async abciQuery(request: AbciRequest) {
+        const client = await this.getClient();
+        const serializedRequest = AbciQueryEncoder.encodeAbciRequest(request);
+        const abciQuery = {
+            path: "/carmentis",
+            data: serializedRequest,
+        };
+        const response = await client.abciQuery(abciQuery);
+        const abciResponse = AbciQueryEncoder.decodeAbciResponse(
+            response.value,
+        );
+        return abciResponse;
     }
 
     private static isRpcError(error: unknown): error is { message: string } {

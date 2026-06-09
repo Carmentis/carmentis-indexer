@@ -10,11 +10,14 @@ import {
     SearchQueryDto,
     GetBlocksQueryDto,
     GetMicroblocksQueryDto,
+    GetMicroblockProofQueryDto,
     GetAccountsQueryDto,
     GetAccountHistoryQueryDto,
+    GetAccountProofQueryDto,
     GetOrganizationsQueryDto,
     GetApplicationsQueryDto,
     GetValidatorNodesQueryDto,
+    GetNodeStatusQueryDto,
     GetVirtualBlockchainsQueryDto,
     GetVotingPowersQueryDto,
 } from "./dto/query.dto";
@@ -24,11 +27,14 @@ import {
     SearchListResponseDto,
     BlockListResponseDto,
     MicroblockListResponseDto,
+    MicroblockProofResponseDto,
     AccountListResponseDto,
     AccountHistoryListResponseDto,
+    AccountProofResponseDto,
     OrganizationListResponseDto,
     ApplicationListResponseDto,
     ValidatorNodeListResponseDto,
+    NodeStatusResponseDto,
     VirtualBlockchainListResponseDto,
     VotingPowerListResponseDto,
 } from "./dto/response.dto";
@@ -83,6 +89,13 @@ export class AppController {
         return this.appService.getMicroblocks(query);
     }
 
+    @Get("/microblock-proof")
+    @ApiOkResponse({ type: MicroblockProofResponseDto })
+    async getMicroblockProof(@Query() query: GetMicroblockProofQueryDto) {
+        this.checkApiAvaibilityOrFail();
+        return this.appService.getMicroblockProof(query);
+    }
+
     @Get("/accounts")
     @ApiOkResponse({ type: AccountListResponseDto })
     async getAccounts(@Query() query: GetAccountsQueryDto) {
@@ -95,6 +108,13 @@ export class AppController {
     async getAccountHistory(@Query() query: GetAccountHistoryQueryDto) {
         this.checkApiAvaibilityOrFail();
         return this.appService.getAccountHistory(query);
+    }
+
+    @Get("/account-proof")
+    @ApiOkResponse({ type: AccountProofResponseDto })
+    async getAccountProof(@Query() query: GetAccountProofQueryDto) {
+        this.checkApiAvaibilityOrFail();
+        return this.appService.getAccountProof(query);
     }
 
     @Get("/organizations")
@@ -116,6 +136,13 @@ export class AppController {
     async getValidatorNodes(@Query() query: GetValidatorNodesQueryDto) {
         this.checkApiAvaibilityOrFail();
         return this.appService.getValidatorNodes(query);
+    }
+
+    @Get("/node-status")
+    @ApiOkResponse({ type: NodeStatusResponseDto })
+    async getNodeStatus(@Query() query: GetNodeStatusQueryDto) {
+        this.checkApiAvaibilityOrFail();
+        return this.appService.getNodeStatus(query);
     }
 
     @Get("/virtual-blockchains")
