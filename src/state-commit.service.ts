@@ -31,7 +31,8 @@ import {
 import { MicroblockEntity } from "./entities/microblock.entity";
 import { BlockData } from "./cometbft-api.service";
 import { MicroblockStorageService } from "./microblock-storage.service";
-import { Column, DeepPartial, EntityManager } from 'typeorm';
+import { NodeStatusService } from "./node-status.service";
+import { DeepPartial, EntityManager } from 'typeorm';
 
 @Injectable()
 export class StateCommitService {
@@ -39,6 +40,7 @@ export class StateCommitService {
 
     constructor(
         private readonly microblockStorageService: MicroblockStorageService,
+        private readonly nodeStatusService: NodeStatusService,
     ) {}
 
     async commitBlock(
@@ -426,6 +428,7 @@ export class StateCommitService {
         if (Object.keys(record).length > 1) {
             await manager.save(ValidatorNodeEntity, record);
         }
+        await this.nodeStatusService.getCurrentNodeStatus(virtualBlockchainId);
     }
 
     private async saveOrganization(

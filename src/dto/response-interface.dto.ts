@@ -218,7 +218,7 @@ export interface ValidatorNode {
     currentVotingPower: number;
     status: NodeStatusEnum;
     statusTimestamp: number;
-    statusIsExpired: boolean;
+    moniker: string;
 }
 
 export type ValidatorNodeListResponse = BaseListResponse<ValidatorNode>;
@@ -227,6 +227,10 @@ export interface NodeStatus {
     nodeId: string;
     status: NodeStatusEnum;
     statusTimestamp: number;
+    moniker: string;
+    latency: number;
+    txInMempool: number;
+    height: number;
 }
 
 export type NodeStatusResponse = NodeStatus;

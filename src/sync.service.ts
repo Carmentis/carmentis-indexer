@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { RequestedAccountUpdate, Utils } from "@cmts-dev/carmentis-sdk-core";
 import { CometbftApiService } from "./cometbft-api.service";
 import { StateCommitService } from "./state-commit.service";
+import { NodeStatusService } from "./node-status.service";
 import { QueryService } from "./query.service";
 import { ChainEntity } from "./entities/chain.entity";
 import { BlockEntity } from "./entities/block.entity";
@@ -24,10 +25,12 @@ export class SyncService implements OnModuleInit {
         private readonly stateCommitService: StateCommitService,
         private readonly syncState: SyncStateService,
         private readonly queryService: QueryService,
+        private readonly nodeStatusService: NodeStatusService,
         private readonly dataSource: DataSource,
     ) {}
 
-    onModuleInit() {
+    async onModuleInit() {
+        await this.nodeStatusService.updateAll();
         this.scheduleNextSynchronization();
     }
 
@@ -36,11 +39,17 @@ export class SyncService implements OnModuleInit {
             () =>
                 this.synchronize()
                     .then(() => {
-                        this.syncDelay = HEALTHY_SYNC_DELAY;
+                        if (this.syncDelay !== HEALTHY_SYNC_DELAY) {
+                            this.logger.log(`Switching to healthy sync delay (${HEALTHY_SYNC_DELAY}ms)`);
+                            this.syncDelay = HEALTHY_SYNC_DELAY;
+                        }
                     })
                     .catch((err) => {
                         this.logger.error(`Synchronization error: ${err}`);
-                        this.syncDelay = DEGRADED_SYNC_DELAY;
+                        if (this.syncDelay !== DEGRADED_SYNC_DELAY) {
+                            this.logger.log(`Switching to degraded sync delay (${DEGRADED_SYNC_DELAY}ms)`);
+                            this.syncDelay = DEGRADED_SYNC_DELAY;
+                        }
                     }),
             this.syncDelay,
         );
@@ -191,6 +200,10 @@ export class SyncService implements OnModuleInit {
                 this.logger.log(
                     `setting voting power of node ${nodeId} to ${votingPower}`,
                 );
+                await manager.save(ValidatorNodeEntity, {
+                    virtualBlockchainId: nodeId,
+                    currentVotingPower: votingPower,
+                });
                 await manager.save(VotingPowerEntity, {
                     nodeId,
                     height,

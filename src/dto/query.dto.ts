@@ -449,6 +449,13 @@ export class GetValidatorNodesQueryDto
     @IsOptional()
     @Type(() => String)
     address?: string;
+
+    @ApiPropertyOptional({
+        description: "Flag to include only validator nodes",
+    })
+    @IsOptional()
+    @Type(() => Boolean)
+    is_validator?: boolean;
 }
 
 export class GetVotingPowersQueryDto

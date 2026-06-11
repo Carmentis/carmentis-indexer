@@ -15,4 +15,6 @@ export class ValidatorNodeEntity extends BaseEntity {
     address: string;
     @Column()
     rpcEndpoint: string;
+    @Column({ default: 0 })
+    currentVotingPower: number;
 }

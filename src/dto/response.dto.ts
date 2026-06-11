@@ -244,7 +244,7 @@ export class ValidatorNodeDto implements ValidatorNode {
     @IsEnum(NodeStatusEnum)
     status: NodeStatusEnum;
     @ApiProperty() statusTimestamp: number;
-    @ApiProperty() statusIsExpired: boolean;
+    @ApiProperty() moniker: string;
 }
 
 export class ValidatorNodeListResponseDto {
@@ -262,6 +262,10 @@ export class NodeStatusResponseDto implements NodeStatus {
     @IsEnum(NodeStatusEnum)
     status: NodeStatusEnum;
     @ApiProperty() statusTimestamp: number;
+    @ApiProperty() moniker: string;
+    @ApiProperty() latency: number;
+    @ApiProperty() txInMempool: number;
+    @ApiProperty() height: number;
 }
 
 export class VirtualBlockchainDto implements VirtualBlockchain {

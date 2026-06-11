@@ -73,7 +73,7 @@ import { MicroblockStorageService } from "./microblock-storage.service";
 import { QueryService } from "./query.service";
 import { SearchService } from "./search.service";
 import { CometbftApiService } from "./cometbft-api.service";
-import { NodeCheckService } from "./node-check.service";
+import { NodeStatusService } from "./node-status.service";
 import { Utils, BlockchainUtils } from "@cmts-dev/carmentis-sdk-core";
 
 const MAX_LIMIT = 100;
@@ -85,7 +85,7 @@ export class AppService {
         private readonly queryService: QueryService,
         private readonly searchService: SearchService,
         private readonly cometbft: CometbftApiService,
-        private readonly nodeCheck: NodeCheckService,
+        private readonly nodeStatusService: NodeStatusService,
     ) {}
 
     getRoot(): string {
@@ -462,7 +462,7 @@ export class AppService {
     }
 
     async getValidatorNodes(query: GetValidatorNodesQueryDto) {
-        const { vb_id, organization_id, public_key, address, order, limit } =
+        const { vb_id, organization_id, public_key, address, is_validator, order, limit } =
             query;
 
         const where: FindOptionsWhere<ValidatorNodeEntity> = {};
@@ -487,22 +487,12 @@ export class AppService {
         });
         const items: ValidatorNode[] = [];
         for (const e of entities) {
-            let currentVotingPower = 0;
-            const res = await VotingPowerEntity.find({
-                where: { nodeId: e.virtualBlockchainId },
-                order: { height: "DESC" },
-                take: 1,
-            });
-            if (res.length === 1) {
-                currentVotingPower = res[0].votingPower;
-            }
-            const status = await this.nodeCheck.getLastNodeStatus(e.virtualBlockchainId);
+            const status = await this.nodeStatusService.getLastNodeStatus(e.virtualBlockchainId);
             const validatorNode: ValidatorNode = {
                 ...e,
-                currentVotingPower,
                 status: status.status,
-                statusTimestamp: status.timestamp,
-                statusIsExpired: status.expired,
+                statusTimestamp: status.statusTimestamp,
+                moniker: status.moniker,
             };
             items.push(validatorNode);
         }
@@ -513,11 +503,10 @@ export class AppService {
 
     async getNodeStatus(query: GetNodeStatusQueryDto) {
         const { node_id } = query;
-        const status = await this.nodeCheck.getCurrentNodeStatus(node_id);
+        const status = await this.nodeStatusService.getCurrentNodeStatus(node_id);
         const response: NodeStatusResponse = {
             nodeId: node_id,
-            status: status.status,
-            statusTimestamp: status.timestamp,
+            ...status
         }
         return response;
     }

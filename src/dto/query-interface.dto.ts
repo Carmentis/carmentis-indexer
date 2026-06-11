@@ -113,6 +113,7 @@ export interface ValidatorNodesQuery extends BaseQuery {
     organization_id?: string;
     public_key?: string;
     address?: string;
+    is_validator?: boolean;
 }
 
 export interface VirtualBlockchainsQuery extends BaseQuery {
