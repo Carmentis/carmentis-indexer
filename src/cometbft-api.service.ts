@@ -5,7 +5,7 @@ import type {
     StatusResponse,
     ValidatorsResponse,
     Validator,
-} from "@cosmjs/tendermint-rpc/build/comet38";
+} from "./cometbft/cometbft-types";
 import * as v from "valibot";
 import {
     AbciQueryEncoder,

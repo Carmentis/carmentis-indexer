@@ -116,14 +116,15 @@ export class NodeStatusService {
             nodeStatus.status = catchingUp ? NodeStatusEnum.Sync : NodeStatusEnum.Ok;
 
             const ts1 = performance.now();
-            const unconfirmedTxRes = await fetch(`${url}/unconfirmed_txs`, {
+            const numUnconfirmedTxRes = await fetch(`${url}/num_unconfirmed_txs`, {
                 signal: AbortSignal.timeout(MAX_FETCH_DELAY)
             });
             const latency1 = performance.now() - ts1;
             nodeStatus.latency = Math.round((latency0 + latency1) / 2);
 
-            const unconfirmedTxJson = await unconfirmedTxRes.json();
-            nodeStatus.txInMempool = unconfirmedTxJson?.result?.n_txs;
+            const numUnconfirmedTxJson = await numUnconfirmedTxRes.json();
+            console.log("numUnconfirmedTxJson", numUnconfirmedTxJson);
+            nodeStatus.txInMempool = numUnconfirmedTxJson?.result?.n_txs;
 
             return nodeStatus;
 

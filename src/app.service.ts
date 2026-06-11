@@ -479,6 +479,9 @@ export class AppService {
         if (address !== undefined) {
             where.address = address;
         }
+        if (is_validator) {
+            where.currentVotingPower = MoreThanOrEqual(1);
+        }
 
         const take = this.take(limit);
         const entities = await ValidatorNodeEntity.find({
