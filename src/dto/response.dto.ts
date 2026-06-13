@@ -115,7 +115,10 @@ export class AccountHistoryDto implements AccountHistory {
     @ApiProperty() timestamp: number;
     @ApiProperty() linkedAccountId: string;
     @ApiProperty() amount: number;
-    @ApiProperty() chainReference: string;
+    @ApiProperty({
+        description: "Base64 representation of the CBOR-encoded chain reference.",
+    })
+    chainReference: string;
     @ApiProperty() publicReference: string;
     @ApiProperty() privateReference: string;
 }
@@ -202,7 +205,7 @@ export class MicroblockDto implements Microblock {
 
     @ApiProperty()
     @ApiPropertyOptional({
-        description: "Returned only if include_content=true",
+        description: "Base64 representation of the microblock content. Returned only if include_content was set to true.",
     })
     content?: string;
 }

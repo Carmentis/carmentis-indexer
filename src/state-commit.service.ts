@@ -4,6 +4,7 @@ import {
     AccountUpdatesAbciResponse,
     VirtualBlockchainType,
     Utils,
+    BlockchainUtils,
     Section,
     SectionType,
     Lock,
@@ -29,6 +30,7 @@ import {
     StakingLockEntity,
 } from "./entities/account.entity";
 import { MicroblockEntity } from "./entities/microblock.entity";
+import { MicroblockStatsEntity } from "./entities/microblock-stats.entity";
 import { BlockData } from "./cometbft-api.service";
 import { MicroblockStorageService } from "./microblock-storage.service";
 import { NodeStatusService } from "./node-status.service";
@@ -146,6 +148,9 @@ export class StateCommitService {
             });
             // 2) save AccountHistoryEntity
             for (const historyUpdate of update.historyUpdate) {
+                const encodedChainReference = BlockchainUtils.encodeChainReference(historyUpdate.chainReference);
+                const chainReference = Buffer.from(encodedChainReference).toString("base64");
+
                 await manager.save(AccountHistoryEntity, {
                     accountId,
                     height: historyUpdate.height,
@@ -155,9 +160,7 @@ export class StateCommitService {
                         historyUpdate.linkedAccount,
                     ),
                     amount: historyUpdate.amount,
-                    chainReference: Utils.binaryToHexa(
-                        historyUpdate.chainReference,
-                    ),
+                    chainReference,
                     publicReference: historyUpdate.publicReference,
                     privateReference: historyUpdate.privateReference,
                 });
@@ -333,6 +336,8 @@ export class StateCommitService {
             }
         }
 
+        await this.updateMicroblockStats(manager, microblock);
+
         if (height == 1) {
             const expirationDay =
                 (header.previousHash[1] << 24) |
@@ -389,6 +394,28 @@ export class StateCommitService {
         }
         if (Object.keys(record).length > 1) {
             await manager.save(AccountEntity, record);
+        }
+    }
+
+    private async updateMicroblockStats(manager: EntityManager, microblock: Microblock) {
+        const header = microblock.getHeader();
+        const isGenesis = header.height === 1;
+        const vbType: VirtualBlockchainType = header.microblockType;
+        const date = microblock.getTimestampAsDate();
+        const hourBucketTimestamp = Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate(),
+            date.getUTCHours(),
+        );
+
+        const where = { hourBucketTimestamp, vbType, isGenesis };
+        const existing = await manager.findOneBy(MicroblockStatsEntity, where);
+
+        if (existing) {
+            await manager.increment(MicroblockStatsEntity, where, 'counter', 1);
+        } else {
+            await manager.save(MicroblockStatsEntity, { ...where, counter: 1 });
         }
     }
 

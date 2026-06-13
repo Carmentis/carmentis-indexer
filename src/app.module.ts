@@ -22,6 +22,7 @@ import { ApplicationEntity } from "./entities/application.entity";
 import { BlockEntity, BlockSignatureEntity } from "./entities/block.entity";
 import { ChainEntity } from "./entities/chain.entity";
 import { MicroblockEntity } from "./entities/microblock.entity";
+import { MicroblockStatsEntity } from "./entities/microblock-stats.entity";
 import { OrganizationEntity } from "./entities/organization.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
 import { VotingPowerEntity } from "./entities/voting-power.entity";
@@ -37,6 +38,7 @@ const entities = [
     BlockSignatureEntity,
     ChainEntity,
     MicroblockEntity,
+    MicroblockStatsEntity,
     OrganizationEntity,
     ValidatorNodeEntity,
     VirtualBlockchainEntity,

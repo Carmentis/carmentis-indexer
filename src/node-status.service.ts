@@ -123,7 +123,6 @@ export class NodeStatusService {
             nodeStatus.latency = Math.round((latency0 + latency1) / 2);
 
             const numUnconfirmedTxJson = await numUnconfirmedTxRes.json();
-            console.log("numUnconfirmedTxJson", numUnconfirmedTxJson);
             nodeStatus.txInMempool = numUnconfirmedTxJson?.result?.n_txs;
 
             return nodeStatus;
