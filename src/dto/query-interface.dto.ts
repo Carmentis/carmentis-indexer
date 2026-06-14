@@ -1,3 +1,5 @@
+import { VirtualBlockchainType as VBType } from "@cmts-dev/carmentis-sdk-core";
+
 export enum SortOrder {
     ASC = "ASC",
     DESC = "DESC",
@@ -39,6 +41,15 @@ export enum SearchObjectType {
     ORGANIZATION = "organization",
     NODE = "node",
     VIRTUAL_BLOCKCHAIN = "vb",
+}
+
+export enum VirtualBlockchainType {
+    PROTOCOL = VBType.PROTOCOL_VIRTUAL_BLOCKCHAIN,
+    ACCOUNT = VBType.ACCOUNT_VIRTUAL_BLOCKCHAIN,
+    NODE = VBType.NODE_VIRTUAL_BLOCKCHAIN,
+    ORGANIZATION = VBType.ORGANIZATION_VIRTUAL_BLOCKCHAIN,
+    APPLICATION = VBType.APPLICATION_VIRTUAL_BLOCKCHAIN,
+    APPLICATION_LEDGER = VBType.APP_LEDGER_VIRTUAL_BLOCKCHAIN,
 }
 
 export interface BaseQuery {
@@ -136,4 +147,11 @@ export interface MicroblockProofQuery {
 
 export interface AccountProofQuery {
     account_id: string;
+}
+
+export interface MicroblockStatsQuery extends BaseQuery {
+    vb_type?: VirtualBlockchainType;
+    is_genesis?: boolean;
+    timestamp_gte?: number;
+    timestamp_lte?: number;
 }

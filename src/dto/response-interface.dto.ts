@@ -172,6 +172,18 @@ export interface MicroblockProof {
 
 export type MicroblockProofResponse = MicroblockProof;
 
+export interface MicroblockCount {
+    vbType: number;
+    isGenesis: boolean;
+    count: number;
+}
+
+export interface MicroblockStats {
+    stats: MicroblockCount[];
+}
+
+export type MicroblockStatsResponse = MicroblockStats;
+
 export interface AccountProof {
     block: {
         height: number,

@@ -8,6 +8,7 @@ import {
     MicroblockSort,
     AccountHistorySort,
     VirtualBlockchainSort,
+    VirtualBlockchainType,
     VotingPowerSort,
     SearchQuery,
     GasPriceQuery,
@@ -24,6 +25,7 @@ import {
     VotingPowersQuery,
     SearchObjectType,
     NodeStatusQuery,
+    MicroblockStatsQuery,
 } from "./query-interface.dto";
 
 const SORT_DESCRIPTION = "Field on which the sort is applied";
@@ -48,7 +50,7 @@ class ListDto {
     limit?: number;
 }
 
-export class GetChainQueryDto {}
+export class GetChainQueryDto { }
 
 export class GetGasPriceQueryDto implements GasPriceQuery {
     @ApiPropertyOptional({
@@ -140,8 +142,7 @@ export class GetBlocksQueryDto extends ListDto implements BlocksQuery {
 
 export class GetMicroblocksQueryDto
     extends ListDto
-    implements MicroblocksQuery
-{
+    implements MicroblocksQuery {
     @ApiPropertyOptional({
         description: SORT_DESCRIPTION,
         enum: MicroblockSort,
@@ -242,8 +243,7 @@ export class GetAccountsQueryDto extends ListDto implements AccountsQuery {
 
 export class GetAccountHistoryQueryDto
     extends ListDto
-    implements AccountHistoryQuery
-{
+    implements AccountHistoryQuery {
     @ApiPropertyOptional({
         description: SORT_DESCRIPTION,
         enum: AccountHistorySort,
@@ -322,8 +322,7 @@ export class GetAccountHistoryQueryDto
 
 export class GetOrganizationsQueryDto
     extends ListDto
-    implements OrganizationsQuery
-{
+    implements OrganizationsQuery {
     @ApiPropertyOptional({
         description: "Virtual blockchain ID",
         example:
@@ -353,8 +352,7 @@ export class GetOrganizationsQueryDto
 
 export class GetApplicationsQueryDto
     extends ListDto
-    implements ApplicationsQuery
-{
+    implements ApplicationsQuery {
     @ApiPropertyOptional({
         description: "Virtual blockchain ID",
         example:
@@ -384,8 +382,7 @@ export class GetApplicationsQueryDto
 
 export class GetVirtualBlockchainsQueryDto
     extends ListDto
-    implements VirtualBlockchainsQuery
-{
+    implements VirtualBlockchainsQuery {
     @ApiPropertyOptional({
         description: SORT_DESCRIPTION,
         enum: VirtualBlockchainSort,
@@ -414,8 +411,7 @@ export class GetVirtualBlockchainsQueryDto
 
 export class GetValidatorNodesQueryDto
     extends ListDto
-    implements ValidatorNodesQuery
-{
+    implements ValidatorNodesQuery {
     @ApiPropertyOptional({
         description: "Virtual blockchain ID",
         example:
@@ -460,8 +456,7 @@ export class GetValidatorNodesQueryDto
 
 export class GetVotingPowersQueryDto
     extends ListDto
-    implements VotingPowersQuery
-{
+    implements VotingPowersQuery {
     @ApiPropertyOptional({
         description: SORT_DESCRIPTION,
         enum: VotingPowerSort,
@@ -504,4 +499,38 @@ export class GetNodeStatusQueryDto implements NodeStatusQuery {
     })
     @Type(() => String)
     node_id: string;
+}
+
+export class GetMicroblockStatsQueryDto implements MicroblockStatsQuery {
+    @ApiPropertyOptional({
+        description: "Limits the stats to a specific virtual blockchain type.",
+        enum: VirtualBlockchainType,
+    })
+    @IsOptional()
+    @Type(() => Number)
+    @IsEnum(VirtualBlockchainType)
+    vb_type?: number;
+
+    @ApiPropertyOptional({
+        description: "Limits the stats to either genesis or non-genesis microblocks.",
+    })
+    @IsOptional()
+    @Type(() => Boolean)
+    is_genesis?: boolean;
+
+    @ApiPropertyOptional({
+        description: "Minimum timestamp in milliseconds (inclusive). Resolution is 1 hour.",
+        example: 1780300800000,
+    })
+    @IsOptional()
+    @Type(() => Number)
+    timestamp_gte?: number;
+
+    @ApiPropertyOptional({
+        description: "Maximum timestamp in milliseconds (inclusive). Resolution is 1 hour.",
+        example: 1780315200000,
+    })
+    @IsOptional()
+    @Type(() => Number)
+    timestamp_lte?: number;
 }

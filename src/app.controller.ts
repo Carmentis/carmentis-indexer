@@ -11,6 +11,7 @@ import {
     GetBlocksQueryDto,
     GetMicroblocksQueryDto,
     GetMicroblockProofQueryDto,
+    GetMicroblockStatsQueryDto,
     GetAccountsQueryDto,
     GetAccountHistoryQueryDto,
     GetAccountProofQueryDto,
@@ -28,6 +29,7 @@ import {
     BlockListResponseDto,
     MicroblockListResponseDto,
     MicroblockProofResponseDto,
+    MicroblockStatsResponseDto,
     AccountListResponseDto,
     AccountHistoryListResponseDto,
     AccountProofResponseDto,
@@ -94,6 +96,13 @@ export class AppController {
     async getMicroblockProof(@Query() query: GetMicroblockProofQueryDto) {
         this.checkApiAvaibilityOrFail();
         return this.appService.getMicroblockProof(query);
+    }
+
+    @Get("/microblock-stats")
+    @ApiOkResponse({ type: MicroblockStatsResponseDto })
+    async getMicroblockStats(@Query() query: GetMicroblockStatsQueryDto) {
+        this.checkApiAvaibilityOrFail();
+        return this.appService.getMicroblockStats(query);
     }
 
     @Get("/accounts")

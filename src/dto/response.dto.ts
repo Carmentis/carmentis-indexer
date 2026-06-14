@@ -14,6 +14,7 @@ import {
     BlockSignature,
     Microblock,
     MicroblockProof,
+    MicroblockStats,
     Organization,
     NodeStatusEnum,
     NodeStatus,
@@ -342,4 +343,15 @@ export class AccountProofResponseDto implements AccountProof {
     block: ProofBlockDto;
     @ApiProperty({ type: () => MicroblockProofVirtualBlockchainDto })
     account: AccountProofAccountDto;
+}
+
+export class MicroblockCountDto {
+    @ApiProperty() vbType: number;
+    @ApiProperty() isGenesis: boolean;
+    @ApiProperty() count: number;
+}
+
+export class MicroblockStatsResponseDto implements MicroblockStats {
+    @ApiProperty({ type: () => MicroblockCountDto, isArray: true })
+    stats: MicroblockCountDto[];
 }

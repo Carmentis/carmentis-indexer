@@ -6,6 +6,7 @@ import {
 import { ChainEntity } from "./entities/chain.entity";
 import { BlockEntity, BlockSignatureEntity } from "./entities/block.entity";
 import { MicroblockEntity } from "./entities/microblock.entity";
+import { MicroblockStatsEntity } from "./entities/microblock-stats.entity";
 import {
     AccountEntity,
     AccountHistoryEntity,
@@ -28,6 +29,8 @@ import {
     Microblock,
     MicroblockListResponse,
     MicroblockProofResponse,
+    MicroblockCount,
+    MicroblockStatsResponse,
     Account,
     AccountListResponse,
     AccountHistory,
@@ -53,6 +56,7 @@ import {
     GetBlocksQueryDto,
     GetMicroblocksQueryDto,
     GetMicroblockProofQueryDto,
+    GetMicroblockStatsQueryDto,
     GetAccountsQueryDto,
     GetAccountHistoryQueryDto,
     GetAccountProofQueryDto,
@@ -74,7 +78,7 @@ import { QueryService } from "./query.service";
 import { SearchService } from "./search.service";
 import { CometbftApiService } from "./cometbft-api.service";
 import { NodeStatusService } from "./node-status.service";
-import { Utils, BlockchainUtils } from "@cmts-dev/carmentis-sdk-core";
+import { N_VIRTUAL_BLOCKCHAINS, Utils, BlockchainUtils } from "@cmts-dev/carmentis-sdk-core";
 
 const MAX_LIMIT = 100;
 
@@ -624,6 +628,55 @@ export class AppService {
                 radixProof,
             },
         };
+        return response;
+    }
+
+    async getMicroblockStats(query: GetMicroblockStatsQueryDto) {
+        const {
+            vb_type,
+            is_genesis,
+            timestamp_gte,
+            timestamp_lte,
+        } = query;
+
+        const where: FindOptionsWhere<MicroblockStatsEntity> = {};
+
+        if (vb_type !== undefined) {
+            where.vbType = vb_type;
+        }
+        if (is_genesis !== undefined) {
+            where.isGenesis = is_genesis;
+        }
+
+        const timestampRange = this.range(timestamp_gte, timestamp_lte);
+        if (timestampRange !== null) {
+            where.hourBucketTimestamp = timestampRange;
+        }
+
+        const rows = await MicroblockStatsEntity.createQueryBuilder('stats')
+            .select('stats.vbType', 'vbType')
+            .addSelect('stats.isGenesis', 'isGenesis')
+            .addSelect('SUM(stats.counter)', 'count')
+            .groupBy('stats.vbType')
+            .addGroupBy('stats.isGenesis')
+            .where(where)
+            .getRawMany();
+
+        // To make client processing more straightforward, we construct a response that includes
+        // all combinations, including those not returned by the query.
+        const stats: MicroblockCount[] = [];
+
+        for (let vbType = 0; vbType < N_VIRTUAL_BLOCKCHAINS; vbType++) {
+            for (const isGenesis of [ true, false ]) {
+                const row = rows.find((r) => r.vbType === vbType && !!r.isGenesis === isGenesis);
+                stats.push({
+                    vbType,
+                    isGenesis,
+                    count: row?.count || 0
+                });
+            }
+        }
+        const response: MicroblockStatsResponse = { stats };
         return response;
     }
 
