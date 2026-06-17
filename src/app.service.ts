@@ -294,6 +294,7 @@ export class AppService {
             sort,
             order,
             limit,
+            public_key,
         } = query;
 
         const where: FindOptionsWhere<AccountEntity> = {};
@@ -302,6 +303,10 @@ export class AppService {
 
         if (id !== undefined) {
             where.id = id;
+        }
+
+        if (public_key !== undefined) {
+            where.publicKey = public_key;
         }
 
         const balanceRange = this.range(balance_gte, balance_lte);

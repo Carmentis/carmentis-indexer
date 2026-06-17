@@ -195,6 +195,15 @@ export class GetAccountsQueryDto extends ListDto implements AccountsQuery {
     sort?: AccountSort;
 
     @ApiPropertyOptional({
+        description: "Public key of the account",
+        example:
+            "SIG:SECP256K1:PK{03ff351698a1b18d21dac31b7a9c77b09d9cfec11a649cf573f0aa1477a49aaa79}",
+    })
+    @IsOptional()
+    @Type(() => String)
+    public_key?: string;
+
+    @ApiPropertyOptional({
         description: "Account ID",
         example:
             "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
