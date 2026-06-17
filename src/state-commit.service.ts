@@ -437,7 +437,7 @@ export class StateCommitService {
                 }
                 case SectionType.VN_COMETBFT_PUBLIC_KEY_DECLARATION: {
                     record.cometPublicKeyType = section.cometPublicKeyType;
-                    record.cometPublicKey = section.cometPublicKey;
+                    record.cometPublicKey = section.cometPublicKey.replace(/=*$/, "");
                     const b64 = EncoderFactory.bytesToBase64Encoder();
                     const rawAddress =
                         CometBFTPublicKeyConverter.convertRawPublicKeyIntoAddress(
