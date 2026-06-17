@@ -1,98 +1,175 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+<div align="center">
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<img src="assets/carmentis.svg" alt="Carmentis" width="220" />
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# Carmentis Indexer
 
-## Description
+### The read-optimised API that indexes the Carmentis blockchain and serves its data to your applications.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+</div>
 
-## Project setup
+---
 
-```bash
-$ npm install
-```
+## Why the Indexer?
 
-## Compile and run the project
+The **Carmentis Indexer** is a [NestJS](https://nestjs.com/) server that continuously reads blocks from a Carmentis
+node, stores them in a local database, and exposes the result through a documented, query-friendly HTTP API. It removes
+the need to talk to a blockchain node directly — instead of paginating low-level RPC and ABCI queries yourself, you get
+a single, stable surface to build explorers, dashboards and back-ends on top of.
 
-```bash
-# development
-$ npm run start
+It is useful when you need to:
 
-# watch mode
-$ npm run start:dev
+- **Query historical chain data efficiently** — browse blocks, microblocks, accounts, organisations, applications and
+  validators without re-deriving them from the node on every request.
+- **Search across the chain** — a dedicated search endpoint resolves hashes and identifiers to the right resource.
+- **Serve a documented API** — every endpoint is described through Swagger UI, served out of the box under `/swagger`.
+- **Stay in sync automatically** — a background synchroniser polls the node and keeps the local database up to date,
+  switching to a slower cadence when the node is unreachable.
+- **Verify on-chain inclusion** — fetch microblock and account proofs straight from the node through the indexer.
 
-# production mode
-$ npm run start:prod
-```
+## Features
 
-## Run tests
+- **Read-only REST API** — all endpoints exposed under `/api/v1` (blocks, microblocks, accounts, organisations,
+  applications, validator nodes, voting powers, virtual blockchains, chain info, gas price and node status).
+- **Continuous synchronisation** — a background service ingests new blocks block-by-block and tracks the chain head,
+  with healthy (1s) and degraded (10s) polling cadences.
+- **Search** — resolve hashes and identifiers to their underlying resource through `/api/v1/search`.
+- **Proofs** — request microblock and account inclusion proofs via the node.
+- **Local storage** — blocks are persisted with [TypeORM](https://typeorm.io/), using SQLite by default.
+- **Self-documenting** — Swagger UI available under `/swagger`.
+- **Sync-aware** — data endpoints return `503 Service Unavailable` until the indexer has caught up with the chain head.
 
-```bash
-# unit tests
-$ npm run test
+## Prerequisites
 
-# e2e tests
-$ npm run test:e2e
+- [Node.js](https://nodejs.org/) 22+
+- [pnpm](https://pnpm.io/) (the project uses pnpm and `corepack` — run `corepack enable` if needed)
+- A reachable Carmentis **node URL**
 
-# test coverage
-$ npm run test:cov
-```
+## Configuration
 
-## Deployment
+The Indexer is configured through **environment variables**. A minimal setup only needs the node URL — everything else
+falls back to sensible defaults:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+| Variable   | Description                                  | Default                                        |
+|------------|----------------------------------------------|------------------------------------------------|
+| `NODE_URL` | URL of the Carmentis node to index           | `https://node1.server1.devnet.carmentis.io`    |
+| `PORT`     | Port the HTTP API listens on                 | `3000`                                          |
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+By default the indexed data is stored in a SQLite database at `data/db/db.sqlite`, which is created automatically on
+first run.
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+export NODE_URL="http://localhost:3500"
+export PORT=3000
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Deploy locally (by hand)
 
-## Resources
+1. Clone the repository and move into it:
 
-Check out a few resources that may come in handy when working with NestJS:
+   ```bash
+   git clone https://github.com/carmentis/indexer.git
+   cd indexer
+   ```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+2. Install the dependencies:
 
-## Support
+   ```bash
+   pnpm install
+   ```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+3. Configure the node URL (and optionally the port):
 
-## Stay in touch
+   ```bash
+   export NODE_URL="http://localhost:3500"
+   ```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+4. Start the server:
+
+   - **Production**:
+
+     ```bash
+     pnpm build
+     pnpm start:prod
+     ```
+
+   - **Development** (with hot reload):
+
+     ```bash
+     pnpm start:dev
+     ```
+
+The API and Swagger UI are then available on the configured port (default `http://localhost:3000`, docs under
+`/swagger`).
+
+## Deploy with Docker
+
+### Option A — build the image yourself
+
+1. Build the image:
+
+   ```bash
+   docker build -t carmentis-indexer .
+   ```
+
+2. Run it, passing the node URL and persisting the database outside the container:
+
+   ```bash
+   docker run --rm --name carmentis-indexer \
+     -p 3000:3000 \
+     -e NODE_URL="http://localhost:3500" \
+     -v "$(pwd)/data:/app/data" \
+     carmentis-indexer
+   ```
+
+### Option B — use the published image
+
+A pre-built image is available on the GitHub Container Registry:
+
+```bash
+docker run --rm --name carmentis-indexer \
+  -p 3000:3000 \
+  -e NODE_URL="http://localhost:3500" \
+  -v "$(pwd)/data:/app/data" \
+  ghcr.io/carmentis/indexer
+```
+
+> The container exposes port `3000`. If you change `PORT`, update the `-p` mapping accordingly.
+> Mounting `./data` keeps the indexed database between restarts — without it, the indexer re-syncs from scratch each
+> time the container is recreated.
+
+## API overview
+
+All endpoints are served under `/api/v1` and documented interactively in Swagger UI (`/swagger`). The main resources
+are:
+
+| Endpoint                      | Description                                         |
+|-------------------------------|-----------------------------------------------------|
+| `GET /api/v1/chain`           | Chain information                                   |
+| `GET /api/v1/gas-price`       | Current gas price                                   |
+| `GET /api/v1/search`          | Resolve a hash or identifier to a resource          |
+| `GET /api/v1/blocks`          | List blocks                                         |
+| `GET /api/v1/microblocks`     | List microblocks                                    |
+| `GET /api/v1/microblock-proof`| Inclusion proof for a microblock                    |
+| `GET /api/v1/microblock-stats`| Microblock statistics                               |
+| `GET /api/v1/accounts`        | List accounts                                       |
+| `GET /api/v1/account-history` | History of an account                               |
+| `GET /api/v1/account-proof`   | Inclusion proof for an account                      |
+| `GET /api/v1/organizations`   | List organisations                                  |
+| `GET /api/v1/applications`    | List applications                                   |
+| `GET /api/v1/validator-nodes` | List validator nodes                                |
+| `GET /api/v1/voting-powers`   | Validator voting powers                             |
+| `GET /api/v1/virtual-blockchains` | List virtual blockchains                        |
+| `GET /api/v1/node-status`     | Status of the underlying node                       |
+
+> While the indexer is still catching up with the chain head, data endpoints return `503 Service Unavailable` together
+> with the current and target heights.
+
+## Contributing
+
+Contributions to improve or extend the Indexer are welcome. Please follow the project's coding standards and submit a
+pull request.
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Licensed under Apache-2.0. See the [`LICENCE.txt`](./LICENCE.txt) file for details.
