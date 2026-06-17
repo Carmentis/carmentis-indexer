@@ -478,7 +478,7 @@ export class AppService {
             where.organizationId = organization_id;
         }
         if (public_key !== undefined) {
-            where.cometPublicKey = public_key;
+            where.cometPublicKey = public_key.replace(/=*$/, "");
         }
         if (address !== undefined) {
             where.address = address;
