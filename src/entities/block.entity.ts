@@ -58,6 +58,8 @@ export class BlockEntity extends BaseEntity {
 export class BlockSignatureEntity extends BaseEntity {
     @PrimaryColumn()
     height: number;
+    @PrimaryColumn()
+    index: number;
 
     @Column()
     blockIdFlag: number;

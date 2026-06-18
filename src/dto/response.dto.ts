@@ -19,6 +19,7 @@ import {
     NodeStatusEnum,
     NodeStatus,
     ValidatorNode,
+    ValidatorStats,
     VirtualBlockchain,
     VotingPower,
 } from "./response-interface.dto";
@@ -93,13 +94,17 @@ export class AccountDto implements Account {
     @ApiProperty() publicKey: string;
     @ApiProperty() height: number;
     @ApiProperty() balance: number;
+    @ApiProperty() spendable: number;
+    @ApiProperty() lockedInStaking: number;
+    @ApiProperty() lockedInVesting: number;
+    @ApiProperty() lockedInEscrows: number;
 
-    @ApiProperty({ type: [EscrowLockDto] })
-    escrowLocks: EscrowLockDto[];
-    @ApiProperty({ type: [VestingLockDto] })
-    vestingLocks: VestingLockDto[];
     @ApiProperty({ type: [StakingLockDto] })
     stakingLocks: StakingLockDto[];
+    @ApiProperty({ type: [VestingLockDto] })
+    vestingLocks: VestingLockDto[];
+    @ApiProperty({ type: [EscrowLockDto] })
+    escrowLocks: EscrowLockDto[];
 }
 
 export class AccountListResponseDto {
@@ -354,4 +359,15 @@ export class MicroblockCountDto {
 export class MicroblockStatsResponseDto implements MicroblockStats {
     @ApiProperty({ type: () => MicroblockCountDto, isArray: true })
     stats: MicroblockCountDto[];
+}
+
+export class ValidatorStatsCountDto {
+    @ApiProperty() nodeId: string;
+    @ApiProperty() proposedBlocks: number;
+    @ApiProperty() signedBlocks: number;
+}
+
+export class ValidatorStatsResponseDto implements ValidatorStats {
+    @ApiProperty({ type: () => ValidatorStatsCountDto, isArray: true })
+    stats: ValidatorStatsCountDto[];
 }

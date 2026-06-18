@@ -47,7 +47,8 @@ export class SyncService implements OnModuleInit {
                     .catch((err) => {
                         this.logger.error(`Synchronization error: ${err}`);
                         if (this.syncDelay !== DEGRADED_SYNC_DELAY) {
-                            this.logger.log(`Switching to degraded sync delay (${DEGRADED_SYNC_DELAY}ms)`);
+                            this.logger.warn(`Switching to degraded sync delay (${DEGRADED_SYNC_DELAY}ms)`);
+                            this.cometbft.changeNode();
                             this.syncDelay = DEGRADED_SYNC_DELAY;
                         }
                     }),

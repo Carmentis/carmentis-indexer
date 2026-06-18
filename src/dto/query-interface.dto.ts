@@ -68,11 +68,11 @@ export interface SearchQuery extends BaseQuery {
 }
 
 export interface AccountsQuery extends BaseQuery {
-    height?: number;
-    height_gte?: number;
-    height_lte?: number;
-    timestamp_gte?: number;
-    timestamp_lte?: number;
+    sort?: AccountSort;
+    public_key?: string;
+    id?: string;
+    balance_gte?: number;
+    balance_lte?: number;
     with_escrow?: boolean;
     with_vesting?: boolean;
     with_staking?: boolean;
@@ -152,6 +152,12 @@ export interface AccountProofQuery {
 export interface MicroblockStatsQuery extends BaseQuery {
     vb_type?: VirtualBlockchainType;
     is_genesis?: boolean;
+    timestamp_gte?: number;
+    timestamp_lte?: number;
+}
+
+export interface ValidatorStatsQuery extends BaseQuery {
+    node_id?: string;
     timestamp_gte?: number;
     timestamp_lte?: number;
 }

@@ -4,6 +4,7 @@ import type {
     CommitResponse,
     StatusResponse,
     ValidatorsResponse,
+    GenesisResponse,
     Validator,
 } from "./cometbft/cometbft-types";
 import * as v from "valibot";
@@ -43,20 +44,38 @@ export interface BlockData {
     microblockCount: number;
 }
 
+const MAX_NODES = 4;
+
 @Injectable()
 export class CometbftApiService implements OnModuleInit {
+    private readonly nodeUrls: string[] = [];
+    private nodeIndex: number;
     private readonly logger = new Logger();
-    private readonly nodeUrl: string;
 
     constructor() {
-        this.nodeUrl =
-            process.env.NODE_URL || "https://node1.server1.devnet.carmentis.io";
+        for (let n = 0; n < MAX_NODES; n++) {
+            this.nodeUrls[n] = process.env[`NODE${n + 1}_URL`] ?? "";
+        }
+        this.nodeIndex = this.nodeUrls.findIndex((url) => url !== "");
+        if (this.nodeIndex === -1) {
+            throw new Error(`At least one NODEx_URL should be specified`);
+        }
+    }
+
+    changeNode() {
+        const currentNodeIndex = this.nodeIndex;
+        do {
+            this.nodeIndex = (this.nodeIndex + 1) % MAX_NODES;
+        } while(this.nodeUrls[this.nodeIndex] === "");
+        if (this.nodeIndex !== currentNodeIndex) {
+            this.logger.log(`switching to node '${this.nodeUrls[this.nodeIndex]}'`);
+        }
     }
 
     async onModuleInit() {}
 
     async getClient() {
-        return Comet38Client.connect(this.nodeUrl);
+        return await Comet38Client.connect(this.nodeUrls[this.nodeIndex]);
     }
 
     async getBlockAtHeight(height: number): Promise<BlockData | null> {
@@ -161,6 +180,17 @@ export class CometbftApiService implements OnModuleInit {
         try {
             return await client.status();
         } catch (error) {
+            console.log(error);
+            return null;
+        }
+    }
+
+    async getGenesis(): Promise<GenesisResponse | null> {
+        const client = await this.getClient();
+        try {
+            return await client.genesis();
+        } catch (error) {
+            console.log(error);
             return null;
         }
     }

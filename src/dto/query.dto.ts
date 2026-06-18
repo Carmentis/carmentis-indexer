@@ -26,6 +26,7 @@ import {
     SearchObjectType,
     NodeStatusQuery,
     MicroblockStatsQuery,
+    ValidatorStatsQuery,
 } from "./query-interface.dto";
 
 const SORT_DESCRIPTION = "Field on which the sort is applied";
@@ -526,6 +527,31 @@ export class GetMicroblockStatsQueryDto implements MicroblockStatsQuery {
     @IsOptional()
     @Type(() => Boolean)
     is_genesis?: boolean;
+
+    @ApiPropertyOptional({
+        description: "Minimum timestamp in milliseconds (inclusive). Resolution is 1 hour.",
+        example: 1780300800000,
+    })
+    @IsOptional()
+    @Type(() => Number)
+    timestamp_gte?: number;
+
+    @ApiPropertyOptional({
+        description: "Maximum timestamp in milliseconds (inclusive). Resolution is 1 hour.",
+        example: 1780315200000,
+    })
+    @IsOptional()
+    @Type(() => Number)
+    timestamp_lte?: number;
+}
+
+export class GetValidatorStatsQueryDto implements ValidatorStatsQuery {
+    @ApiPropertyOptional({
+        description: "Node virtual blockchain ID",
+    })
+    @IsOptional()
+    @Type(() => String)
+    node_id?: string;
 
     @ApiPropertyOptional({
         description: "Minimum timestamp in milliseconds (inclusive). Resolution is 1 hour.",

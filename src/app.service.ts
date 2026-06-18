@@ -17,6 +17,7 @@ import {
 import { OrganizationEntity } from "./entities/organization.entity";
 import { ApplicationEntity } from "./entities/application.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
+import { ValidatorStatsEntity } from "./entities/validator-stats.entity";
 import { VirtualBlockchainEntity } from "./entities/virtual-blockchain.entity";
 import { VotingPowerEntity } from "./entities/voting-power.entity";
 import {
@@ -42,6 +43,7 @@ import {
     ApplicationListResponse,
     ValidatorNode,
     ValidatorNodeListResponse,
+    ValidatorStatsResponse,
     NodeStatusResponse,
     VirtualBlockchain,
     VirtualBlockchainListResponse,
@@ -63,6 +65,7 @@ import {
     GetOrganizationsQueryDto,
     GetApplicationsQueryDto,
     GetValidatorNodesQueryDto,
+    GetValidatorStatsQueryDto,
     GetVirtualBlockchainsQueryDto,
     GetVotingPowersQueryDto,
     GetNodeStatusQueryDto,
@@ -78,7 +81,14 @@ import { QueryService } from "./query.service";
 import { SearchService } from "./search.service";
 import { CometbftApiService } from "./cometbft-api.service";
 import { NodeStatusService } from "./node-status.service";
-import { N_VIRTUAL_BLOCKCHAINS, Utils, BlockchainUtils } from "@cmts-dev/carmentis-sdk-core";
+import {
+    N_VIRTUAL_BLOCKCHAINS,
+    BalanceAvailability,
+    type Lock,
+    LockType,
+    Utils,
+    BlockchainUtils
+} from "@cmts-dev/carmentis-sdk-core";
 
 const MAX_LIMIT = 100;
 
@@ -332,15 +342,26 @@ export class AppService {
                 where: { accountId: e.id },
             });
             if (
-                (!with_escrow || escrowLocks.length > 0) &&
                 (!with_staking || stakingLocks.length > 0) &&
-                (!with_vesting || vestingLocks.length > 0)
+                (!with_vesting || vestingLocks.length > 0) &&
+                (!with_escrow || escrowLocks.length > 0)
             ) {
+                const balance = this.getAccountBalanceAvaibility(
+                    e.balance,
+                    stakingLocks,
+                    vestingLocks,
+                    escrowLocks,
+                );
+                const breakdown = balance.getBreakdown();
                 const account: Account = {
                     ...e,
-                    escrowLocks,
-                    vestingLocks,
+                    spendable: breakdown.spendable,
+                    lockedInStaking: breakdown.staked,
+                    lockedInVesting: breakdown.vested,
+                    lockedInEscrows: breakdown.escrowed,
                     stakingLocks,
+                    vestingLocks,
+                    escrowLocks,
                 };
                 items.push(account);
             }
@@ -348,6 +369,55 @@ export class AppService {
         const hasMore = this.hasMore(items, take);
         const response: AccountListResponse = { items, hasMore };
         return response;
+    }
+
+    getAccountBalanceAvaibility(
+        balance: number,
+        stakingLocks: StakingLockEntity[],
+        vestingLocks: VestingLockEntity[],
+        escrowLocks: EscrowLockEntity[],
+    ) {
+        const locks: Lock[] = []
+        for (const lock of stakingLocks) {
+            locks.push({
+                type: LockType.NodeStaking,
+                lockedAmountInAtomics: lock.amount,
+                parameters: {
+                    validatorNodeId: Utils.binaryFromHexa(lock.validatorNodeId),
+                    plannedUnlockAmountInAtomics: lock.plannedSlashingAmountInAtomics,
+                    plannedUnlockTimestamp: lock.plannedUnlockTimestamp,
+                    slashed: lock.slashed,
+                    plannedSlashingAmountInAtomics: lock.plannedUnlockAmountInAtomics,
+                    plannedSlashingTimestamp: lock.plannedUnlockTimestamp,
+                }
+            });
+        }
+        for (const lock of vestingLocks) {
+            locks.push({
+                type: LockType.Vesting,
+                lockedAmountInAtomics: lock.amount,
+                parameters: {
+                    initialVestedAmountInAtomics: lock.initialVestedAmountInAtomics,
+                    cliffStartTimestamp: lock.cliffStartTimestamp,
+                    cliffDurationDays: lock.cliffDurationDays,
+                    vestingDurationDays: lock.vestingDurationDays,
+                }
+            });
+        }
+        for (const lock of escrowLocks) {
+            locks.push({
+                type: LockType.Escrow,
+                lockedAmountInAtomics: lock.amount,
+                parameters: {
+                    escrowIdentifier: Utils.binaryFromHexa(lock.escrowIdentifier),
+                    fundEmitterAccountId: Utils.binaryFromHexa(lock.fundEmitterAccountId),
+                    transferAuthorizerAccountId: Utils.binaryFromHexa(lock.transferAuthorizerAccountId),
+                    startTimestamp: lock.startTimestamp,
+                    durationDays: lock.durationDays,
+                }
+            });
+        }
+        return new BalanceAvailability(balance, locks);
     }
 
     async getAccountHistory(query: GetAccountHistoryQueryDto) {
@@ -682,6 +752,36 @@ export class AppService {
             }
         }
         const response: MicroblockStatsResponse = { stats };
+        return response;
+    }
+
+    async getValidatorStats(query: GetValidatorStatsQueryDto) {
+        const {
+            node_id,
+            timestamp_gte,
+            timestamp_lte,
+        } = query;
+
+        const where: FindOptionsWhere<ValidatorStatsEntity> = {};
+
+        if (node_id !== undefined) {
+            where.nodeId = node_id;
+        }
+
+        const timestampRange = this.range(timestamp_gte, timestamp_lte);
+        if (timestampRange !== null) {
+            where.hourBucketTimestamp = timestampRange;
+        }
+
+        const stats = await ValidatorStatsEntity.createQueryBuilder('stats')
+            .select('stats.nodeId', 'nodeId')
+            .addSelect('SUM(stats.proposedBlocks)', 'proposedBlocks')
+            .addSelect('SUM(stats.signedBlocks)', 'signedBlocks')
+            .groupBy('stats.nodeId')
+            .where(where)
+            .getRawMany();
+
+        const response: ValidatorStatsResponse = { stats };
         return response;
     }
 

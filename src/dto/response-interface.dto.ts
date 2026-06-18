@@ -68,6 +68,10 @@ export interface Account {
     publicKey: string;
     height: number;
     balance: number;
+    spendable: number;
+    lockedInStaking: number;
+    lockedInVesting: number;
+    lockedInEscrows: number;
     escrowLocks: EscrowLock[];
     vestingLocks: VestingLock[];
     stakingLocks: StakingLock[];
@@ -234,6 +238,18 @@ export interface ValidatorNode {
 }
 
 export type ValidatorNodeListResponse = BaseListResponse<ValidatorNode>;
+
+export interface ValidatorStatsCount {
+    nodeId: string;
+    proposedBlocks: number;
+    signedBlocks: number;
+}
+
+export interface ValidatorStats {
+    stats: ValidatorStatsCount[];
+}
+
+export type ValidatorStatsResponse = ValidatorStats;
 
 export interface NodeStatus {
     nodeId: string;

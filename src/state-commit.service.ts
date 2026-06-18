@@ -31,9 +31,11 @@ import {
 } from "./entities/account.entity";
 import { MicroblockEntity } from "./entities/microblock.entity";
 import { MicroblockStatsEntity } from "./entities/microblock-stats.entity";
+import { ValidatorStatsEntity } from "./entities/validator-stats.entity";
 import { BlockData } from "./cometbft-api.service";
 import { MicroblockStorageService } from "./microblock-storage.service";
 import { NodeStatusService } from "./node-status.service";
+import { CometbftApiService } from "./cometbft-api.service";
 import { DeepPartial, EntityManager } from 'typeorm';
 
 @Injectable()
@@ -43,7 +45,17 @@ export class StateCommitService {
     constructor(
         private readonly microblockStorageService: MicroblockStorageService,
         private readonly nodeStatusService: NodeStatusService,
+        private readonly cometbft: CometbftApiService,
     ) {}
+
+    static getHourBucketTimestamp(date: Date) {
+        return Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate(),
+            date.getUTCHours(),
+        );
+    }
 
     async commitBlock(
         manager: EntityManager,
@@ -54,15 +66,19 @@ export class StateCommitService {
         const commitData = block.commit;
 
         if (commitData == null) {
+            if (height !== 1) {
+                throw new Error(`block.commit is null and this is not the genesis block`);
+            }
             const nullHash = Utils.binaryToHexa(Utils.getNullHash());
+            const genesis = await this.cometbft.getGenesis();
 
             await manager.save(BlockEntity, {
-                height: height,
+                height: 1,
                 hash: nullHash,
                 blockVersion: 0,
                 appVersion: 0,
                 chainId: "",
-                milliseconds: 0,
+                milliseconds: genesis?.genesisTime?.getTime() ?? 0,
                 nanoseconds: 0,
                 partsTotal: 0,
                 partsHash: nullHash,
@@ -108,23 +124,49 @@ export class StateCommitService {
                 proposerAddress: Utils.binaryToHexa(header.proposerAddress),
             });
 
+            const date = new Date(header.time.getTime());
+            await this.updateValidatorStats(manager, date, 'proposedBlocks', header.proposerAddress);
+
+            let index = 0;
             for (const sig of commit.signatures) {
                 await manager.save(BlockSignatureEntity, {
                     height,
+                    index,
                     blockIdFlag: sig.blockIdFlag,
                     validatorAddress: Utils.binaryToHexa(
-                        sig.validatorAddress || Utils.getNullHash(),
+                        sig?.validatorAddress ?? Utils.getNullHash(),
                     ),
-                    milliseconds: sig.timestamp ? sig.timestamp.getTime() : 0,
-                    nanoseconds: sig.timestamp
-                        ? sig.timestamp.nanoseconds || 0
-                        : 0,
+                    milliseconds: sig?.timestamp?.getTime() ?? 0,
+                    nanoseconds: sig?.timestamp?.nanoseconds ?? 0,
                     signature: Utils.binaryToHexa(
-                        sig.signature || Utils.getNullHash(),
+                        sig?.signature ?? Utils.getNullHash(),
                     ),
                 });
+                // BLOCK_ID_FLAG_COMMIT
+                if (sig.blockIdFlag === 2) {
+                    await this.updateValidatorStats(manager, date, 'signedBlocks', sig?.validatorAddress);
+                }
+                index++;
             }
         }
+    }
+
+    async updateValidatorStats(manager: EntityManager, date: Date, stat: string, nodeAddress: Uint8Array | undefined) {
+        if (nodeAddress === undefined) {
+            return;
+        }
+        const record = await manager.find(ValidatorNodeEntity, { where: { address: Utils.binaryToHexa(nodeAddress) }});
+        if (record.length !== 1) {
+            return;
+        }
+        const hourBucketTimestamp = StateCommitService.getHourBucketTimestamp(date);
+        const where = { hourBucketTimestamp, nodeId: record[0].virtualBlockchainId };
+        const existing = await manager.findOneBy(ValidatorStatsEntity, where);
+
+        if (!existing) {
+            await manager.save(ValidatorStatsEntity, { ...where, signedBlocks: 0, proposedBlocks: 0 });
+        }
+        await manager.increment(ValidatorStatsEntity, where, stat, 1);
     }
 
     async commitAccountUpdates(
@@ -402,13 +444,7 @@ export class StateCommitService {
         const isGenesis = header.height === 1;
         const vbType: VirtualBlockchainType = header.microblockType;
         const date = microblock.getTimestampAsDate();
-        const hourBucketTimestamp = Date.UTC(
-            date.getUTCFullYear(),
-            date.getUTCMonth(),
-            date.getUTCDate(),
-            date.getUTCHours(),
-        );
-
+        const hourBucketTimestamp = StateCommitService.getHourBucketTimestamp(date);
         const where = { hourBucketTimestamp, vbType, isGenesis };
         const existing = await manager.findOneBy(MicroblockStatsEntity, where);
 

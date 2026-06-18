@@ -18,6 +18,7 @@ import {
     GetOrganizationsQueryDto,
     GetApplicationsQueryDto,
     GetValidatorNodesQueryDto,
+    GetValidatorStatsQueryDto,
     GetNodeStatusQueryDto,
     GetVirtualBlockchainsQueryDto,
     GetVotingPowersQueryDto,
@@ -36,6 +37,7 @@ import {
     OrganizationListResponseDto,
     ApplicationListResponseDto,
     ValidatorNodeListResponseDto,
+    ValidatorStatsResponseDto,
     NodeStatusResponseDto,
     VirtualBlockchainListResponseDto,
     VotingPowerListResponseDto,
@@ -145,6 +147,13 @@ export class AppController {
     async getValidatorNodes(@Query() query: GetValidatorNodesQueryDto) {
         this.checkApiAvaibilityOrFail();
         return this.appService.getValidatorNodes(query);
+    }
+
+    @Get("/validator-stats")
+    @ApiOkResponse({ type: ValidatorStatsResponseDto })
+    async getValidatorStats(@Query() query: GetValidatorStatsQueryDto) {
+        this.checkApiAvaibilityOrFail();
+        return this.appService.getValidatorStats(query);
     }
 
     @Get("/node-status")

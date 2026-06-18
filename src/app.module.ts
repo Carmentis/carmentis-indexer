@@ -25,6 +25,7 @@ import { MicroblockEntity } from "./entities/microblock.entity";
 import { MicroblockStatsEntity } from "./entities/microblock-stats.entity";
 import { OrganizationEntity } from "./entities/organization.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
+import { ValidatorStatsEntity } from "./entities/validator-stats.entity";
 import { VotingPowerEntity } from "./entities/voting-power.entity";
 
 const entities = [
@@ -41,6 +42,7 @@ const entities = [
     MicroblockStatsEntity,
     OrganizationEntity,
     ValidatorNodeEntity,
+    ValidatorStatsEntity,
     VirtualBlockchainEntity,
     VotingPowerEntity,
 ];
