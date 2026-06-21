@@ -3,6 +3,13 @@ export interface BaseListResponse<T> {
     hasMore: boolean;
 }
 
+export class Root {
+    name: string;
+    swagger: string;
+    openapi: string;
+    currentNode: string;
+}
+
 export interface ObjectCount {
     type: number;
     count: number;

@@ -1,6 +1,15 @@
-import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
+import {
+    BaseEntity,
+    Column,
+    Entity,
+    PrimaryColumn,
+    Index,
+} from "typeorm";
 
 @Entity()
+@Index(["organizationId"])
+@Index(["cometPublicKey"])
+@Index(["address"])
 export class ValidatorNodeEntity extends BaseEntity {
     @PrimaryColumn()
     virtualBlockchainId: string;

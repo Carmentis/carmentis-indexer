@@ -24,6 +24,7 @@ import {
     GetVotingPowersQueryDto,
 } from "./dto/query.dto";
 import {
+    RootResponseDto,
     GasPriceResponseDto,
     ChainResponseDto,
     SearchListResponseDto,
@@ -54,7 +55,8 @@ export class AppController {
     ) {}
 
     @Get()
-    getRoot(): string {
+    @ApiOkResponse({ type: RootResponseDto })
+    getRoot() {
         return this.appService.getRoot();
     }
 

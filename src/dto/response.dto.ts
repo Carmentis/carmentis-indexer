@@ -1,4 +1,5 @@
 import {
+    Root,
     ObjectCount,
     Chain,
     GasPrice,
@@ -26,6 +27,13 @@ import {
 
 import { IsEnum } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+
+export class RootResponseDto implements Root {
+    @ApiProperty() name: string;
+    @ApiProperty() swagger: string;
+    @ApiProperty() openapi: string;
+    @ApiProperty() currentNode: string;
+}
 
 export class ObjectCountDto implements ObjectCount {
     @ApiProperty() type: number;

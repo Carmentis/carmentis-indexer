@@ -62,20 +62,24 @@ export class CometbftApiService implements OnModuleInit {
         }
     }
 
+    getCurrentNodeUrl() {
+        return this.nodeUrls[this.nodeIndex];
+    }
+
     changeNode() {
         const currentNodeIndex = this.nodeIndex;
         do {
             this.nodeIndex = (this.nodeIndex + 1) % MAX_NODES;
-        } while(this.nodeUrls[this.nodeIndex] === "");
+        } while(this.getCurrentNodeUrl() === "");
         if (this.nodeIndex !== currentNodeIndex) {
-            this.logger.log(`switching to node '${this.nodeUrls[this.nodeIndex]}'`);
+            this.logger.log(`switching to node '${this.getCurrentNodeUrl()}'`);
         }
     }
 
     async onModuleInit() {}
 
-    async getClient() {
-        return await Comet38Client.connect(this.nodeUrls[this.nodeIndex]);
+    private async getClient() {
+        return await Comet38Client.connect(this.getCurrentNodeUrl());
     }
 
     async getBlockAtHeight(height: number): Promise<BlockData | null> {

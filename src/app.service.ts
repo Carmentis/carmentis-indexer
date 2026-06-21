@@ -21,6 +21,7 @@ import { ValidatorStatsEntity } from "./entities/validator-stats.entity";
 import { VirtualBlockchainEntity } from "./entities/virtual-blockchain.entity";
 import { VotingPowerEntity } from "./entities/voting-power.entity";
 import {
+    Root,
     ChainResponse,
     GasPriceResponse,
     Search,
@@ -102,8 +103,14 @@ export class AppService {
         private readonly nodeStatusService: NodeStatusService,
     ) {}
 
-    getRoot(): string {
-        return `Carmentis Indexer API v1<br><a href="../../swagger">swagger</a>`;
+    getRoot() {
+        const response: Root = {
+            name: 'Carmentis Indexer API',
+            swagger: '/swagger',
+            openapi: '/swagger-json',
+            currentNode: this.cometbft.getCurrentNodeUrl(),
+        };
+        return response;
     }
 
     async getChain(query: GetChainQueryDto) {

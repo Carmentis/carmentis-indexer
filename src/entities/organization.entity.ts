@@ -5,10 +5,13 @@ import {
     JoinColumn,
     ManyToOne,
     PrimaryColumn,
+    Index,
 } from "typeorm";
 import { AccountEntity } from "./account.entity";
 
 @Entity()
+@Index(["accountId"])
+@Index(["name"])
 export class OrganizationEntity extends BaseEntity {
     @PrimaryColumn()
     virtualBlockchainId: string;

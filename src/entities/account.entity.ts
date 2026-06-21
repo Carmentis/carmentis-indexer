@@ -6,9 +6,12 @@ import {
     ManyToOne,
     JoinColumn,
     PrimaryGeneratedColumn,
+    Index,
 } from "typeorm";
 
 @Entity()
+@Index(["publicKey"])
+@Index(["balance"])
 export class AccountEntity extends BaseEntity {
     @PrimaryColumn()
     id: string;
@@ -24,6 +27,9 @@ export class AccountEntity extends BaseEntity {
 }
 
 @Entity()
+@Index(["accountId", "timestamp"])
+@Index(["linkedAccountId"])
+@Index(["type"])
 export class AccountHistoryEntity extends BaseEntity {
     @PrimaryColumn()
     accountId: string;

@@ -5,9 +5,11 @@ import {
     JoinColumn,
     ManyToOne,
     PrimaryColumn,
+    Index,
 } from "typeorm";
 
 @Entity()
+@Index(["milliseconds"])
 export class BlockEntity extends BaseEntity {
     @PrimaryColumn()
     height: number;

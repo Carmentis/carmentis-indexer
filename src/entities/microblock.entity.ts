@@ -5,10 +5,13 @@ import {
     JoinColumn,
     ManyToOne,
     PrimaryColumn,
+    Index,
 } from "typeorm";
 import { BlockEntity } from "./block.entity";
 
 @Entity()
+@Index(["blockHeight"])
+@Index(["virtualBlockchainId", "height"])
 export class MicroblockEntity extends BaseEntity {
     @PrimaryColumn()
     hash: string;
