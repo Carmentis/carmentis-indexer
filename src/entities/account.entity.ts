@@ -28,6 +28,7 @@ export class AccountEntity extends BaseEntity {
 
 @Entity()
 @Index(["accountId", "timestamp"])
+@Index(["timestamp"])
 @Index(["linkedAccountId"])
 @Index(["type"])
 export class AccountHistoryEntity extends BaseEntity {
