@@ -55,6 +55,7 @@ const entities = [
             database: "data/db/db.sqlite",
             entities: entities,
             synchronize: true,
+            logging: ["schema", "error"],
         }),
     ],
     controllers: [AppController],
