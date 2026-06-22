@@ -48,9 +48,9 @@ export class SyncService implements OnModuleInit {
                         this.logger.error(`Synchronization error: ${err}`);
                         if (this.syncDelay !== DEGRADED_SYNC_DELAY) {
                             this.logger.warn(`Switching to degraded sync delay (${DEGRADED_SYNC_DELAY}ms)`);
-                            this.cometbft.changeNode();
                             this.syncDelay = DEGRADED_SYNC_DELAY;
                         }
+                        this.cometbft.changeNode();
                     }),
             this.syncDelay,
         );
@@ -60,8 +60,7 @@ export class SyncService implements OnModuleInit {
         try {
             this.logger.log(`Starting sync process`);
 
-            const { knownHeight, latestBlockHeight } =
-                await this.getSyncStatus();
+            const { knownHeight, latestBlockHeight } = await this.getSyncStatus();
             this.logger.log(
                 `Known height = ${knownHeight}, latest block height = ${latestBlockHeight}`,
             );
@@ -166,11 +165,6 @@ export class SyncService implements OnModuleInit {
         height: number,
         blockTimestamp: number,
     ) {
-        // turn the block timestamp into a day timestamp
-        const timestamp =
-            Utils.addDaysToTimestamp(Math.floor(blockTimestamp / 1000), 0) *
-            1000;
-
         // get the known voting powers from the DB
         const votingPowers = await this.queryService.getCurrentVotingPowers();
 
@@ -208,7 +202,7 @@ export class SyncService implements OnModuleInit {
                 await manager.save(VotingPowerEntity, {
                     nodeId,
                     height,
-                    timestamp,
+                    timestamp: blockTimestamp,
                     votingPower,
                 });
             }
@@ -224,7 +218,7 @@ export class SyncService implements OnModuleInit {
                 await manager.save(VotingPowerEntity, {
                     nodeId: vp.nodeId,
                     height,
-                    timestamp,
+                    timestamp: blockTimestamp,
                     votingPower: 0,
                 });
             }

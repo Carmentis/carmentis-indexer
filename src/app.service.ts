@@ -91,7 +91,7 @@ import {
     BlockchainUtils
 } from "@cmts-dev/carmentis-sdk-core";
 
-const MAX_LIMIT = 100;
+const MAX_LIMIT = 1000;
 
 @Injectable()
 export class AppService {
