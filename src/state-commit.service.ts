@@ -94,6 +94,8 @@ export class StateCommitService {
                 lastResultsHash: nullHash,
                 evidenceHash: nullHash,
                 proposerAddress: nullHash,
+                microblocks: 0,
+                feesInAtomics: 0,
             });
         } else {
             const { header, commit } = commitData;
@@ -122,6 +124,8 @@ export class StateCommitService {
                 lastResultsHash: Utils.binaryToHexa(header.lastResultsHash),
                 evidenceHash: Utils.binaryToHexa(header.evidenceHash),
                 proposerAddress: Utils.binaryToHexa(header.proposerAddress),
+                microblocks: 0,
+                feesInAtomics: 0,
             });
 
             const date = new Date(header.time.getTime());
@@ -149,6 +153,21 @@ export class StateCommitService {
                 index++;
             }
         }
+    }
+
+    async commitBlockMicroblocksAndFees(
+        manager: EntityManager,
+        height: number,
+        microblocks: number,
+        feesInAtomics: number,
+    ) {
+        this.logger.log(`Updating block ${height} with microblocks=${microblocks} and fees=${feesInAtomics}`);
+
+        await manager.save(BlockEntity, {
+            height,
+            microblocks,
+            feesInAtomics,
+        });
     }
 
     async updateValidatorStats(manager: EntityManager, date: Date, stat: string, nodeAddress: Uint8Array | undefined) {
@@ -305,9 +324,11 @@ export class StateCommitService {
         blockHeight: number,
         serializedMicroblock: Uint8Array,
     ) {
-        const microblock =
-            Microblock.loadFromSerializedMicroblock(serializedMicroblock);
+        const microblock = Microblock.loadFromSerializedMicroblock(serializedMicroblock);
         const header = microblock.getHeader();
+        const gas = microblock.getGas();
+        const gasPrice = microblock.getGasPrice().getAmountAsAtomic();
+        const feesInAtomics = gas * gasPrice;
         const sections = microblock.getAllSections();
         const hash = Utils.binaryToHexa(microblock.getHash().toBytes());
         const type: VirtualBlockchainType = header.microblockType;
@@ -339,8 +360,8 @@ export class StateCommitService {
             type,
             height,
             size: serializedMicroblock.length,
-            gas: microblock.getGas(),
-            gasPrice: microblock.getGasPrice().getAmountAsAtomic(),
+            gas,
+            gasPrice,
         });
         await this.microblockStorageService.saveMicroblock(
             hash,
@@ -409,6 +430,7 @@ export class StateCommitService {
                 },
             );
         }
+        return feesInAtomics;
     }
 
     private async saveAccount(

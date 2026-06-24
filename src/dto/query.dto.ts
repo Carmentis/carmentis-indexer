@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum, IsOptional } from "class-validator";
-import { Type } from "class-transformer";
+import { IsEnum, IsOptional, IsBoolean, IsString, IsNumber } from "class-validator";
+import { Type, Transform } from "class-transformer";
 import {
     SortOrder,
     AccountSort,
@@ -27,6 +27,7 @@ import {
     NodeStatusQuery,
     MicroblockStatsQuery,
     ValidatorStatsQuery,
+    NodeRewardQuery,
 } from "./query-interface.dto";
 
 const SORT_DESCRIPTION = "Field on which the sort is applied";
@@ -48,6 +49,7 @@ class ListDto {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     limit?: number;
 }
 
@@ -60,6 +62,7 @@ export class GetGasPriceQueryDto implements GasPriceQuery {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     height_gte?: number;
 
     @ApiPropertyOptional({
@@ -68,6 +71,7 @@ export class GetGasPriceQueryDto implements GasPriceQuery {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     height_lte?: number;
 }
 
@@ -77,6 +81,7 @@ export class SearchQueryDto extends ListDto implements SearchQuery {
         example: "123",
     })
     @Type(() => String)
+    @IsString()
     q: string;
 
     @ApiPropertyOptional({
@@ -87,6 +92,7 @@ export class SearchQueryDto extends ListDto implements SearchQuery {
     @IsOptional()
     @IsEnum(SearchObjectType)
     @Type(() => String)
+    @IsString()
     type?: string;
 }
 
@@ -106,6 +112,7 @@ export class GetBlocksQueryDto extends ListDto implements BlocksQuery {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     height?: number;
 
     @ApiPropertyOptional({
@@ -114,6 +121,7 @@ export class GetBlocksQueryDto extends ListDto implements BlocksQuery {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     height_gte?: number;
 
     @ApiPropertyOptional({
@@ -122,6 +130,7 @@ export class GetBlocksQueryDto extends ListDto implements BlocksQuery {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     height_lte?: number;
 
     @ApiPropertyOptional({
@@ -130,6 +139,7 @@ export class GetBlocksQueryDto extends ListDto implements BlocksQuery {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     timestamp_gte?: number;
 
     @ApiPropertyOptional({
@@ -138,6 +148,7 @@ export class GetBlocksQueryDto extends ListDto implements BlocksQuery {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     timestamp_lte?: number;
 }
 
@@ -159,6 +170,7 @@ export class GetMicroblocksQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     hash?: string;
 
     @ApiPropertyOptional({
@@ -167,6 +179,7 @@ export class GetMicroblocksQueryDto
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     block_height?: number;
 
     @ApiPropertyOptional({
@@ -175,14 +188,16 @@ export class GetMicroblocksQueryDto
             "c4807cb71556c183ad79880be6c2732ae8b82089bbb27845f4452f27222900bc",
     })
     @IsOptional()
-    @Type(() => Number)
+    @Type(() => String)
+    @IsString()
     vb_id?: string;
 
     @ApiPropertyOptional({
         description: "Flag to include the microblock content in the response",
     })
     @IsOptional()
-    @Type(() => Boolean)
+    @IsBoolean()
+    @Transform(({ value }) => value === "true")
     include_content?: boolean;
 }
 
@@ -202,6 +217,7 @@ export class GetAccountsQueryDto extends ListDto implements AccountsQuery {
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     public_key?: string;
 
     @ApiPropertyOptional({
@@ -211,6 +227,7 @@ export class GetAccountsQueryDto extends ListDto implements AccountsQuery {
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     id?: string;
 
     @ApiPropertyOptional({
@@ -219,6 +236,7 @@ export class GetAccountsQueryDto extends ListDto implements AccountsQuery {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     balance_gte?: number;
 
     @ApiPropertyOptional({
@@ -227,27 +245,31 @@ export class GetAccountsQueryDto extends ListDto implements AccountsQuery {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     balance_lte?: number;
 
     @ApiPropertyOptional({
         description: "Filter accounts with at least one escrow lock",
     })
     @IsOptional()
-    @Type(() => Boolean)
+    @IsBoolean()
+    @Transform(({ value }) => value === "true")
     with_escrow?: boolean;
 
     @ApiPropertyOptional({
         description: "Filter accounts with at least one vesting lock",
     })
     @IsOptional()
-    @Type(() => Boolean)
+    @IsBoolean()
+    @Transform(({ value }) => value === "true")
     with_vesting?: boolean;
 
     @ApiPropertyOptional({
         description: "Filter accounts with at least one staking lock",
     })
     @IsOptional()
-    @Type(() => Boolean)
+    @IsBoolean()
+    @Transform(({ value }) => value === "true")
     with_staking?: boolean;
 }
 
@@ -269,6 +291,7 @@ export class GetAccountHistoryQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     account_id?: string;
 
     @ApiPropertyOptional({
@@ -278,6 +301,7 @@ export class GetAccountHistoryQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     linked_account_id?: string;
 
     @ApiPropertyOptional({
@@ -286,6 +310,7 @@ export class GetAccountHistoryQueryDto
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     type?: number;
 
     @ApiPropertyOptional({
@@ -295,6 +320,7 @@ export class GetAccountHistoryQueryDto
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     height?: number;
 
     @ApiPropertyOptional({
@@ -303,6 +329,7 @@ export class GetAccountHistoryQueryDto
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     height_gte?: number;
 
     @ApiPropertyOptional({
@@ -311,6 +338,7 @@ export class GetAccountHistoryQueryDto
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     height_lte?: number;
 
     @ApiPropertyOptional({
@@ -319,6 +347,7 @@ export class GetAccountHistoryQueryDto
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     timestamp_gte?: number;
 
     @ApiPropertyOptional({
@@ -327,6 +356,7 @@ export class GetAccountHistoryQueryDto
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     timestamp_lte?: number;
 }
 
@@ -340,6 +370,7 @@ export class GetOrganizationsQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     vb_id?: string;
 
     @ApiPropertyOptional({
@@ -349,6 +380,7 @@ export class GetOrganizationsQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     account_id?: string;
 
     @ApiPropertyOptional({
@@ -357,6 +389,7 @@ export class GetOrganizationsQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     name?: string;
 }
 
@@ -370,6 +403,7 @@ export class GetApplicationsQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     vb_id?: string;
 
     @ApiPropertyOptional({
@@ -379,6 +413,7 @@ export class GetApplicationsQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     organization_id?: string;
 
     @ApiPropertyOptional({
@@ -387,6 +422,7 @@ export class GetApplicationsQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     name?: string;
 }
 
@@ -408,6 +444,7 @@ export class GetVirtualBlockchainsQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     vb_id?: string;
 
     @ApiPropertyOptional({
@@ -416,6 +453,7 @@ export class GetVirtualBlockchainsQueryDto
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     type?: number;
 }
 
@@ -429,6 +467,7 @@ export class GetValidatorNodesQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     vb_id?: string;
 
     @ApiPropertyOptional({
@@ -438,6 +477,7 @@ export class GetValidatorNodesQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     organization_id?: string;
 
     @ApiPropertyOptional({
@@ -446,6 +486,7 @@ export class GetValidatorNodesQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     public_key?: string;
 
     @ApiPropertyOptional({
@@ -454,13 +495,15 @@ export class GetValidatorNodesQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     address?: string;
 
     @ApiPropertyOptional({
         description: "Flag to include only validator nodes",
     })
     @IsOptional()
-    @Type(() => Boolean)
+    @IsBoolean()
+    @Transform(({ value }) => value === "true")
     is_validator?: boolean;
 }
 
@@ -482,6 +525,7 @@ export class GetVotingPowersQueryDto
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     node_id?: string;
 }
 
@@ -490,6 +534,7 @@ export class GetMicroblockProofQueryDto implements MicroblockProofQuery {
         description: "Microblock hash",
     })
     @Type(() => String)
+    @IsString()
     hash: string;
 }
 
@@ -498,6 +543,7 @@ export class GetAccountProofQueryDto implements AccountProofQuery {
         description: "Account ID",
     })
     @Type(() => String)
+    @IsString()
     account_id: string;
 }
 
@@ -508,6 +554,7 @@ export class GetNodeStatusQueryDto implements NodeStatusQuery {
             "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
     })
     @Type(() => String)
+    @IsString()
     node_id: string;
 }
 
@@ -525,7 +572,8 @@ export class GetMicroblockStatsQueryDto implements MicroblockStatsQuery {
         description: "Limits the stats to either genesis or non-genesis microblocks.",
     })
     @IsOptional()
-    @Type(() => Boolean)
+    @IsBoolean()
+    @Transform(({ value }) => value === "true")
     is_genesis?: boolean;
 
     @ApiPropertyOptional({
@@ -534,6 +582,7 @@ export class GetMicroblockStatsQueryDto implements MicroblockStatsQuery {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     timestamp_gte?: number;
 
     @ApiPropertyOptional({
@@ -542,6 +591,7 @@ export class GetMicroblockStatsQueryDto implements MicroblockStatsQuery {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     timestamp_lte?: number;
 }
 
@@ -551,6 +601,7 @@ export class GetValidatorStatsQueryDto implements ValidatorStatsQuery {
     })
     @IsOptional()
     @Type(() => String)
+    @IsString()
     node_id?: string;
 
     @ApiPropertyOptional({
@@ -559,6 +610,7 @@ export class GetValidatorStatsQueryDto implements ValidatorStatsQuery {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     timestamp_gte?: number;
 
     @ApiPropertyOptional({
@@ -567,5 +619,40 @@ export class GetValidatorStatsQueryDto implements ValidatorStatsQuery {
     })
     @IsOptional()
     @Type(() => Number)
+    @IsNumber()
     timestamp_lte?: number;
+}
+
+export class GetNodeRewardQueryDto implements NodeRewardQuery {
+    @ApiProperty({
+        description: "Node virtual blockchain ID",
+        example:
+            "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
+    })
+    @Type(() => String)
+    @IsString()
+    node_id: string;
+
+    @ApiProperty({
+        description: "Reward payer account ID",
+        example:
+            "c4807cb71556c183ad79880be6c2732ae8b82089bbb27845f4452f27222900bc",
+    })
+    @Type(() => String)
+    @IsString()
+    payer_account_id: string;
+
+    @ApiProperty({
+        description: "Start timestamp in milliseconds",
+    })
+    @Type(() => Number)
+    @IsNumber()
+    start_time: number;
+
+    @ApiProperty({
+        description: "End timestamp in milliseconds",
+    })
+    @Type(() => Number)
+    @IsNumber()
+    end_time: number;
 }

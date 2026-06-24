@@ -22,6 +22,7 @@ import {
     GetNodeStatusQueryDto,
     GetVirtualBlockchainsQueryDto,
     GetVotingPowersQueryDto,
+    GetNodeRewardQueryDto,
 } from "./dto/query.dto";
 import {
     RootResponseDto,
@@ -42,6 +43,7 @@ import {
     NodeStatusResponseDto,
     VirtualBlockchainListResponseDto,
     VotingPowerListResponseDto,
+    NodeRewardResponseDto,
 } from "./dto/response.dto";
 import { AppService } from "./app.service";
 import { ApiOkResponse } from "@nestjs/swagger";
@@ -179,9 +181,16 @@ export class AppController {
         return this.appService.getVotingPowers(query);
     }
 
+    @Get("/node-reward")
+    @ApiOkResponse({ type: NodeRewardResponseDto })
+    async getNodeReward(@Query() query: GetNodeRewardQueryDto) {
+        this.checkApiAvaibilityOrFail();
+        console.log("getNodeReward", query);
+        return this.appService.getNodeReward(query);
+    }
+
     checkApiAvaibilityOrFail() {
-        const { dbHeight, chainHeight, synchronized } =
-            this.syncState.getStatus();
+        const { dbHeight, chainHeight, synchronized } = this.syncState.getStatus();
         if (!synchronized) {
             throw new ServiceUnavailableException(
                 `the indexer is not synchronized (height ${dbHeight} / ${chainHeight})`,

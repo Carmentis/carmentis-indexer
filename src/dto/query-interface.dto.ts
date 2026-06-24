@@ -161,3 +161,10 @@ export interface ValidatorStatsQuery extends BaseQuery {
     timestamp_gte?: number;
     timestamp_lte?: number;
 }
+
+export interface NodeRewardQuery {
+    node_id: string;
+    payer_account_id: string;
+    start_time: number;
+    end_time: number;
+}

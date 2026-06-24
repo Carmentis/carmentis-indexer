@@ -143,6 +143,8 @@ export interface Block {
     evidenceHash: string;
     proposerAddress: string;
     signatures: BlockSignature[];
+    microblocks: number;
+    feesInAtomics: number;
 }
 
 export type BlockListResponse = BaseListResponse<Block>;
@@ -290,3 +292,21 @@ export interface VotingPower {
 }
 
 export type VotingPowerListResponse = BaseListResponse<VotingPower>;
+
+export interface NodePeriodReward {
+    startTime: number
+    endTime: number
+    votingPower: number
+    uptimeHours: number
+    downtimeHours: number
+    rewardInAtomics: number
+}
+
+export interface NodeReward {
+    accruedRewardInAtomics: number
+    paidRewardInAtomics: number
+    unpaidRewardInAtomics: number
+    periods: NodePeriodReward[]
+}
+
+export type NodeRewardResponse = NodeReward;

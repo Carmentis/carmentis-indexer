@@ -54,6 +54,10 @@ export class BlockEntity extends BaseEntity {
     evidenceHash: string;
     @Column()
     proposerAddress: string;
+    @Column()
+    microblocks: number;
+    @Column()
+    feesInAtomics: number;
 }
 
 @Entity()

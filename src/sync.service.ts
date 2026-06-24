@@ -93,7 +93,13 @@ export class SyncService implements OnModuleInit {
                 await this.cometbft.getBlockModifiedAccountsAtHeight(height);
             const modifiedAccounts = blockModifiedAccounts.modifiedAccounts;
             await this.syncModifiedAccounts(manager, modifiedAccounts);
-            await this.syncMicroblocks(manager, height);
+            const { microblocks, feesInAtomics } = await this.syncMicroblocks(manager, height);
+            await this.stateCommitService.commitBlockMicroblocksAndFees(
+                manager,
+                height,
+                microblocks,
+                feesInAtomics,
+            );
             await this.syncVotingPowers(
                 manager,
                 height,
@@ -135,6 +141,8 @@ export class SyncService implements OnModuleInit {
     }
 
     async syncMicroblocks(manager: EntityManager, height: number) {
+        let microblocks = 0;
+        let feesInAtomics = 0;
         for (let partIndex = 0; ; partIndex++) {
             const blockContent = await this.cometbft.getRawBlockContentAtHeight(
                 height,
@@ -148,16 +156,18 @@ export class SyncService implements OnModuleInit {
                 `Fetched ${count} microblock(s) for block ${height} (part ${pNdx} of ${nParts})`,
             );
             for (const serializedMicroblock of serializedMicroblocks) {
-                await this.stateCommitService.commitMicroblock(
+                feesInAtomics += await this.stateCommitService.commitMicroblock(
                     manager,
                     height,
                     serializedMicroblock,
                 );
+                microblocks++;
             }
             if (partIndex >= blockContent.numberOfParts - 1) {
                 break;
             }
         }
+        return { microblocks, feesInAtomics };
     }
 
     async syncVotingPowers(
@@ -262,7 +272,7 @@ export class SyncService implements OnModuleInit {
             if (earliestBlockHash !== knownStatus.earliestBlockHash) {
                 throw new Error(
                     `Earliest block hash mismatch detected. Was the chain reset?\n` +
-                        `If so, please delete 'db.sqlite' and restart the indexer.`,
+                    `If so, please delete the database and restart the indexer.`,
                 );
             }
         }

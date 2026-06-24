@@ -50,6 +50,7 @@ import {
     VirtualBlockchainListResponse,
     VotingPower,
     VotingPowerListResponse,
+    NodeRewardResponse,
 } from "./dto/response-interface.dto";
 import { SearchObjectType } from "./dto/query-interface.dto";
 import {
@@ -70,6 +71,7 @@ import {
     GetVirtualBlockchainsQueryDto,
     GetVotingPowersQueryDto,
     GetNodeStatusQueryDto,
+    GetNodeRewardQueryDto,
 } from "./dto/query.dto";
 import {
     FindOptionsWhere,
@@ -82,6 +84,7 @@ import { QueryService } from "./query.service";
 import { SearchService } from "./search.service";
 import { CometbftApiService } from "./cometbft-api.service";
 import { NodeStatusService } from "./node-status.service";
+import { NodeRewardService } from "./node-reward.service";
 import {
     N_VIRTUAL_BLOCKCHAINS,
     BalanceAvailability,
@@ -101,6 +104,7 @@ export class AppService {
         private readonly searchService: SearchService,
         private readonly cometbft: CometbftApiService,
         private readonly nodeStatusService: NodeStatusService,
+        private readonly nodeRewardService: NodeRewardService,
     ) {}
 
     getRoot() {
@@ -255,6 +259,7 @@ export class AppService {
     }
 
     async getMicroblocks(query: GetMicroblocksQueryDto) {
+        console.log("getMicroblocks", query);
         const {
             hash,
             block_height,
@@ -789,6 +794,11 @@ export class AppService {
             .getRawMany();
 
         const response: ValidatorStatsResponse = { stats };
+        return response;
+    }
+
+    async getNodeReward(query: GetNodeRewardQueryDto) {
+        const response: NodeRewardResponse = await this.nodeRewardService.getNodeReward(query);
         return response;
     }
 

@@ -9,6 +9,7 @@ import { MicroblockStorageService } from "./microblock-storage.service";
 import { QueryService } from "./query.service";
 import { SearchService } from "./search.service";
 import { NodeStatusService } from "./node-status.service";
+import { NodeRewardService } from "./node-reward.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { VirtualBlockchainEntity } from "./entities/virtual-blockchain.entity";
 import {
@@ -69,6 +70,7 @@ const entities = [
         SearchService,
         MicroblockStorageService,
         NodeStatusService,
+        NodeRewardService,
     ],
 })
 export class AppModule {}

@@ -23,6 +23,7 @@ import {
     ValidatorStats,
     VirtualBlockchain,
     VotingPower,
+    NodeReward,
 } from "./response-interface.dto";
 
 import { IsEnum } from "class-validator";
@@ -191,9 +192,10 @@ export class BlockDto implements Block {
     @ApiProperty() lastResultsHash: string;
     @ApiProperty() evidenceHash: string;
     @ApiProperty() proposerAddress: string;
-
     @ApiProperty({ type: [BlockSignatureDto] })
     signatures: BlockSignatureDto[];
+    @ApiProperty() microblocks: number;
+    @ApiProperty() feesInAtomics: number;
 }
 
 export class BlockListResponseDto {
@@ -378,4 +380,21 @@ export class ValidatorStatsCountDto {
 export class ValidatorStatsResponseDto implements ValidatorStats {
     @ApiProperty({ type: () => ValidatorStatsCountDto, isArray: true })
     stats: ValidatorStatsCountDto[];
+}
+
+export class NodePeriodRewardDto {
+    @ApiProperty() startTime: number
+    @ApiProperty() endTime: number
+    @ApiProperty() votingPower: number
+    @ApiProperty() uptimeHours: number
+    @ApiProperty() downtimeHours: number
+    @ApiProperty() rewardInAtomics: number
+}
+
+export class NodeRewardResponseDto implements NodeReward {
+    @ApiProperty() accruedRewardInAtomics: number
+    @ApiProperty() paidRewardInAtomics: number
+    @ApiProperty() unpaidRewardInAtomics: number
+    @ApiProperty({ type: () => NodePeriodRewardDto, isArray: true })
+    periods: NodePeriodRewardDto[];
 }

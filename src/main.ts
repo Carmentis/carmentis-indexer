@@ -38,7 +38,7 @@ async function bootstrap() {
         swaggerCustomOptions,
     );
 
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
     const port = process.env.PORT ?? 3000;
     logger.log(`Listening at port ${port}`);
