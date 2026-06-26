@@ -130,6 +130,7 @@ export class AccountHistoryDto implements AccountHistory {
     @ApiProperty() timestamp: number;
     @ApiProperty() linkedAccountId: string;
     @ApiProperty() amount: number;
+    @ApiProperty() newBalance: number;
     @ApiProperty({
         description: "Base64 representation of the CBOR-encoded chain reference.",
     })

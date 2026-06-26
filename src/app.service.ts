@@ -259,7 +259,6 @@ export class AppService {
     }
 
     async getMicroblocks(query: GetMicroblocksQueryDto) {
-        console.log("getMicroblocks", query);
         const {
             hash,
             block_height,

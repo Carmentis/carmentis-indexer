@@ -185,7 +185,6 @@ export class AppController {
     @ApiOkResponse({ type: NodeRewardResponseDto })
     async getNodeReward(@Query() query: GetNodeRewardQueryDto) {
         this.checkApiAvaibilityOrFail();
-        console.log("getNodeReward", query);
         return this.appService.getNodeReward(query);
     }
 

@@ -3,11 +3,10 @@ import { VotingPowerEntity } from "./entities/voting-power.entity"
 import { ValidatorStatsEntity } from "./entities/validator-stats.entity"
 import { AccountHistoryEntity } from "./entities/account.entity"
 import { NodePeriodReward, NodeReward } from "./dto/response-interface.dto"
-import { BK_SENT_PAYMENT } from "@cmts-dev/carmentis-sdk-core";
+import { BK_SENT_PAYMENT, CMTSToken } from "@cmts-dev/carmentis-sdk-core";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity"
 import { OrganizationEntity } from "./entities/organization.entity"
 import { GetNodeRewardQueryDto } from "./dto/query.dto"
-import { start } from "repl"
 
 const REWARD_RATE_PER_YEAR = 0.10;
 const MS_IN_HOUR = 60 * 60 * 1000;
@@ -50,13 +49,11 @@ export class NodeRewardService {
     }
 
     private async getAccruedRewardToDate(nodeId: string, startTime: number, endTime: number): Promise<NodePeriodReward[]> {
-        console.log("getAccruedRewardToDate", startTime, endTime);
         const votingPowers = await VotingPowerEntity.find({
             where: { nodeId },
             order: { height: "ASC" },
         });
         let lastTs = NodeRewardService.roundTimestampToHour(startTime);
-        console.log("getAccruedRewardToDate / first ts", lastTs);
         let votingPower = 0;
         const list: NodePeriodReward[] = [];
 
@@ -73,7 +70,6 @@ export class NodeRewardService {
     }
 
     private async getAccruedRewardForPeriod(nodeId: string, votingPower: number, startTime: number, endTime: number): Promise<NodePeriodReward> {
-        console.log("getAccruedRewardForPeriod", startTime, endTime);
         let rewardInAtomics = 0;
         let downtimeHours = 0;
         let uptimeHours = 0;
@@ -87,7 +83,8 @@ export class NodeRewardService {
             const proposedBlocks = stats?.proposedBlocks ?? 0;
             if (proposedBlocks > 0) {
                 const delta = Math.min(ts + MS_IN_HOUR, endTime) - ts;
-                rewardInAtomics += delta * REWARD_RATE_PER_MS * votingPower;
+                const cmtsAsAtomics = CMTSToken.createCMTS(1).getAmountAsAtomic();
+                rewardInAtomics += delta * REWARD_RATE_PER_MS * votingPower * cmtsAsAtomics;
                 uptimeHours++;
             }
             else {
@@ -119,16 +116,14 @@ export class NodeRewardService {
             throw new Error(`Organization '${node.organizationId}' of node '${nodeId}' not found`);
         }
         const nodeAccountId = organization.accountId;
-        const history = await AccountHistoryEntity.find({
-            where: {
-                accountId: payerAccountId,
-                linkedAccountId: nodeAccountId,
-                type: BK_SENT_PAYMENT,
-            },
-            order: {
-                height: "ASC"
-            }
-        });
+        const history = await AccountHistoryEntity.createQueryBuilder("h")
+            .where("h.accountId = :payerAccountId", { payerAccountId })
+            .andWhere("h.linkedAccountId = :nodeAccountId", { nodeAccountId })
+            .andWhere("h.type = :type", { type: BK_SENT_PAYMENT })
+            .andWhere("h.publicReference like :reference", { reference: `%${nodeId}%`})
+            .orderBy("h.height", "ASC")
+            .getMany();
+
         let paidAmountInAtomics = 0;
         for (const record of history) {
             paidAmountInAtomics += record.amount;

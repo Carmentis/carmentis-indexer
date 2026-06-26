@@ -16,6 +16,7 @@ import {
     CometBFTPublicKeyConverter,
     CryptoSchemeFactory,
     CryptoEncoderFactory,
+    BK_PLUS,
 } from "@cmts-dev/carmentis-sdk-core";
 import { BlockEntity, BlockSignatureEntity } from "./entities/block.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
@@ -201,30 +202,40 @@ export class StateCommitService {
             const lastHistoryHash = Utils.binaryToHexa(
                 update.currentState.lastHistoryHash,
             );
+            const lastBalance = update.currentState.balance;
             await manager.save(AccountEntity, {
                 id: accountId,
                 height: update.currentState.height,
-                balance: update.currentState.balance,
+                balance: lastBalance,
                 lastHistoryHash,
             });
             // 2) save AccountHistoryEntity
+            let balance = lastBalance;
             for (const historyUpdate of update.historyUpdate) {
+                const type = historyUpdate.type;
+                const amount = historyUpdate.amount;
                 const encodedChainReference = BlockchainUtils.encodeChainReference(historyUpdate.chainReference);
                 const chainReference = Buffer.from(encodedChainReference).toString("base64");
 
                 await manager.save(AccountHistoryEntity, {
                     accountId,
                     height: historyUpdate.height,
-                    type: historyUpdate.type,
+                    type,
                     timestamp: historyUpdate.timestamp,
                     linkedAccountId: Utils.binaryToHexa(
                         historyUpdate.linkedAccount,
                     ),
-                    amount: historyUpdate.amount,
+                    amount,
+                    newBalance: balance,
                     chainReference,
                     publicReference: historyUpdate.publicReference,
                     privateReference: historyUpdate.privateReference,
                 });
+                if (type & BK_PLUS) {
+                    balance -= amount;
+                } else {
+                    balance += amount;
+                }
             }
             // 3) save EscrowLockEntity, VestingLockEntity, StakingLockEntity
             await manager.delete(EscrowLockEntity, { accountId });
@@ -296,7 +307,7 @@ export class StateCommitService {
             amount,
             initialVestedAmountInAtomics: params.initialVestedAmountInAtomics,
             cliffStartTimestamp: params.cliffStartTimestamp,
-            cliffDurationDays: params.vestingDurationDays,
+            cliffDurationDays: params.cliffDurationDays,
             vestingDurationDays: params.vestingDurationDays,
         });
     }
@@ -312,9 +323,9 @@ export class StateCommitService {
             amount,
             validatorNodeId: Utils.binaryToHexa(params.validatorNodeId),
             plannedUnlockAmountInAtomics: params.plannedUnlockAmountInAtomics,
-            plannedUnlockTimestamp: params.plannedSlashingTimestamp,
+            plannedUnlockTimestamp: params.plannedUnlockTimestamp,
             slashed: params.slashed,
-            plannedSlashingAmountInAtomics: params.plannedUnlockAmountInAtomics,
+            plannedSlashingAmountInAtomics: params.plannedSlashingAmountInAtomics,
             plannedSlashingTimestamp: params.plannedSlashingTimestamp,
         });
     }

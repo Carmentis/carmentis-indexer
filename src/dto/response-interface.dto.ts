@@ -93,6 +93,7 @@ export interface AccountHistory {
     timestamp: number;
     linkedAccountId: string;
     amount: number;
+    newBalance: number;
     chainReference: string;
     publicReference: string;
     privateReference: string;

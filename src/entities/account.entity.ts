@@ -46,6 +46,8 @@ export class AccountHistoryEntity extends BaseEntity {
     @Column()
     amount: number;
     @Column()
+    newBalance: number;
+    @Column()
     chainReference: string;
     @Column()
     publicReference: string;
