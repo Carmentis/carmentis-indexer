@@ -53,19 +53,19 @@ export class NodeRewardService {
             where: { nodeId },
             order: { height: "ASC" },
         });
-        let lastTs = NodeRewardService.roundTimestampToHour(startTime);
+        let lastHour = NodeRewardService.roundTimestampToHour(startTime);
         let votingPower = 0;
         const list: NodePeriodReward[] = [];
 
         // compute accrued amount updates at each voting power update
         for (const vp of votingPowers) {
-            const timestamp = NodeRewardService.roundTimestampToHour(vp.timestamp);
-            list.push(await this.getAccruedRewardForPeriod(nodeId, votingPower, lastTs, timestamp));
-            lastTs = timestamp;
+            const endHour = NodeRewardService.roundTimestampToHour(vp.timestamp);
+            list.push(await this.getAccruedRewardForPeriod(nodeId, votingPower, lastHour, endHour));
+            lastHour = Math.max(lastHour, endHour);
             votingPower = vp.votingPower;
         }
         // add accrued amount from the last voting power update to now
-        list.push(await this.getAccruedRewardForPeriod(nodeId, votingPower, lastTs, endTime));
+        list.push(await this.getAccruedRewardForPeriod(nodeId, votingPower, lastHour, endTime));
         return list;
     }
 
