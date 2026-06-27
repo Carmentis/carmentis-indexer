@@ -2,6 +2,8 @@ import { Injectable, Logger } from "@nestjs/common";
 import {
     Microblock,
     AccountUpdatesAbciResponse,
+    AccountState,
+    AccountHistoryEntry,
     VirtualBlockchainType,
     Utils,
     BlockchainUtils,
@@ -189,90 +191,91 @@ export class StateCommitService {
         await manager.increment(ValidatorStatsEntity, where, stat, 1);
     }
 
-    async commitAccountUpdates(
+    async commitAccountAndLocks(
         manager: EntityManager,
-        accountUpdates: AccountUpdatesAbciResponse,
+        accountId: string,
+        state: AccountState,
     ) {
-        this.logger.log(
-            `Committing ${accountUpdates.list.length} account updates`,
+        const lastHistoryHash = Utils.binaryToHexa(
+            state.lastHistoryHash,
         );
-        for (const update of accountUpdates.list) {
-            // 1) save AccountEntity
-            const accountId = Utils.binaryToHexa(update.accountHash);
-            const lastHistoryHash = Utils.binaryToHexa(
-                update.currentState.lastHistoryHash,
-            );
-            const lastBalance = update.currentState.balance;
-            await manager.save(AccountEntity, {
-                id: accountId,
-                height: update.currentState.height,
-                balance: lastBalance,
-                lastHistoryHash,
-            });
-            // 2) save AccountHistoryEntity
-            let balance = lastBalance;
-            for (const historyUpdate of update.historyUpdate) {
-                const type = historyUpdate.type;
-                const amount = historyUpdate.amount;
-                const encodedChainReference = BlockchainUtils.encodeChainReference(historyUpdate.chainReference);
-                const chainReference = Buffer.from(encodedChainReference).toString("base64");
+        await manager.save(AccountEntity, {
+            id: accountId,
+            height: state.height,
+            balance: state.balance,
+            lastHistoryHash,
+        });
 
-                await manager.save(AccountHistoryEntity, {
-                    accountId,
-                    height: historyUpdate.height,
-                    type,
-                    timestamp: historyUpdate.timestamp,
-                    linkedAccountId: Utils.binaryToHexa(
-                        historyUpdate.linkedAccount,
-                    ),
-                    amount,
-                    newBalance: balance,
-                    chainReference,
-                    publicReference: historyUpdate.publicReference,
-                    privateReference: historyUpdate.privateReference,
-                });
-                if (type & BK_PLUS) {
-                    balance -= amount;
-                } else {
-                    balance += amount;
+        await manager.delete(EscrowLockEntity, { accountId });
+        await manager.delete(VestingLockEntity, { accountId });
+        await manager.delete(StakingLockEntity, { accountId });
+
+        for (const lock of state.locks as Lock[]) {
+            switch (lock.type) {
+                case LockType.Escrow: {
+                    await this.commitEscrowLock(
+                        manager,
+                        accountId,
+                        lock.lockedAmountInAtomics,
+                        lock.parameters,
+                    );
+                    break;
                 }
-            }
-            // 3) save EscrowLockEntity, VestingLockEntity, StakingLockEntity
-            await manager.delete(EscrowLockEntity, { accountId });
-            await manager.delete(VestingLockEntity, { accountId });
-            await manager.delete(StakingLockEntity, { accountId });
-            for (const lock of update.currentState.locks as Lock[]) {
-                switch (lock.type) {
-                    case LockType.Escrow: {
-                        await this.commitEscrowLock(
-                            manager,
-                            accountId,
-                            lock.lockedAmountInAtomics,
-                            lock.parameters,
-                        );
-                        break;
-                    }
-                    case LockType.Vesting: {
-                        await this.commitVestingLock(
-                            manager,
-                            accountId,
-                            lock.lockedAmountInAtomics,
-                            lock.parameters,
-                        );
-                        break;
-                    }
-                    case LockType.NodeStaking: {
-                        await this.commitStakingLock(
-                            manager,
-                            accountId,
-                            lock.lockedAmountInAtomics,
-                            lock.parameters,
-                        );
-                        break;
-                    }
+                case LockType.Vesting: {
+                    await this.commitVestingLock(
+                        manager,
+                        accountId,
+                        lock.lockedAmountInAtomics,
+                        lock.parameters,
+                    );
+                    break;
+                }
+                case LockType.NodeStaking: {
+                    await this.commitStakingLock(
+                        manager,
+                        accountId,
+                        lock.lockedAmountInAtomics,
+                        lock.parameters,
+                    );
+                    break;
                 }
             }
         }
+    }
+
+    async commitAccountHistory(
+        manager: EntityManager,
+        accountId: string,
+        balance: number,
+        accountHistoryEntries: AccountHistoryEntry[],
+    ) {
+        for (const entry of accountHistoryEntries) {
+            const type = entry.type;
+            const amount = entry.amount;
+            const encodedChainReference = BlockchainUtils.encodeChainReference(entry.chainReference);
+            const chainReference = Buffer.from(encodedChainReference).toString("base64");
+
+            await manager.save(AccountHistoryEntity, {
+                accountId,
+                height: entry.height,
+                type,
+                timestamp: entry.timestamp,
+                linkedAccountId: Utils.binaryToHexa(
+                    entry.linkedAccount,
+                ),
+                amount,
+                newBalance: balance,
+                chainReference,
+                publicReference: entry.publicReference,
+                privateReference: entry.privateReference,
+            });
+            if (type & BK_PLUS) {
+                balance -= amount;
+            } else {
+                balance += amount;
+            }
+        }
+        return balance;
     }
 
     async commitEscrowLock(

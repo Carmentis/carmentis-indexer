@@ -112,9 +112,6 @@ export class SyncService implements OnModuleInit {
         manager: EntityManager,
         modifiedAccounts: Uint8Array[],
     ) {
-        this.logger.log(
-            `Fetching ${modifiedAccounts.length} modified accounts`,
-        );
         const requestedAccountUpdates: RequestedAccountUpdate[] = [];
         for (const modifiedAccount of modifiedAccounts) {
             let lastKnownHistoryHash = new Uint8Array(32);
@@ -131,13 +128,69 @@ export class SyncService implements OnModuleInit {
                 lastKnownHistoryHash,
             });
         }
-        const accountUpdates = await this.cometbft.getAccountUpdates(
-            requestedAccountUpdates,
-        );
-        await this.stateCommitService.commitAccountUpdates(
-            manager,
-            accountUpdates,
-        );
+
+        const balances = new Map<string, number>();
+
+        for (let round = 1; requestedAccountUpdates.length > 0; round++) {
+            this.logger.log(
+                `Fetching ${requestedAccountUpdates.length} account updates (round #${round})`,
+            );
+            const accountUpdates = await this.cometbft.getAccountUpdates(
+                requestedAccountUpdates,
+            );
+            for (const update of accountUpdates.list) {
+                const index = requestedAccountUpdates.findIndex((requestedUpdate) =>
+                    Utils.binaryIsEqual(requestedUpdate.accountHash, update.accountHash)
+                );
+                if (index === -1) {
+                    throw new Error(`inconsistency in getAccountUpdates() response`);
+                }
+
+                let balance: number;
+                const accountId = Utils.binaryToHexa(update.accountHash);
+                const storedBalance = balances.get(accountId);
+                if (storedBalance === undefined) {
+                    await this.stateCommitService.commitAccountAndLocks(
+                        manager,
+                        accountId,
+                        update.currentState,
+                    );
+                    balance = update.currentState.balance;
+                } else {
+                    balance = storedBalance;
+                }
+                const newBalance = await this.stateCommitService.commitAccountHistory(
+                    manager,
+                    accountId,
+                    balance,
+                    update.historyUpdate,
+                );
+                balances.set(accountId, newBalance);
+
+                if (update.historyUpdate.length === 0) {
+                    // The node does not send an empty historyUpdate when its internal limit of entries in
+                    // a single response is reached. Only if it's really empty. So we can safely remove
+                    // this request from the pool.
+                    requestedAccountUpdates.splice(index, 1);
+                    continue;
+                }
+
+                const lastUpdateEntry = update.historyUpdate[update.historyUpdate.length - 1];
+                if (Utils.binaryIsEqual(
+                    requestedAccountUpdates[index].lastKnownHistoryHash,
+                    lastUpdateEntry.previousHistoryHash
+                )) {
+                    // we've reached 'lastKnownHistoryHash'
+                    // remove this request from the pool
+                    requestedAccountUpdates.splice(index, 1);
+                }
+                else {
+                    // we haven't reached 'lastKnownHistoryHash' yet
+                    // set or update 'firstHistoryHash' and keep the request in the pool for the next round
+                    requestedAccountUpdates[index].firstHistoryHash = lastUpdateEntry.previousHistoryHash;
+                }
+            }
+        }
     }
 
     async syncMicroblocks(manager: EntityManager, height: number) {
