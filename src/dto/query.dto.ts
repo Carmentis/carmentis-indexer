@@ -536,6 +536,13 @@ export class GetMicroblockProofQueryDto implements MicroblockProofQuery {
     @Type(() => String)
     @IsString()
     hash: string;
+    @ApiPropertyOptional({
+        description: "Node URL from which to obtain the proof. Chosen by the indexer if not specified.",
+    })
+    @IsOptional()
+    @Type(() => String)
+    @IsString()
+    node_url?: string;
 }
 
 export class GetAccountProofQueryDto implements AccountProofQuery {
@@ -545,6 +552,13 @@ export class GetAccountProofQueryDto implements AccountProofQuery {
     @Type(() => String)
     @IsString()
     account_id: string;
+    @ApiPropertyOptional({
+        description: "Node URL from which to obtain the proof. Chosen by the indexer if not specified.",
+    })
+    @IsOptional()
+    @Type(() => String)
+    @IsString()
+    node_url?: string;
 }
 
 export class GetNodeStatusQueryDto implements NodeStatusQuery {

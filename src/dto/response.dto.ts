@@ -339,7 +339,7 @@ export class MicroblockProofVirtualBlockchainDto {
     @ApiProperty() radixProof: string[];
 }
 
-export class MicroblockProofResponseDto implements MicroblockProof {
+export class MicroblockProofWrapperDto {
     @ApiProperty({ type: () => ProofBlockDto })
     block: ProofBlockDto;
     @ApiProperty({ type: () => MicroblockProofMicroblockDto })
@@ -348,17 +348,29 @@ export class MicroblockProofResponseDto implements MicroblockProof {
     virtualBlockchain: MicroblockProofVirtualBlockchainDto;
 }
 
+export class MicroblockProofResponseDto implements MicroblockProof {
+    @ApiProperty() nodeUrl: string;
+    @ApiProperty({ type: () => MicroblockProofWrapperDto })
+    proof: MicroblockProofWrapperDto;
+}
+
 export class AccountProofAccountDto {
     @ApiProperty() virtualBlockchainId: string;
     @ApiProperty() serializedState: string;
     @ApiProperty() radixProof: string[];
 }
 
-export class AccountProofResponseDto implements AccountProof {
+export class AccountProofWrapperDto {
     @ApiProperty({ type: () => ProofBlockDto })
     block: ProofBlockDto;
     @ApiProperty({ type: () => MicroblockProofVirtualBlockchainDto })
     account: AccountProofAccountDto;
+}
+
+export class AccountProofResponseDto implements AccountProof {
+    @ApiProperty() nodeUrl: string;
+    @ApiProperty({ type: () => AccountProofWrapperDto })
+    proof: AccountProofWrapperDto;
 }
 
 export class MicroblockCountDto {

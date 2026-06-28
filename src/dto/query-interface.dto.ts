@@ -143,10 +143,12 @@ export interface NodeStatusQuery {
 
 export interface MicroblockProofQuery {
     hash: string;
+    node_url?: string;
 }
 
 export interface AccountProofQuery {
     account_id: string;
+    node_url?: string;
 }
 
 export interface MicroblockStatsQuery extends BaseQuery {

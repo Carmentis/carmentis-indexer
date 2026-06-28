@@ -658,8 +658,9 @@ export class AppService {
     }
 
     async getMicroblockProof(query: GetMicroblockProofQueryDto) {
-        const { hash } = query;
-        const { proof } = await this.cometbft.getMicroblockProof(hash);
+        const { hash, node_url } = query;
+        const nodeUrl = node_url ?? this.cometbft.getCurrentNodeUrl();
+        const { proof } = await this.cometbft.getMicroblockProof(hash, nodeUrl);
         const { block, microblock, virtualBlockchain } = proof;
         const encodedState = BlockchainUtils.encodeVirtualBlockchainState(virtualBlockchain.state);
         const serializedState = Buffer.from(encodedState).toString("base64");
@@ -670,30 +671,34 @@ export class AppService {
             Utils.binaryToHexa(bin)
         );
         const response: MicroblockProofResponse = {
-            block: {
-                height: block.height,
-                vbRadixHash: Utils.binaryToHexa(block.vbRadixHash),
-                tokenRadixHash: Utils.binaryToHexa(block.tokenRadixHash),
-                storageHash: Utils.binaryToHexa(block.storageHash),
-                appHash: Utils.binaryToHexa(block.appHash),
-            },
-            microblock: {
-                virtualBlockchainId: Utils.binaryToHexa(microblock.virtualBlockchainId),
-                height: microblock.height,
-                hash: Utils.binaryToHexa(microblock.hash),
-            },
-            virtualBlockchain: {
-                serializedState,
-                merkleWitnesses,
-                radixProof,
+            nodeUrl,
+            proof: {
+                block: {
+                    height: block.height,
+                    vbRadixHash: Utils.binaryToHexa(block.vbRadixHash),
+                    tokenRadixHash: Utils.binaryToHexa(block.tokenRadixHash),
+                    storageHash: Utils.binaryToHexa(block.storageHash),
+                    appHash: Utils.binaryToHexa(block.appHash),
+                },
+                microblock: {
+                    virtualBlockchainId: Utils.binaryToHexa(microblock.virtualBlockchainId),
+                    height: microblock.height,
+                    hash: Utils.binaryToHexa(microblock.hash),
+                },
+                virtualBlockchain: {
+                    serializedState,
+                    merkleWitnesses,
+                    radixProof,
+                },
             },
         };
         return response;
     }
 
     async getAccountProof(query: GetAccountProofQueryDto) {
-        const { account_id: accountId } = query;
-        const { proof } = await this.cometbft.getAccountProof(accountId);
+        const { account_id: accountId, node_url } = query;
+        const nodeUrl = node_url ?? this.cometbft.getCurrentNodeUrl();
+        const { proof } = await this.cometbft.getAccountProof(accountId, nodeUrl);
         const { block, account } = proof;
         const encodedState = BlockchainUtils.encodeAccountState(account.state);
         const serializedState = Buffer.from(encodedState).toString("base64");
@@ -701,17 +706,20 @@ export class AppService {
             Utils.binaryToHexa(bin)
         );
         const response: AccountProofResponse = {
-            block: {
-                height: block.height,
-                vbRadixHash: Utils.binaryToHexa(block.vbRadixHash),
-                tokenRadixHash: Utils.binaryToHexa(block.tokenRadixHash),
-                storageHash: Utils.binaryToHexa(block.storageHash),
-                appHash: Utils.binaryToHexa(block.appHash),
-            },
-            account: {
-                virtualBlockchainId: Utils.binaryToHexa(account.virtualBlockchainId),
-                serializedState,
-                radixProof,
+            nodeUrl,
+            proof: {
+                block: {
+                    height: block.height,
+                    vbRadixHash: Utils.binaryToHexa(block.vbRadixHash),
+                    tokenRadixHash: Utils.binaryToHexa(block.tokenRadixHash),
+                    storageHash: Utils.binaryToHexa(block.storageHash),
+                    appHash: Utils.binaryToHexa(block.appHash),
+                },
+                account: {
+                    virtualBlockchainId: Utils.binaryToHexa(account.virtualBlockchainId),
+                    serializedState,
+                    radixProof,
+                },
             },
         };
         return response;

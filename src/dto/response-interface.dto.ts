@@ -165,22 +165,25 @@ export interface Microblock {
 export type MicroblockListResponse = BaseListResponse<Microblock>;
 
 export interface MicroblockProof {
-    block: {
-        height: number,
-        vbRadixHash: string,
-        tokenRadixHash: string,
-        storageHash: string,
-        appHash: string,
-    }
-    microblock: {
-        virtualBlockchainId: string,
-        height: number,
-        hash: string,
-    },
-    virtualBlockchain: {
-        serializedState: string,
-        merkleWitnesses: string[],
-        radixProof: string[],
+    nodeUrl: string,
+    proof: {
+        block: {
+            height: number,
+            vbRadixHash: string,
+            tokenRadixHash: string,
+            storageHash: string,
+            appHash: string,
+        }
+        microblock: {
+            virtualBlockchainId: string,
+            height: number,
+            hash: string,
+        },
+        virtualBlockchain: {
+            serializedState: string,
+            merkleWitnesses: string[],
+            radixProof: string[],
+        },
     },
 }
 
@@ -199,17 +202,20 @@ export interface MicroblockStats {
 export type MicroblockStatsResponse = MicroblockStats;
 
 export interface AccountProof {
-    block: {
-        height: number,
-        vbRadixHash: string,
-        tokenRadixHash: string,
-        storageHash: string,
-        appHash: string,
-    }
-    account: {
-        virtualBlockchainId: string,
-        serializedState: string,
-        radixProof: string[],
+    nodeUrl: string,
+    proof: {
+        block: {
+            height: number,
+            vbRadixHash: string,
+            tokenRadixHash: string,
+            storageHash: string,
+            appHash: string,
+        }
+        account: {
+            virtualBlockchainId: string,
+            serializedState: string,
+            radixProof: string[],
+        },
     },
 }
 

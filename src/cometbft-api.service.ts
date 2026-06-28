@@ -78,8 +78,8 @@ export class CometbftApiService implements OnModuleInit {
 
     async onModuleInit() {}
 
-    private async getClient() {
-        return await Comet38Client.connect(this.getCurrentNodeUrl());
+    private async getClient(url: string = this.getCurrentNodeUrl()) {
+        return await Comet38Client.connect(url);
     }
 
     async getBlockAtHeight(height: number): Promise<BlockData | null> {
@@ -219,12 +219,13 @@ export class CometbftApiService implements OnModuleInit {
 
     async getMicroblockProof(
         hash: string,
+        nodeUrl: string,
     ): Promise<MicroblockProofAbciResponse> {
         const request: AbciRequest = {
             requestType: AbciRequestType.GET_MICROBLOCK_PROOF,
             hash: Utils.binaryFromHexa(hash),
         };
-        const abciResponse = await this.abciQuery(request);
+        const abciResponse = await this.abciQuery(request, nodeUrl);
         if (abciResponse.responseType !== AbciResponseType.MICROBLOCK_PROOF) {
             throw new Error(`failed to fetch proof`);
         }
@@ -234,12 +235,13 @@ export class CometbftApiService implements OnModuleInit {
 
     async getAccountProof(
         accountId: string,
+        nodeUrl: string,
     ): Promise<AccountProofAbciResponse> {
         const request: AbciRequest = {
             requestType: AbciRequestType.GET_ACCOUNT_PROOF,
             accountId: Utils.binaryFromHexa(accountId),
         };
-        const abciResponse = await this.abciQuery(request);
+        const abciResponse = await this.abciQuery(request, nodeUrl);
         if (abciResponse.responseType !== AbciResponseType.ACCOUNT_PROOF) {
             throw new Error(`failed to fetch proof`);
         }
@@ -247,8 +249,8 @@ export class CometbftApiService implements OnModuleInit {
         return abciResponse as AccountProofAbciResponse;
     }
 
-    private async abciQuery(request: AbciRequest) {
-        const client = await this.getClient();
+    private async abciQuery(request: AbciRequest, nodeUrl?: string) {
+        const client = await this.getClient(nodeUrl);
         const serializedRequest = AbciQueryEncoder.encodeAbciRequest(request);
         const abciQuery = {
             path: "/carmentis",
