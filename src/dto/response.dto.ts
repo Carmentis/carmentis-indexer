@@ -363,7 +363,7 @@ export class AccountProofAccountDto {
 export class AccountProofWrapperDto {
     @ApiProperty({ type: () => ProofBlockDto })
     block: ProofBlockDto;
-    @ApiProperty({ type: () => MicroblockProofVirtualBlockchainDto })
+    @ApiProperty({ type: () => AccountProofAccountDto })
     account: AccountProofAccountDto;
 }
 

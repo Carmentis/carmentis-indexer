@@ -552,8 +552,15 @@ export class AppService {
     }
 
     async getValidatorNodes(query: GetValidatorNodesQueryDto) {
-        const { vb_id, organization_id, public_key, address, is_validator, order, limit } =
-            query;
+        const {
+            vb_id,
+            organization_id,
+            public_key,
+            address,
+            is_validator,
+            order,
+            limit
+        } = query;
 
         const where: FindOptionsWhere<ValidatorNodeEntity> = {};
 
