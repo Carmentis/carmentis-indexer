@@ -4,8 +4,10 @@ import { CometbftApiService } from "./cometbft-api.service";
 import { StateCommitService } from "./state-commit.service";
 import { NodeStatusService } from "./node-status.service";
 import { QueryService } from "./query.service";
+import { MicroblockStorageService } from "./microblock-storage.service";
 import { ChainEntity } from "./entities/chain.entity";
 import { BlockEntity } from "./entities/block.entity";
+import { MicroblockFileEntity } from "./entities/microblock-file.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
 import { VotingPowerEntity } from "./entities/voting-power.entity";
 import { SyncStateService } from "./sync-state.service";
@@ -23,6 +25,7 @@ export class SyncService implements OnModuleInit {
     constructor(
         private readonly cometbft: CometbftApiService,
         private readonly stateCommitService: StateCommitService,
+        private readonly microblockStorageService: MicroblockStorageService,
         private readonly syncState: SyncStateService,
         private readonly queryService: QueryService,
         private readonly nodeStatusService: NodeStatusService,
@@ -193,9 +196,43 @@ export class SyncService implements OnModuleInit {
         }
     }
 
+    async beginMicroblockUpdate(manager: EntityManager, height: number) {
+        const record = await manager.createQueryBuilder(MicroblockFileEntity, "f")
+            .orderBy('f.id', 'DESC')
+            .getOne();
+
+        let fileId: number = record?.id ?? 0;
+        let offset: number = record?.size ?? 0;
+
+        if (fileId === 0 || offset >= MicroblockStorageService.getMaxMicroblockFileSize()) {
+            fileId++;
+            offset = 0;
+            await manager.save(MicroblockFileEntity, {
+                id: fileId,
+                minHeight: height,
+                maxHeight: height,
+                size: 0,
+            });
+        }
+        await this.microblockStorageService.beginUpdate(fileId, offset);
+    }
+
+    async closeMicroblockUpdate(manager: EntityManager, height: number) {
+        const fileId = this.microblockStorageService.getFileId();
+        const pointer = this.microblockStorageService.getPointer();
+        await this.microblockStorageService.closeUpdate();
+        await manager.save(MicroblockFileEntity, {
+            id: fileId,
+            maxHeight: height,
+            size: pointer,
+        });
+    }
+
     async syncMicroblocks(manager: EntityManager, height: number) {
+        await this.beginMicroblockUpdate(manager, height);
         let microblocks = 0;
         let feesInAtomics = 0;
+
         for (let partIndex = 0; ; partIndex++) {
             const blockContent = await this.cometbft.getRawBlockContentAtHeight(
                 height,
@@ -220,6 +257,7 @@ export class SyncService implements OnModuleInit {
                 break;
             }
         }
+        await this.closeMicroblockUpdate(manager, height);
         return { microblocks, feesInAtomics };
     }
 

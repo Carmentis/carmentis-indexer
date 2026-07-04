@@ -25,6 +25,7 @@ import {
     VotingPower,
     NodeReward,
 } from "./response-interface.dto";
+//import { MicroblockProof } from "@cmts-dev/carmentis-sdk-core"
 
 import { IsEnum } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
@@ -340,6 +341,7 @@ export class MicroblockProofVirtualBlockchainDto {
 }
 
 export class MicroblockProofWrapperDto {
+//  @ApiProperty() provider: string;
     @ApiProperty({ type: () => ProofBlockDto })
     block: ProofBlockDto;
     @ApiProperty({ type: () => MicroblockProofMicroblockDto })

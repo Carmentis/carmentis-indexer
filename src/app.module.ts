@@ -24,6 +24,7 @@ import { BlockEntity, BlockSignatureEntity } from "./entities/block.entity";
 import { ChainEntity } from "./entities/chain.entity";
 import { MicroblockEntity } from "./entities/microblock.entity";
 import { MicroblockStatsEntity } from "./entities/microblock-stats.entity";
+import { MicroblockFileEntity } from "./entities/microblock-file.entity";
 import { OrganizationEntity } from "./entities/organization.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
 import { ValidatorStatsEntity } from "./entities/validator-stats.entity";
@@ -41,6 +42,7 @@ const entities = [
     ChainEntity,
     MicroblockEntity,
     MicroblockStatsEntity,
+    MicroblockFileEntity,
     OrganizationEntity,
     ValidatorNodeEntity,
     ValidatorStatsEntity,

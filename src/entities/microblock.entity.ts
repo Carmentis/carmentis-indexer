@@ -8,6 +8,7 @@ import {
     Index,
 } from "typeorm";
 import { BlockEntity } from "./block.entity";
+import { MicroblockFileEntity } from "./microblock-file.entity";
 
 @Entity()
 @Index(["blockHeight"])
@@ -30,8 +31,16 @@ export class MicroblockEntity extends BaseEntity {
     gas: number;
     @Column()
     gasPrice: number;
+    @Column()
+    fileId: number;
+    @Column()
+    fileOffset: number;
 
     @ManyToOne(() => BlockEntity, { onDelete: "RESTRICT" })
     @JoinColumn({ name: "blockHeight", referencedColumnName: "height" })
     block: BlockEntity;
+
+    @ManyToOne(() => MicroblockFileEntity, { onDelete: "RESTRICT" })
+    @JoinColumn({ name: "fileId", referencedColumnName: "id" })
+    microblockFile: MicroblockFileEntity;
 }

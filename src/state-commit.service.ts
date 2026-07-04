@@ -1,7 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import {
     Microblock,
-    AccountUpdatesAbciResponse,
     AccountState,
     AccountHistoryEntry,
     VirtualBlockchainType,
@@ -376,9 +375,10 @@ export class StateCommitService {
             size: serializedMicroblock.length,
             gas,
             gasPrice,
+            fileId: this.microblockStorageService.getFileId(),
+            fileOffset: this.microblockStorageService.getPointer(),
         });
-        await this.microblockStorageService.saveMicroblock(
-            hash,
+        await this.microblockStorageService.writeMicroblock(
             serializedMicroblock,
         );
 

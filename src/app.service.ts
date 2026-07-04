@@ -94,7 +94,7 @@ import {
     BlockchainUtils
 } from "@cmts-dev/carmentis-sdk-core";
 
-const MAX_LIMIT = 1000;
+const MAX_LIMIT = 200;
 
 @Injectable()
 export class AppService {
@@ -291,11 +291,17 @@ export class AppService {
         });
         const items: Microblock[] = [];
         for (const e of entities) {
-            const microblock: Microblock = { ...e };
+            const { fileId, fileOffset, ...e0 } = e;
+            const microblock: Microblock = { ...e0 };
             if (include_content) {
-                const rawContent =
-                    await this.microblockStorageService.loadMicroblock(e.hash);
-                microblock.content = rawContent.toString("base64");
+                const rawContent = await this.microblockStorageService.readMicroblock(
+                    fileId, fileOffset, e.size
+                );
+                microblock.content = Buffer.from(
+                    rawContent.buffer,
+                    rawContent.byteOffset,
+                    rawContent.byteLength
+                ).toString('base64');
             }
             items.push(microblock);
         }
