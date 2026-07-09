@@ -45,7 +45,7 @@ export class MicroblockStorageService {
             throw new Error(`PANIC - file '${filePath}' is shorter than expected`);
         }
         if (offset < fileSize) {
-            this.logger.warn(`file '${filePath}' is larger than expected (shutdown during batch processing)`);
+            this.logger.warn(`file '${filePath}' is larger than expected (shutdown during batch processing?)`);
         }
         this.pointer = offset;
     }
@@ -93,7 +93,10 @@ export class MicroblockStorageService {
         }
         const offset = this.pointer;
         const size = data.length;
-        await this.handle.write(data, 0, size, offset);
+        const wr = await this.handle.write(data, 0, size, offset);
+        if (wr.bytesWritten !== size) {
+            throw new Error(`only ${wr.bytesWritten} of ${size} bytes written to microblock file`);
+        }
         this.pointer += size;
         return { fileId: this.fileId, offset, size };
     }
