@@ -316,6 +316,10 @@ export class SyncService implements OnModuleInit {
                 this.logger.log(
                     `setting voting power of node ${vp.nodeId} to 0`,
                 );
+                await manager.save(ValidatorNodeEntity, {
+                    virtualBlockchainId: vp.nodeId,
+                    currentVotingPower: 0,
+                });
                 await manager.save(VotingPowerEntity, {
                     nodeId: vp.nodeId,
                     height,
