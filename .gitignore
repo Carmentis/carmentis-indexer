@@ -50,7 +50,7 @@ lerna-debug.log*
 data
 
 # debug scripts
-run.bat
+*.bat
 
 # Runtime data
 pids

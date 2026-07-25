@@ -1,6 +1,7 @@
 export interface BaseListResponse<T> {
     items: T[];
     hasMore: boolean;
+    totalRecords?: number;
 }
 
 export class Root {

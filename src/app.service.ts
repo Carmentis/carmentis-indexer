@@ -52,7 +52,7 @@ import {
     VotingPowerListResponse,
     NodeRewardResponse,
 } from "./dto/response-interface.dto";
-import { SearchObjectType } from "./dto/query-interface.dto";
+import { SearchObjectType, AccountHistorySort } from "./dto/query-interface.dto";
 import {
     GetChainQueryDto,
     GetGasPriceQueryDto,
@@ -74,7 +74,10 @@ import {
     GetNodeRewardQueryDto,
 } from "./dto/query.dto";
 import {
+    BaseEntity,
     FindOptionsWhere,
+    FindOptionsOrder,
+    FindManyOptions,
     MoreThanOrEqual,
     LessThanOrEqual,
     Between,
@@ -95,6 +98,19 @@ import {
 } from "@cmts-dev/carmentis-sdk-core";
 
 const MAX_LIMIT = 200;
+
+interface FindOptions<T> {
+    where?: FindOptionsWhere<T> | FindOptionsWhere<T>[];
+    order?: FindOptionsOrder<T>;
+    offset?: number;
+    limit?: number;
+}
+
+interface FindResult<T> {
+    items: T[];
+    hasMore: boolean;
+    totalRecords?: number;
+}
 
 @Injectable()
 export class AppService {
@@ -214,6 +230,7 @@ export class AppService {
             timestamp_lte,
             sort,
             order,
+            offset,
             limit,
         } = query;
 
@@ -239,22 +256,28 @@ export class AppService {
             where.milliseconds = timestampRange;
         }
 
-        const take = this.take(limit);
-        const entities = await BlockEntity.find({
-            where,
-            order: sort ? { [sort]: order } : undefined,
-            take,
-        });
+        const entities = await this.find<BlockEntity>(
+            BlockEntity,
+            {
+                where,
+                order: sort ? { [sort]: order } : undefined,
+                offset,
+                limit,
+            }
+        );
         const items: Block[] = [];
-        for (const e of entities) {
+        for (const e of entities.items) {
             const signatures = await BlockSignatureEntity.find({
                 where: { height: e.height },
             });
             const block: Block = { ...e, signatures };
             items.push(block);
         }
-        const hasMore = this.hasMore(items, take);
-        const response: BlockListResponse = { items, hasMore };
+        const response: BlockListResponse = {
+            items,
+            hasMore: entities.hasMore,
+            totalRecords: entities.totalRecords,
+        };
         return response;
     }
 
@@ -266,6 +289,7 @@ export class AppService {
             include_content,
             sort,
             order,
+            offset,
             limit,
         } = query;
 
@@ -283,14 +307,17 @@ export class AppService {
             where.virtualBlockchainId = vb_id;
         }
 
-        const take = this.take(limit);
-        const entities = await MicroblockEntity.find({
-            where,
-            order: sort ? { [sort]: order } : undefined,
-            take,
-        });
+        const entities = await this.find<MicroblockEntity>(
+            MicroblockEntity,
+            {
+                where,
+                order: sort ? { [sort]: order } : undefined,
+                offset,
+                limit,
+            }
+        );
         const items: Microblock[] = [];
-        for (const e of entities) {
+        for (const e of entities.items) {
             const { fileId, fileOffset, ...e0 } = e;
             const microblock: Microblock = { ...e0 };
             if (include_content) {
@@ -305,8 +332,11 @@ export class AppService {
             }
             items.push(microblock);
         }
-        const hasMore = this.hasMore(items, take);
-        const response: MicroblockListResponse = { items, hasMore };
+        const response: MicroblockListResponse = {
+            items,
+            hasMore: entities.hasMore,
+            totalRecords: entities.totalRecords,
+        };
         return response;
     }
 
@@ -318,10 +348,11 @@ export class AppService {
             with_escrow,
             with_staking,
             with_vesting,
+            public_key,
             sort,
             order,
+            offset,
             limit,
-            public_key,
         } = query;
 
         const where: FindOptionsWhere<AccountEntity> = {};
@@ -341,14 +372,17 @@ export class AppService {
             where.balance = balanceRange;
         }
 
-        const take = this.take(limit);
-        const entities = await AccountEntity.find({
-            where,
-            order: sort ? { [sort]: order } : undefined,
-            take,
-        });
+        const entities = await this.find<AccountEntity>(
+            AccountEntity,
+            {
+                where,
+                order: sort ? { [sort]: order } : undefined,
+                offset,
+                limit,
+            }
+        );
         const items: Account[] = [];
-        for (const e of entities) {
+        for (const e of entities.items) {
             const escrowLocks = await EscrowLockEntity.find({
                 where: { accountId: e.id },
             });
@@ -383,8 +417,11 @@ export class AppService {
                 items.push(account);
             }
         }
-        const hasMore = this.hasMore(items, take);
-        const response: AccountListResponse = { items, hasMore };
+        const response: AccountListResponse = {
+            items,
+            hasMore: entities.hasMore,
+            totalRecords: entities.totalRecords,
+        };
         return response;
     }
 
@@ -449,6 +486,7 @@ export class AppService {
             timestamp_lte,
             sort,
             order,
+            offset,
             limit,
         } = query;
 
@@ -484,23 +522,35 @@ export class AppService {
             where.timestamp = timestampRange;
         }
 
-        const take = this.take(limit);
-        const entities = await AccountHistoryEntity.find({
-            where,
-            order: sort ? { [sort]: order } : undefined,
-            take,
-        });
-        const items = entities.map((e) => {
+        const orderStatement: FindOptionsOrder<AccountHistoryEntity> | undefined = sort
+            ? sort === AccountHistorySort.TIMESTAMP
+                ? { timestamp: order, height: order }
+                : { [sort]: order }
+            : undefined;
+    
+        const entities = await this.find<AccountHistoryEntity>(
+            AccountHistoryEntity,
+            {
+                where,
+                order: orderStatement,
+                offset,
+                limit,
+            }
+        );
+        const items = entities.items.map((e) => {
             const accountHistory: AccountHistory = { ...e };
             return accountHistory;
         });
-        const hasMore = this.hasMore(items, take);
-        const response: AccountHistoryListResponse = { items, hasMore };
+        const response: AccountHistoryListResponse = {
+            items,
+            hasMore: entities.hasMore,
+            totalRecords: entities.totalRecords,
+        };
         return response;
     }
 
     async getOrganizations(query: GetOrganizationsQueryDto) {
-        const { vb_id, account_id, name, order, limit } = query;
+        const { vb_id, account_id, name, order, offset, limit } = query;
 
         const where: FindOptionsWhere<OrganizationEntity> = {};
 
@@ -514,22 +564,28 @@ export class AppService {
             where.name = name;
         }
 
-        const take = this.take(limit);
-        const entities = await OrganizationEntity.find({
-            where,
-            take,
-        });
-        const items = entities.map((e) => {
+        const entities = await this.find<OrganizationEntity>(
+            OrganizationEntity, {
+                where,
+                offset,
+                limit,
+            }
+        );
+
+        const items = entities.items.map((e) => {
             const organization: Organization = { ...e };
             return organization;
         });
-        const hasMore = this.hasMore(items, take);
-        const response: OrganizationListResponse = { items, hasMore };
+        const response: OrganizationListResponse = {
+            items,
+            hasMore: entities.hasMore,
+            totalRecords: entities.totalRecords
+        };
         return response;
     }
 
     async getApplications(query: GetApplicationsQueryDto) {
-        const { vb_id, organization_id, name, order, limit } = query;
+        const { vb_id, organization_id, name, order, offset, limit } = query;
 
         const where: FindOptionsWhere<ApplicationEntity> = {};
 
@@ -543,17 +599,23 @@ export class AppService {
             where.name = name;
         }
 
-        const take = this.take(limit);
-        const entities = await ApplicationEntity.find({
-            where,
-            take,
-        });
-        const items = entities.map((e) => {
+        const entities = await this.find<ApplicationEntity>(
+            ApplicationEntity,
+            {
+                where,
+                offset,
+                limit,
+            }
+        );
+        const items = entities.items.map((e) => {
             const application: Application = { ...e };
             return application;
         });
-        const hasMore = this.hasMore(items, take);
-        const response: ApplicationListResponse = { items, hasMore };
+        const response: ApplicationListResponse = {
+            items,
+            hasMore: entities.hasMore,
+            totalRecords: entities.totalRecords,
+        };
         return response;
     }
 
@@ -565,6 +627,7 @@ export class AppService {
             address,
             is_validator,
             order,
+            offset,
             limit
         } = query;
 
@@ -586,13 +649,16 @@ export class AppService {
             where.currentVotingPower = MoreThanOrEqual(1);
         }
 
-        const take = this.take(limit);
-        const entities = await ValidatorNodeEntity.find({
-            where,
-            take,
-        });
+        const entities = await this.find<ValidatorNodeEntity>(
+            ValidatorNodeEntity,
+            {
+                where,
+                offset,
+                limit,
+            }
+        );
         const items: ValidatorNode[] = [];
-        for (const e of entities) {
+        for (const e of entities.items) {
             const status = await this.nodeStatusService.getLastNodeStatus(e.virtualBlockchainId);
             const validatorNode: ValidatorNode = {
                 ...e,
@@ -602,8 +668,11 @@ export class AppService {
             };
             items.push(validatorNode);
         }
-        const hasMore = this.hasMore(items, take);
-        const response: ValidatorNodeListResponse = { items, hasMore };
+        const response: ValidatorNodeListResponse = {
+            items,
+            hasMore: entities.hasMore,
+            totalRecords: entities.totalRecords,
+        };
         return response;
     }
 
@@ -618,7 +687,7 @@ export class AppService {
     }
 
     async getVirtualBlockchains(query: GetVirtualBlockchainsQueryDto) {
-        const { vb_id, type, sort, order, limit } = query;
+        const { vb_id, type, sort, order, offset, limit } = query;
 
         const where: FindOptionsWhere<VirtualBlockchainEntity> = {};
 
@@ -629,23 +698,29 @@ export class AppService {
             where.type = type;
         }
 
-        const take = this.take(limit);
-        const entities = await VirtualBlockchainEntity.find({
-            where,
-            order: sort ? { [sort]: order } : undefined,
-            take,
-        });
-        const items = entities.map((e) => {
+        const entities = await this.find<VirtualBlockchainEntity>(
+            VirtualBlockchainEntity,
+            {
+                where,
+                order: sort ? { [sort]: order } : undefined,
+                offset,
+                limit,
+            }
+        );
+        const items = entities.items.map((e) => {
             const virtualBlockchain: VirtualBlockchain = { ...e };
             return virtualBlockchain;
         });
-        const hasMore = this.hasMore(items, take);
-        const response: VirtualBlockchainListResponse = { items, hasMore };
+        const response: VirtualBlockchainListResponse = {
+            items,
+            hasMore: entities.hasMore,
+            totalRecords: entities.totalRecords,
+        };
         return response;
     }
 
     async getVotingPowers(query: GetVotingPowersQueryDto) {
-        const { node_id, sort, order, limit } = query;
+        const { node_id, sort, order, offset, limit } = query;
 
         const where: FindOptionsWhere<VotingPowerEntity> = {};
 
@@ -655,18 +730,24 @@ export class AppService {
             where.nodeId = node_id;
         }
 
-        const take = this.take(limit);
-        const entities = await VotingPowerEntity.find({
-            where,
-            order: sort ? { [sort]: order } : undefined,
-            take,
-        });
-        const items = entities.map((e) => {
+        const entities = await this.find<VotingPowerEntity>(
+            VotingPowerEntity,
+            {
+                where,
+                order: sort ? { [sort]: order } : undefined,
+                offset,
+                limit,
+            }
+        );
+        const items = entities.items.map((e) => {
             const votingPower: VotingPower = { ...e };
             return votingPower;
         });
-        const hasMore = this.hasMore(items, take);
-        const response: VotingPowerListResponse = { items, hasMore };
+        const response: VotingPowerListResponse = {
+            items,
+            hasMore: entities.hasMore,
+            totalRecords: entities.totalRecords,
+        };
         return response;
     }
 
@@ -841,17 +922,46 @@ export class AppService {
         }
     }
 
-    private take(limit: number | undefined) {
-        return (
-            (limit === undefined ? MAX_LIMIT : Math.min(MAX_LIMIT, limit)) + 1
-        );
-    }
+    private async find<T extends BaseEntity>(
+        entity: {
+            find(options: FindManyOptions<T>): Promise<T[]>;
+            count(options: FindManyOptions<T>): Promise<number>;
+        },
+        options: FindOptions<T>,
+    ): Promise<FindResult<T>> {
+        const limit = options.limit === undefined
+            ? MAX_LIMIT
+            : Math.min(MAX_LIMIT, options.limit);
 
-    private hasMore(items: unknown[], take: number) {
-        if (items.length > take - 1) {
-            items.pop();
-            return true;
+        if (options.offset === undefined) {
+            const items = await entity.find({
+                where: options.where,
+                order: options.order,
+                take: limit + 1,
+            });
+
+            return {
+                items: items.slice(0, limit),
+                hasMore: items.length > limit,
+            };
         }
-        return false;
+
+        const [totalRecords, items] = await Promise.all([
+            entity.count({
+                where: options.where,
+            }),
+            entity.find({
+                where: options.where,
+                order: options.order,
+                skip: options.offset,
+                take: limit + 1,
+            }),
+        ]);
+
+        return {
+            items: items.slice(0, limit),
+            hasMore: items.length > limit,
+            totalRecords,
+        };
     }
 }

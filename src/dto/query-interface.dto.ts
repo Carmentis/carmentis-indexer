@@ -28,6 +28,11 @@ export enum VirtualBlockchainSort {
     MODIFICATION_TIMESTAMP = "modificationTimestamp",
     EXPIRATION_TIMESTAMP = "expirationTimestamp",
 }
+
+export enum ValidatorNodeSort {
+    VOTING_POWER = "votingPower",
+}
+
 export enum VotingPowerSort {
     HEIGHT = "height",
 }
@@ -54,6 +59,7 @@ export enum VirtualBlockchainType {
 
 export interface BaseQuery {
     order?: SortOrder;
+    offset?: number;
     limit?: number;
 }
 

@@ -8,8 +8,10 @@ import {
     MicroblockSort,
     AccountHistorySort,
     VirtualBlockchainSort,
+    ValidatorNodeSort,
     VirtualBlockchainType,
     VotingPowerSort,
+    BaseQuery,
     SearchQuery,
     GasPriceQuery,
     AccountsQuery,
@@ -32,7 +34,7 @@ import {
 
 const SORT_DESCRIPTION = "Field on which the sort is applied";
 
-class ListDto {
+class ListDto implements BaseQuery {
     @ApiPropertyOptional({
         description: "Sort order",
         default: SortOrder.ASC,
@@ -44,7 +46,16 @@ class ListDto {
     order?: SortOrder;
 
     @ApiPropertyOptional({
-        description: "Limit number of results",
+        description: "How many results to skip (for pagination)",
+        example: 10,
+    })
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    offset?: number;
+
+    @ApiPropertyOptional({
+        description: "Maximum number of results",
         example: 10,
     })
     @IsOptional()
@@ -460,6 +471,14 @@ export class GetVirtualBlockchainsQueryDto
 export class GetValidatorNodesQueryDto
     extends ListDto
     implements ValidatorNodesQuery {
+    @ApiPropertyOptional({
+        description: SORT_DESCRIPTION,
+        enum: ValidatorNodeSort,
+    })
+    @IsOptional()
+    @IsEnum(ValidatorNodeSort)
+    sort?: ValidatorNodeSort;
+
     @ApiPropertyOptional({
         description: "Virtual blockchain ID",
         example:

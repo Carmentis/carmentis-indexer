@@ -25,10 +25,21 @@ import {
     VotingPower,
     NodeReward,
 } from "./response-interface.dto";
-//import { MicroblockProof } from "@cmts-dev/carmentis-sdk-core"
 
 import { IsEnum } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+
+class ResponseListDto {
+    @ApiProperty({
+        description: "Set to 'true' if more results are available.",
+    })
+    hasMore: boolean;
+    @ApiProperty()
+    @ApiPropertyOptional({
+        description: "Total number of available records. Returned only when 'offset' is used in the query.",
+    })
+    totalRecords?: number;
+}
 
 export class RootResponseDto implements Root {
     @ApiProperty() name: string;
@@ -65,11 +76,9 @@ export class SearchDto implements Search {
     @ApiProperty() matchedFieldValue: string;
 }
 
-export class SearchListResponseDto {
+export class SearchListResponseDto extends ResponseListDto {
     @ApiProperty({ type: () => SearchDto, isArray: true })
     items: SearchDto[];
-    @ApiProperty()
-    hasMore: boolean;
 }
 
 export class EscrowLockDto implements EscrowLock {
@@ -117,11 +126,9 @@ export class AccountDto implements Account {
     escrowLocks: EscrowLockDto[];
 }
 
-export class AccountListResponseDto {
+export class AccountListResponseDto extends ResponseListDto {
     @ApiProperty({ type: () => AccountDto, isArray: true })
     items: AccountDto[];
-    @ApiProperty()
-    hasMore: boolean;
 }
 
 export class AccountHistoryDto implements AccountHistory {
@@ -140,11 +147,9 @@ export class AccountHistoryDto implements AccountHistory {
     @ApiProperty() privateReference: string;
 }
 
-export class AccountHistoryListResponseDto {
+export class AccountHistoryListResponseDto extends ResponseListDto {
     @ApiProperty({ type: () => AccountHistoryDto, isArray: true })
     items: AccountHistoryDto[];
-    @ApiProperty()
-    hasMore: boolean;
 }
 
 export class ApplicationDto implements Application {
@@ -156,11 +161,9 @@ export class ApplicationDto implements Application {
     @ApiProperty() description: string;
 }
 
-export class ApplicationListResponseDto {
+export class ApplicationListResponseDto extends ResponseListDto {
     @ApiProperty({ type: () => ApplicationDto, isArray: true })
     items: ApplicationDto[];
-    @ApiProperty()
-    hasMore: boolean;
 }
 
 export class BlockSignatureDto implements BlockSignature {
@@ -200,11 +203,9 @@ export class BlockDto implements Block {
     @ApiProperty() feesInAtomics: number;
 }
 
-export class BlockListResponseDto {
+export class BlockListResponseDto extends ResponseListDto {
     @ApiProperty({ type: () => BlockDto, isArray: true })
     items: BlockDto[];
-    @ApiProperty()
-    hasMore: boolean;
 }
 
 export class MicroblockDto implements Microblock {
@@ -223,16 +224,14 @@ export class MicroblockDto implements Microblock {
 
     @ApiProperty()
     @ApiPropertyOptional({
-        description: "Base64 representation of the microblock content. Returned only if include_content was set to true.",
+        description: "Base64 representation of the microblock content. Returned only if 'include_content' was set to true.",
     })
     content?: string;
 }
 
-export class MicroblockListResponseDto {
+export class MicroblockListResponseDto extends ResponseListDto {
     @ApiProperty({ type: () => MicroblockDto, isArray: true })
     items: MicroblockDto[];
-    @ApiProperty()
-    hasMore: boolean;
 }
 
 export class OrganizationDto implements Organization {
@@ -244,11 +243,9 @@ export class OrganizationDto implements Organization {
     @ApiProperty() website: string;
 }
 
-export class OrganizationListResponseDto {
+export class OrganizationListResponseDto extends ResponseListDto {
     @ApiProperty({ type: () => OrganizationDto, isArray: true })
     items: OrganizationDto[];
-    @ApiProperty()
-    hasMore: boolean;
 }
 
 export class ValidatorNodeDto implements ValidatorNode {
@@ -268,11 +265,9 @@ export class ValidatorNodeDto implements ValidatorNode {
     @ApiProperty() moniker: string;
 }
 
-export class ValidatorNodeListResponseDto {
+export class ValidatorNodeListResponseDto extends ResponseListDto {
     @ApiProperty({ type: () => ValidatorNodeDto, isArray: true })
     items: ValidatorNodeDto[];
-    @ApiProperty()
-    hasMore: boolean;
 }
 
 export class NodeStatusResponseDto implements NodeStatus {
@@ -299,11 +294,9 @@ export class VirtualBlockchainDto implements VirtualBlockchain {
     @ApiProperty() lastMicroblockHash: string;
 }
 
-export class VirtualBlockchainListResponseDto {
+export class VirtualBlockchainListResponseDto extends ResponseListDto {
     @ApiProperty({ type: () => VirtualBlockchainDto, isArray: true })
     items: VirtualBlockchainDto[];
-    @ApiProperty()
-    hasMore: boolean;
 }
 
 export class VotingPowerDto implements VotingPower {
@@ -313,11 +306,9 @@ export class VotingPowerDto implements VotingPower {
     @ApiProperty() votingPower: number;
 }
 
-export class VotingPowerListResponseDto {
+export class VotingPowerListResponseDto extends ResponseListDto {
     @ApiProperty({ type: () => VotingPowerDto, isArray: true })
     items: VotingPowerDto[];
-    @ApiProperty()
-    hasMore: boolean;
 }
 
 export class ProofBlockDto {
