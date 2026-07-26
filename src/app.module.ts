@@ -58,6 +58,7 @@ const entities = [
             database: "data/db/db.sqlite",
             entities: entities,
             synchronize: true,
+            maxQueryExecutionTime: 500,
             logging: ["schema", "error"],
         }),
     ],

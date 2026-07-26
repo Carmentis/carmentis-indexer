@@ -98,6 +98,7 @@ import {
 } from "@cmts-dev/carmentis-sdk-core";
 
 const MAX_LIMIT = 200;
+const MAX_OFFSET = 50000;
 
 interface FindOptions<T> {
     where?: FindOptionsWhere<T> | FindOptionsWhere<T>[];
@@ -953,7 +954,7 @@ export class AppService {
             entity.find({
                 where: options.where,
                 order: options.order,
-                skip: options.offset,
+                skip: Math.min(options.offset, MAX_OFFSET),
                 take: limit + 1,
             }),
         ]);
@@ -961,7 +962,7 @@ export class AppService {
         return {
             items: items.slice(0, limit),
             hasMore: items.length > limit,
-            totalRecords,
+            totalRecords: Math.min(totalRecords, MAX_OFFSET + MAX_LIMIT),
         };
     }
 }
