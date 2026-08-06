@@ -34,6 +34,7 @@ import {
 import { MicroblockEntity } from "./entities/microblock.entity";
 import { MicroblockStatsEntity } from "./entities/microblock-stats.entity";
 import { ValidatorStatsEntity } from "./entities/validator-stats.entity";
+import { CustomSectionEntity } from "./entities/custom-section.entity";
 import { BlockData } from "./cometbft-api.service";
 import { MicroblockStorageService } from "./microblock-storage.service";
 import { NodeStatusService } from "./node-status.service";
@@ -382,6 +383,8 @@ export class StateCommitService {
             serializedMicroblock,
         );
 
+        await this.saveCustomSections(manager, virtualBlockchainId, type, height, hash, sections);
+
         switch (type) {
             case VirtualBlockchainType.ACCOUNT_VIRTUAL_BLOCKCHAIN: {
                 await this.saveAccount(manager, virtualBlockchainId, sections);
@@ -445,6 +448,40 @@ export class StateCommitService {
             );
         }
         return feesInAtomics;
+    }
+
+    private async saveCustomSections(
+        manager: EntityManager,
+        virtualBlockchainId: string,
+        virtualBlockchainType: number,
+        height: number,
+        microblockHash: string,
+        sections: Section[],
+    ) {
+        let sectionIndex = 0;
+        for (const section of sections) {
+            if (section.type === SectionType.CUSTOM) {
+                const keys = Object.keys(section).filter((name) => name !== 'type');
+                let tag = "";
+                if (keys.length === 1 && /^__\w+__$/.test(keys[0])) {
+                    tag = keys[0];
+                }
+                if (tag) {
+                    const record = {
+                        microblockHash,
+                        sectionIndex,
+                        virtualBlockchainId,
+                        virtualBlockchainType,
+                        tag,
+                        height,
+                    };
+                    await manager.save(CustomSectionEntity, record);
+                } else {
+                    this.logger.warn(`ignoring custom section with unexpected format`);
+                }
+            }
+            sectionIndex++;
+        }
     }
 
     private async saveAccount(

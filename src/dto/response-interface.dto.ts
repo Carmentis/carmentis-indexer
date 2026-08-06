@@ -233,6 +233,19 @@ export interface Organization {
 
 export type OrganizationListResponse = BaseListResponse<Organization>;
 
+export interface OrganizationCertificate {
+    microblockHash: string;
+    microblockHeight: number;
+    sectionIndex: number;
+    jwt: string;
+}
+
+export interface OrganizationCertificates {
+    certificates: OrganizationCertificate[];
+}
+
+export type OrganizationCertificateListResponse = OrganizationCertificates;
+
 export enum NodeStatusEnum {
     Unknown = "UNKNOWN",
     Ok = "OK",

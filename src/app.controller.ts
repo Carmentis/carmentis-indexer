@@ -16,6 +16,7 @@ import {
     GetAccountHistoryQueryDto,
     GetAccountProofQueryDto,
     GetOrganizationsQueryDto,
+    GetOrganizationCertificatesQueryDto,
     GetApplicationsQueryDto,
     GetValidatorNodesQueryDto,
     GetValidatorStatsQueryDto,
@@ -37,6 +38,7 @@ import {
     AccountHistoryListResponseDto,
     AccountProofResponseDto,
     OrganizationListResponseDto,
+    OrganizationCertificateListResponseDto,
     ApplicationListResponseDto,
     ValidatorNodeListResponseDto,
     ValidatorStatsResponseDto,
@@ -137,6 +139,13 @@ export class AppController {
     async getOrganizations(@Query() query: GetOrganizationsQueryDto) {
         this.checkApiAvaibilityOrFail();
         return this.appService.getOrganizations(query);
+    }
+
+    @Get("/organization-certificates")
+    @ApiOkResponse({ type: OrganizationCertificateListResponseDto })
+    async getOrganizationCertificates(@Query() query: GetOrganizationCertificatesQueryDto) {
+        this.checkApiAvaibilityOrFail();
+        return this.appService.getOrganizationCertificates(query);
     }
 
     @Get("/applications")

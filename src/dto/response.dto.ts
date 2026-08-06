@@ -17,6 +17,7 @@ import {
     MicroblockProof,
     MicroblockStats,
     Organization,
+    OrganizationCertificate,
     NodeStatusEnum,
     NodeStatus,
     ValidatorNode,
@@ -246,6 +247,18 @@ export class OrganizationDto implements Organization {
 export class OrganizationListResponseDto extends ResponseListDto {
     @ApiProperty({ type: () => OrganizationDto, isArray: true })
     items: OrganizationDto[];
+}
+
+export class OrganizationCertificateDto implements OrganizationCertificate {
+    @ApiProperty() microblockHash: string;
+    @ApiProperty() microblockHeight: number;
+    @ApiProperty() sectionIndex: number;
+    @ApiProperty() jwt: string;
+}
+
+export class OrganizationCertificateListResponseDto extends ResponseListDto {
+    @ApiProperty({ type: () => OrganizationCertificateDto, isArray: true })
+    items: OrganizationCertificateDto[];
 }
 
 export class ValidatorNodeDto implements ValidatorNode {

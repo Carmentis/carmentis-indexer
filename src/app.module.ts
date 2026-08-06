@@ -10,6 +10,7 @@ import { QueryService } from "./query.service";
 import { SearchService } from "./search.service";
 import { NodeStatusService } from "./node-status.service";
 import { NodeRewardService } from "./node-reward.service";
+import { VirtualBlockchainService } from "./virtual-blockchain.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { VirtualBlockchainEntity } from "./entities/virtual-blockchain.entity";
 import {
@@ -29,6 +30,7 @@ import { OrganizationEntity } from "./entities/organization.entity";
 import { ValidatorNodeEntity } from "./entities/validator-node.entity";
 import { ValidatorStatsEntity } from "./entities/validator-stats.entity";
 import { VotingPowerEntity } from "./entities/voting-power.entity";
+import { CustomSectionEntity } from "./entities/custom-section.entity";
 
 const entities = [
     AccountEntity,
@@ -48,6 +50,7 @@ const entities = [
     ValidatorStatsEntity,
     VirtualBlockchainEntity,
     VotingPowerEntity,
+    CustomSectionEntity,
 ];
 
 @Module({
@@ -74,6 +77,7 @@ const entities = [
         MicroblockStorageService,
         NodeStatusService,
         NodeRewardService,
+        VirtualBlockchainService,
     ],
 })
 export class AppModule {}

@@ -119,6 +119,10 @@ export interface OrganizationsQuery extends BaseQuery {
     name?: string;
 }
 
+export interface OrganizationCertificatesQuery {
+    vb_id: string;
+}
+
 export interface ApplicationsQuery extends BaseQuery {
     vb_id?: string;
     organization_id?: string;

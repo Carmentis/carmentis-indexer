@@ -65,6 +65,7 @@ import {
     GetAccountHistoryQueryDto,
     GetAccountProofQueryDto,
     GetOrganizationsQueryDto,
+    GetOrganizationCertificatesQueryDto,
     GetApplicationsQueryDto,
     GetValidatorNodesQueryDto,
     GetValidatorStatsQueryDto,
@@ -88,6 +89,7 @@ import { SearchService } from "./search.service";
 import { CometbftApiService } from "./cometbft-api.service";
 import { NodeStatusService } from "./node-status.service";
 import { NodeRewardService } from "./node-reward.service";
+import { VirtualBlockchainService } from "./virtual-blockchain.service";
 import {
     N_VIRTUAL_BLOCKCHAINS,
     BalanceAvailability,
@@ -122,6 +124,7 @@ export class AppService {
         private readonly cometbft: CometbftApiService,
         private readonly nodeStatusService: NodeStatusService,
         private readonly nodeRewardService: NodeRewardService,
+        private readonly virtualBlockchainService: VirtualBlockchainService,
     ) {}
 
     getRoot() {
@@ -583,6 +586,12 @@ export class AppService {
             totalRecords: entities.totalRecords
         };
         return response;
+    }
+
+    async getOrganizationCertificates(query: GetOrganizationCertificatesQueryDto) {
+        const { vb_id } = query;
+        const list = await this.virtualBlockchainService.getOrganizationCertificates(vb_id);
+        return { items: list };
     }
 
     async getApplications(query: GetApplicationsQueryDto) {

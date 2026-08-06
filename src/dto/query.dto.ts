@@ -21,6 +21,7 @@ import {
     MicroblocksQuery,
     MicroblockProofQuery,
     OrganizationsQuery,
+    OrganizationCertificatesQuery,
     ApplicationsQuery,
     ValidatorNodesQuery,
     VirtualBlockchainsQuery,
@@ -402,6 +403,19 @@ export class GetOrganizationsQueryDto
     @Type(() => String)
     @IsString()
     name?: string;
+}
+
+export class GetOrganizationCertificatesQueryDto
+    extends ListDto
+    implements OrganizationCertificatesQuery {
+    @ApiProperty({
+        description: "Virtual blockchain ID",
+        example:
+            "511d98d94eac50e6bd5df8dad285c90c309c55a57bdf9db8c57d0ec931c7c57a",
+    })
+    @Type(() => String)
+    @IsString()
+    vb_id: string;
 }
 
 export class GetApplicationsQueryDto
