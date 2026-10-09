@@ -6,7 +6,6 @@ COPY . /app
 WORKDIR /app
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --dangerously-allow-all-builds && \
-    pnpm run build && \
-    pnpm prune --prod
+    pnpm run build
 EXPOSE 3000
 CMD [ "pnpm", "start:prod" ]
