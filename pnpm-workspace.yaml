@@ -2,5 +2,10 @@ packages:
   - .
 minimumReleaseAge: 0
 confirmModulesPurge: false
-onlyBuiltDependencies:
-  - sqlite3
+allowBuilds:
+  '@nestjs/core': true
+  '@scarf/scarf': true
+  '@swc/core': true
+  better-sqlite3: true
+  cbor-extract: true
+  sqlite3: true
