@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 
 @Entity()
+@Index(["hash"])
 @Index(["milliseconds"])
 export class BlockEntity extends BaseEntity {
     @PrimaryColumn()
