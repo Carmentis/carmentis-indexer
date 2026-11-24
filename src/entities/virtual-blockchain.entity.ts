@@ -8,6 +8,7 @@ import {
 
 @Entity()
 @Index(["type"])
+@Index(["type", "modificationTimestamp"])
 @Index(["creationTimestamp"])
 @Index(["modificationTimestamp"])
 @Index(["expirationTimestamp"])
