@@ -7,6 +7,7 @@ import {
 } from "typeorm";
 
 @Entity()
+@Index(["type"])
 @Index(["creationTimestamp"])
 @Index(["modificationTimestamp"])
 @Index(["expirationTimestamp"])
