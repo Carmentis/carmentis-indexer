@@ -3,6 +3,7 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { SyncService } from "./sync.service";
 import { SyncStateService } from "./sync-state.service";
+import { ExchangeRatesService } from "./exchange-rates.service";
 import { CometbftApiService } from "./cometbft-api.service";
 import { StateCommitService } from "./state-commit.service";
 import { MicroblockStorageService } from "./microblock-storage.service";
@@ -31,6 +32,7 @@ import { ValidatorNodeEntity } from "./entities/validator-node.entity";
 import { ValidatorStatsEntity } from "./entities/validator-stats.entity";
 import { VotingPowerEntity } from "./entities/voting-power.entity";
 import { CustomSectionEntity } from "./entities/custom-section.entity";
+import { ExchangeRateEntity } from "./entities/exchange-rate.entity";
 
 const entities = [
     AccountEntity,
@@ -51,6 +53,7 @@ const entities = [
     VirtualBlockchainEntity,
     VotingPowerEntity,
     CustomSectionEntity,
+    ExchangeRateEntity,
 ];
 
 @Module({
@@ -70,6 +73,7 @@ const entities = [
         AppService,
         SyncService,
         SyncStateService,
+        ExchangeRatesService,
         CometbftApiService,
         StateCommitService,
         QueryService,

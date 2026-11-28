@@ -31,6 +31,7 @@ import {
     MicroblockStatsQuery,
     ValidatorStatsQuery,
     NodeRewardQuery,
+    ExchangeRateQuery,
 } from "./query-interface.dto";
 
 const SORT_DESCRIPTION = "Field on which the sort is applied";
@@ -702,4 +703,14 @@ export class GetNodeRewardQueryDto implements NodeRewardQuery {
     @Type(() => Number)
     @IsNumber()
     end_time: number;
+}
+
+export class GetExchangeRateQueryDto implements ExchangeRateQuery {
+    @ApiProperty({
+        description: "Three-letter ISO 4217 currency code to convert EUR into.",
+        example: "USD",
+    })
+    @Type(() => String)
+    @IsString()
+    target_currency: string;
 }

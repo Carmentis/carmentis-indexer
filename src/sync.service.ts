@@ -14,8 +14,8 @@ import { SyncStateService } from "./sync-state.service";
 import { AccountEntity } from "./entities/account.entity";
 import { DataSource, EntityManager } from "typeorm";
 
-const HEALTHY_SYNC_DELAY = 1000;
-const DEGRADED_SYNC_DELAY = 10000;
+const HEALTHY_SYNC_DELAY = 1 * 1000;
+const DEGRADED_SYNC_DELAY = 10 * 1000;
 
 @Injectable()
 export class SyncService implements OnModuleInit {

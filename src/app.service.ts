@@ -51,6 +51,7 @@ import {
     VotingPower,
     VotingPowerListResponse,
     NodeRewardResponse,
+    ExchangeRateResponse,
 } from "./dto/response-interface.dto";
 import { SearchObjectType, AccountHistorySort } from "./dto/query-interface.dto";
 import {
@@ -73,6 +74,7 @@ import {
     GetVotingPowersQueryDto,
     GetNodeStatusQueryDto,
     GetNodeRewardQueryDto,
+    GetExchangeRateQueryDto,
 } from "./dto/query.dto";
 import {
     BaseEntity,
@@ -98,6 +100,7 @@ import {
     Utils,
     BlockchainUtils
 } from "@cmts-dev/carmentis-sdk-core";
+import { ExchangeRateEntity } from "./entities/exchange-rate.entity";
 
 const MAX_LIMIT = 200;
 const MAX_OFFSET = 50000;
@@ -910,6 +913,20 @@ export class AppService {
 
     async getNodeReward(query: GetNodeRewardQueryDto) {
         const response: NodeRewardResponse = await this.nodeRewardService.getNodeReward(query);
+        return response;
+    }
+
+    async getExchangeRate(query: GetExchangeRateQueryDto) {
+        const res = await ExchangeRateEntity.findOne({
+            where: {
+                sourceCurrency: "EUR",
+                targetCurrency: query.target_currency,
+            }
+        });
+        if (res === null) {
+            throw new Error(`exchange rate not found`);
+        }
+        const response: ExchangeRateResponse = res;
         return response;
     }
 

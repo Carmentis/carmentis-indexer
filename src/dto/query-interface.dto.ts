@@ -180,3 +180,7 @@ export interface NodeRewardQuery {
     start_time: number;
     end_time: number;
 }
+
+export interface ExchangeRateQuery {
+    target_currency: string;
+}

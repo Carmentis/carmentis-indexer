@@ -24,6 +24,7 @@ import {
     GetVirtualBlockchainsQueryDto,
     GetVotingPowersQueryDto,
     GetNodeRewardQueryDto,
+    GetExchangeRateQueryDto,
 } from "./dto/query.dto";
 import {
     RootResponseDto,
@@ -46,6 +47,7 @@ import {
     VirtualBlockchainListResponseDto,
     VotingPowerListResponseDto,
     NodeRewardResponseDto,
+    ExchangeRateResponseDto,
 } from "./dto/response.dto";
 import { AppService } from "./app.service";
 import { ApiOkResponse } from "@nestjs/swagger";
@@ -195,6 +197,12 @@ export class AppController {
     async getNodeReward(@Query() query: GetNodeRewardQueryDto) {
         this.checkApiAvaibilityOrFail();
         return this.appService.getNodeReward(query);
+    }
+
+    @Get("/exchange-rate")
+    @ApiOkResponse({ type: ExchangeRateResponseDto })
+    async getExchangeRate(@Query() query: GetExchangeRateQueryDto) {
+        return this.appService.getExchangeRate(query);
     }
 
     checkApiAvaibilityOrFail() {

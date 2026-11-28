@@ -25,6 +25,7 @@ import {
     VirtualBlockchain,
     VotingPower,
     NodeReward,
+    ExchangeRate,
 } from "./response-interface.dto";
 
 import { IsEnum } from "class-validator";
@@ -416,4 +417,11 @@ export class NodeRewardResponseDto implements NodeReward {
     @ApiProperty() unpaidRewardInAtomics: number
     @ApiProperty({ type: () => NodePeriodRewardDto, isArray: true })
     periods: NodePeriodRewardDto[];
+}
+
+export class ExchangeRateResponseDto implements ExchangeRate {
+    @ApiProperty() sourceCurrency: string
+    @ApiProperty() targetCurrency: string
+    @ApiProperty() exchangeRate: number
+    @ApiProperty() retrievedAtInSeconds: number
 }

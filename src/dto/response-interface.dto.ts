@@ -331,3 +331,12 @@ export interface NodeReward {
 }
 
 export type NodeRewardResponse = NodeReward;
+
+export interface ExchangeRate {
+    sourceCurrency: string
+    targetCurrency: string
+    exchangeRate: number
+    retrievedAtInSeconds: number
+}
+
+export type ExchangeRateResponse = ExchangeRate;
