@@ -13,6 +13,7 @@ import {
     AbciRequest,
     AbciRequestType,
     AbciResponseType,
+    AbciResponse,
     BlockInformationAbciResponseSchema,
     BlockInformationAbciResponse,
     RawBlockContentAbciResponseSchema,
@@ -139,8 +140,8 @@ export class CometbftApiService implements OnModuleInit {
             partIndex,
         };
         const abciResponse = await this.abciQuery(request);
-        if (abciResponse.responseType !== AbciResponseType.RAW_BLOCK_CONTENT) {
-            throw new Error(`failed to fetch block content`);
+        if (this.unexpectedAbciResponse(abciResponse, AbciResponseType.RAW_BLOCK_CONTENT)) {
+            throw new Error(`failed to fetch content of block ${height}`);
         }
         v.parse(RawBlockContentAbciResponseSchema, abciResponse);
         return abciResponse as RawBlockContentAbciResponse;
@@ -154,11 +155,8 @@ export class CometbftApiService implements OnModuleInit {
             height,
         };
         const abciResponse = await this.abciQuery(request);
-        if (
-            abciResponse.responseType !==
-            AbciResponseType.BLOCK_MODIFIED_ACCOUNTS
-        ) {
-            throw new Error(`failed to fetch modified accounts`);
+        if (this.unexpectedAbciResponse(abciResponse, AbciResponseType.BLOCK_MODIFIED_ACCOUNTS)) {
+            throw new Error(`failed to fetch modified accounts at height ${height}`);
         }
         v.parse(BlockModifiedAccountsAbciResponseSchema, abciResponse);
         return abciResponse as BlockModifiedAccountsAbciResponse;
@@ -172,8 +170,8 @@ export class CometbftApiService implements OnModuleInit {
             list: requestedAccountUpdates,
         };
         const abciResponse = await this.abciQuery(request);
-        if (abciResponse.responseType !== AbciResponseType.ACCOUNT_UPDATES) {
-            throw new Error(`failed to fetch account updates`);
+        if (this.unexpectedAbciResponse(abciResponse, AbciResponseType.ACCOUNT_UPDATES)) {
+            throw new Error(`failed to fetch account updates (${requestedAccountUpdates.length} account(s) requested)`);
         }
         v.parse(AccountUpdatesAbciResponseSchema, abciResponse);
         return abciResponse as AccountUpdatesAbciResponse;
@@ -261,6 +259,14 @@ export class CometbftApiService implements OnModuleInit {
             response.value,
         );
         return abciResponse;
+    }
+
+    private unexpectedAbciResponse(abciResponse: AbciResponse, expectedType: number) {
+        if (abciResponse.responseType !== expectedType) {
+            this.logger.error(`unexpected ABCI response (expecting type ${expectedType}): ${JSON.stringify(abciResponse)}`);
+            return true;
+        }
+        return false;
     }
 
     private static isRpcError(error: unknown): error is { message: string } {
